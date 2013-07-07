@@ -16,7 +16,7 @@
 <com.android.launcher2.AppsCustomizeTabHost
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-    android:background="#FF000000">
+    android:background="#80000000">
     <LinearLayout
         android:id="@+id/apps_customize_content"
         android:orientation="vertical"
@@ -28,6 +28,7 @@
              with the text in the tabs in AppsCustomizeTabHost. -->
         <FrameLayout
             android:id="@+id/tabs_container"
+            android:background="@drawable/ab_solid_dark_holo"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/apps_customize_tab_bar_height"
             android:layout_marginTop="@dimen/apps_customize_tab_bar_margin_top"
@@ -37,7 +38,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="left"
-                android:background="@drawable/tab_unselected_holo"
                 android:tabStripEnabled="false"
                 android:divider="@null" />
             <include
@@ -74,7 +74,7 @@
                 android:id="@+id/animation_buffer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#FF000000"
+                android:background="#80000000"
                 android:visibility="gone" />
 
             <include
