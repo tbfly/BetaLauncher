@@ -92,21 +92,15 @@ public class ThemeUtils {
         String themePackage = getThemePackageName(mContext, packageName);
         PackageManager pm = mContext.getPackageManager();
         Resources themeResources = null;
-        Resources appResources = mContext.getResources();
         try {
             themeResources = pm.getResourcesForApplication(themePackage);
         } catch (NameNotFoundException e) {
             setThemePackageName(mContext, packageName);
-            themeResources = appResources;
         }
         if (themeResources != null) {
             int resourceID = themeResources.getIdentifier(resourceName, "drawable", themePackage);
             if (resourceID != 0) {
                return themeResources.getDrawable(resourceID);
-            }
-            resourceID = appResources.getIdentifier(resourceName, "drawable", packageName);
-            if (resourceID != 0) {
-               return appResources.getDrawable(resourceID);
             }
         }
         return null;
@@ -122,21 +116,15 @@ public class ThemeUtils {
         String themePackage = getThemePackageName(mContext, packageName);
         PackageManager pm = mContext.getPackageManager();
         Resources themeResources = null;
-        Resources appResources = mContext.getResources();
         try {
             themeResources = pm.getResourcesForApplication(themePackage);
         } catch (NameNotFoundException e) {
             setThemePackageName(mContext, packageName);
-            themeResources = appResources;
         }
         if (themeResources != null) {
             int resourceID = themeResources.getIdentifier(resourceName, "color", themePackage);
             if (resourceID != 0) {
                return themeResources.getColor(resourceID);
-            }
-            resourceID = appResources.getIdentifier(resourceName, "color", packageName);
-            if (resourceID != 0) {
-               return appResources.getColor(resourceID);
             }
         }
         return 0;
@@ -152,21 +140,15 @@ public class ThemeUtils {
         String themePackage = getThemePackageName(mContext, packageName);
         PackageManager pm = mContext.getPackageManager();
         Resources themeResources = null;
-        Resources appResources = mContext.getResources();
         try {
             themeResources = pm.getResourcesForApplication(themePackage);
         } catch (NameNotFoundException e) {
             setThemePackageName(mContext, packageName);
-            themeResources = appResources;
         }
         if (themeResources != null) {
             int resourceID = themeResources.getIdentifier(resourceName, "xml", themePackage);
             if (resourceID != 0) {
                return themeResources.getXml(resourceID);
-            }
-            resourceID = appResources.getIdentifier(resourceName, "xml", packageName);
-            if (resourceID != 0) {
-               return appResources.getXml(resourceID);
             }
         }
         return null;
