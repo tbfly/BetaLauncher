@@ -93,21 +93,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.android.launcher2.WallpaperChooser"
-            android:theme="@style/Theme.WallpaperPicker"
-            android:label="@string/pick_wallpaper"
-            android:icon="@mipmap/ic_launcher_wallpaper"
-            android:finishOnCloseSystemDialogs="true"
-            android:process=":wallpaper_chooser">
-            <intent-filter>
-                <action android:name="android.intent.action.SET_WALLPAPER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data android:name="android.wallpaper.preview"
-                android:resource="@xml/wallpaper_picker_preview" />
-        </activity>
-
         <!-- Intent received used to prepopulate the default workspace. -->
         <receiver
             android:name="com.android.launcher2.PreloadReceiver"
@@ -143,15 +128,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- New user initialization; set up initial wallpaper -->
-        <receiver
-            android:name="com.android.launcher2.UserInitializeReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.USER_INITIALIZE" />
-            </intent-filter>
-        </receiver>
-        
         <!-- The settings provider contains Home's data, like the workspace favorites -->
         <provider
             android:name="com.android.launcher2.LauncherProvider"
