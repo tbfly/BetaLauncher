@@ -1,0 +1,7 @@
+# Compiled source #
+###################
+bin/
+gen/
+build/
+.settings/
+project.properties
