@@ -776,6 +776,11 @@ public final class Launcher extends Activity
 
     @Override
     protected void onPause() {
+        // NOTE: We want all transitions from launcher to act as if the wallpaper were enabled
+        // to be consistent.  So re-enable the flag here, and we will re-disable it as necessary
+        // when Launcher resumes and we are still in AllApps.
+        updateWallpaperVisibility();
+
         super.onPause();
         mPaused = true;
         mDragController.cancelDrag();
@@ -2405,6 +2410,12 @@ public final class Launcher extends Activity
                 mWorkspaceBackgroundDrawable : mBlackBackgroundDrawable);
     }
 
+    void updateWallpaperVisibility() {
+        int wpflags = WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        getWindow().setFlags(wpflags, WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
+        setWorkspaceBackground(true);
+    }
+
     private void dispatchOnLauncherTransitionPrepare(View v, boolean animated, boolean toWorkspace) {
         if (v instanceof LauncherTransitionable) {
             ((LauncherTransitionable) v).onLauncherTransitionPrepare(this, animated, toWorkspace);
@@ -2500,10 +2511,6 @@ public final class Launcher extends Activity
         // Shrink workspaces away if going to AppsCustomize from workspace
         Animator workspaceAnim =
                 mWorkspace.getChangeStateAnimation(Workspace.State.SMALL, animated);
-
-        hideHotseat(true);
-        mDockDivider.animate().alpha(0f).setDuration(duration);
-        fromView.animate().alpha(0f).setDuration(duration);
 
         if (animated) {
             toView.setScaleX(scale);
@@ -2629,6 +2636,9 @@ public final class Launcher extends Activity
             } else {
                 startAnimRunnable.run();
             }
+            mDockDivider.animate().alpha(0f).setDuration(duration);
+            toView.animate().alpha(0f).setDuration(duration);
+            hideHotseat(true);
         } else {
             toView.setTranslationX(0.0f);
             toView.setTranslationY(0.0f);
@@ -2653,6 +2663,9 @@ public final class Launcher extends Activity
             dispatchOnLauncherTransitionPrepare(toView, animated, false);
             dispatchOnLauncherTransitionStart(toView, animated, false);
             dispatchOnLauncherTransitionEnd(toView, animated, false);
+            mDockDivider.setAlpha(0f);
+            fromView.setAlpha(0f);
+            hideHotseat(false);
         }
     }
 
@@ -2689,9 +2702,8 @@ public final class Launcher extends Activity
         }
 
         setPivotsForZoom(fromView, scaleFactor);
+        updateWallpaperVisibility();
         showHotseat(animated);
-        mDockDivider.animate().alpha(1f).setDuration(duration);
-        toView.animate().alpha(1f).setDuration(duration);
         if (animated) {
             final LauncherViewPropertyAnimator scaleAnim =
                     new LauncherViewPropertyAnimator(fromView);
@@ -2722,6 +2734,7 @@ public final class Launcher extends Activity
             mStateAnimation.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    updateWallpaperVisibility();
                     fromView.setVisibility(View.GONE);
                     dispatchOnLauncherTransitionEnd(fromView, animated, true);
                     dispatchOnLauncherTransitionEnd(toView, animated, true);
@@ -2750,6 +2763,8 @@ public final class Launcher extends Activity
                     mStateAnimation.start();
                 }
             });
+            mDockDivider.animate().alpha(1f).setDuration(duration);
+            toView.animate().alpha(1f).setDuration(duration);
         } else {
             fromView.setVisibility(View.GONE);
             dispatchOnLauncherTransitionPrepare(fromView, animated, true);
@@ -2759,6 +2774,8 @@ public final class Launcher extends Activity
             dispatchOnLauncherTransitionStart(toView, animated, true);
             dispatchOnLauncherTransitionEnd(toView, animated, true);
             mWorkspace.hideScrollingIndicator(false);
+            mDockDivider.setAlpha(1.0f);
+            toView.setAlpha(1.0f);
         }
     }
 
@@ -2772,6 +2789,7 @@ public final class Launcher extends Activity
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        updateWallpaperVisibility();
     }
 
     void showWorkspace(boolean animated) {
