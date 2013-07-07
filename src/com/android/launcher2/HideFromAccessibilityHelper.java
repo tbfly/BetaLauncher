@@ -16,6 +16,7 @@
 
 package com.android.launcher2;
 
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.OnHierarchyChangeListener;
@@ -39,8 +40,11 @@ public class HideFromAccessibilityHelper implements OnHierarchyChangeListener {
     }
 
     private void setImportantForAccessibilityToNoHelper(View v) {
-        mPreviousValues.put(v, v.getImportantForAccessibility());
-        v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mPreviousValues.put(v, v.getImportantForAccessibility());
+            v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        }
 
         // Call method on children recursively
         if (v instanceof ViewGroup) {
@@ -57,7 +61,7 @@ public class HideFromAccessibilityHelper implements OnHierarchyChangeListener {
     }
 
     public void restoreImportantForAccessibility(View v) {
-        if (mHide) {
+        if (mHide && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             restoreImportantForAccessibilityHelper(v);
         }
         mHide = false;
@@ -80,7 +84,7 @@ public class HideFromAccessibilityHelper implements OnHierarchyChangeListener {
             }
             for (int i = 0; i < vg.getChildCount(); i++) {
                 View child = vg.getChildAt(i);
-                if (includeView(child)) {
+                if (includeView(child) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     restoreImportantForAccessibilityHelper(child);
                 }
             }
@@ -94,7 +98,7 @@ public class HideFromAccessibilityHelper implements OnHierarchyChangeListener {
     }
 
     public void onChildViewRemoved(View parent, View child) {
-        if (mHide && includeView(child)) {
+        if (mHide && includeView(child) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             restoreImportantForAccessibilityHelper(child);
         }
     }

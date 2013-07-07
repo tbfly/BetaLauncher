@@ -57,6 +57,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -1779,7 +1780,7 @@ public final class Launcher extends Activity
                 success = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
                         info.componentName, options);
             } else {
-                success = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
+                success = LennoxCompatibility.bindAppWidgetIdIfAllowed(mAppWidgetManager,appWidgetId,
                         info.componentName);
             }
             if (success) {
@@ -2064,7 +2065,7 @@ public final class Launcher extends Activity
             // private contract between launcher and may be ignored in the future).
             boolean useLaunchAnimation = (v != null) &&
                     !intent.hasExtra(INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION);
-            if (useLaunchAnimation) {
+            if (useLaunchAnimation && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 ActivityOptions opts = ActivityOptions.makeScaleUpAnimation(v, 0, 0,
                         v.getMeasuredWidth(), v.getMeasuredHeight());
 
@@ -2392,7 +2393,7 @@ public final class Launcher extends Activity
     }
 
     private void setWorkspaceBackground(boolean workspace) {
-        mLauncherView.setBackground(workspace ?
+        mLauncherView.setBackgroundDrawable(workspace ?
                 mWorkspaceBackgroundDrawable : mBlackBackgroundDrawable);
     }
 
@@ -2619,7 +2620,11 @@ public final class Launcher extends Activity
                 final OnGlobalLayoutListener delayedStart = new OnGlobalLayoutListener() {
                     public void onGlobalLayout() {
                         toView.post(startAnimRunnable);
-                        observer.removeOnGlobalLayoutListener(this);
+                        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                            observer.removeGlobalOnLayoutListener(this);
+                        } else {
+                            observer.removeOnGlobalLayoutListener(this);
+                        }
                     }
                 };
                 observer.addOnGlobalLayoutListener(delayedStart);
@@ -3313,6 +3318,7 @@ public final class Launcher extends Activity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindItems(ArrayList<ItemInfo> shortcuts, int start, int end) {
         setLoadOnResume();
 
@@ -3559,6 +3565,7 @@ public final class Launcher extends Activity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAllApplications(final ArrayList<ApplicationInfo> apps) {
         Runnable setAllAppsRunnable = new Runnable() {
             public void run() {
@@ -3591,6 +3598,7 @@ public final class Launcher extends Activity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAppsAdded(ArrayList<ApplicationInfo> apps) {
         setLoadOnResume();
 
@@ -3604,6 +3612,7 @@ public final class Launcher extends Activity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAppsUpdated(ArrayList<ApplicationInfo> apps) {
         setLoadOnResume();
         if (mWorkspace != null) {
@@ -3620,6 +3629,7 @@ public final class Launcher extends Activity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAppsRemoved(ArrayList<String> packageNames, boolean permanent) {
         if (permanent) {
             mWorkspace.removeItems(packageNames);

@@ -217,7 +217,7 @@ public class SearchDropTargetBar extends FrameLayout implements DragController.D
                 mQSBSearchBar.setBackgroundResource(0);
             } else if (mPreviousBackground != null && (searchVisible || voiceVisible)) {
                 // Restore the background
-                mQSBSearchBar.setBackground(mPreviousBackground);
+                mQSBSearchBar.setBackgroundDrawable(mPreviousBackground);
             }
         }
     }

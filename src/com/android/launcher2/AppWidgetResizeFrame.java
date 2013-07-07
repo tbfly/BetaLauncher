@@ -9,6 +9,7 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -340,8 +341,10 @@ public class AppWidgetResizeFrame extends FrameLayout {
             int spanX, int spanY) {
 
         getWidgetSizeRanges(launcher, spanX, spanY, mTmpRect);
-        widgetView.updateAppWidgetSize(null, mTmpRect.left, mTmpRect.top,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            widgetView.updateAppWidgetSize(null, mTmpRect.left, mTmpRect.top,
                 mTmpRect.right, mTmpRect.bottom);
+        }
     }
 
     static Rect getWidgetSizeRanges(Launcher launcher, int spanX, int spanY, Rect rect) {

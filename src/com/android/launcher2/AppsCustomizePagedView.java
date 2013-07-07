@@ -356,8 +356,10 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mFadeInAdjacentScreens = false;
 
         // Unless otherwise specified this view is important for accessibility.
-        if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            }
         }
     }
 
@@ -628,14 +630,16 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
 
             options = new Bundle();
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
                     mTmpRect.left - xPaddingDips);
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
                     mTmpRect.top - yPaddingDips);
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
                     mTmpRect.right - xPaddingDips);
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
                     mTmpRect.bottom - yPaddingDips);
+            }
         }
         return options;
     }
@@ -656,14 +660,15 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 mWidgetLoadingId = mLauncher.getAppWidgetHost().allocateAppWidgetId();
                 // Options will be null for platforms with JB or lower, so this serves as an
                 // SDK level check.
+                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mLauncher);
                 if (options == null) {
-                    if (AppWidgetManager.getInstance(mLauncher).bindAppWidgetIdIfAllowed(
+                    if (LennoxCompatibility.bindAppWidgetIdIfAllowed(appWidgetManager,
                             mWidgetLoadingId, info.componentName)) {
                         mWidgetCleanupState = WIDGET_BOUND;
                     }
                 } else {
-                    if (AppWidgetManager.getInstance(mLauncher).bindAppWidgetIdIfAllowed(
-                            mWidgetLoadingId, info.componentName, options)) {
+                    if (appWidgetManager.bindAppWidgetIdIfAllowed(mWidgetLoadingId,
+                              info.componentName, options)) {
                         mWidgetCleanupState = WIDGET_BOUND;
                     }
                 }

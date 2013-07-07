@@ -734,17 +734,17 @@ public class LauncherProvider extends ContentProvider {
 
                         if (favoriteType == Favorites.ITEM_TYPE_WIDGET_CLOCK) {
                             // TODO: check return value
-                            appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
+                            LennoxCompatibility.bindAppWidgetIdIfAllowed(appWidgetManager,appWidgetId,
                                     new ComponentName("com.android.alarmclock",
                                     "com.android.alarmclock.AnalogAppWidgetProvider"));
                         } else if (favoriteType == Favorites.ITEM_TYPE_WIDGET_PHOTO_FRAME) {
                             // TODO: check return value
-                            appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
+                            LennoxCompatibility.bindAppWidgetIdIfAllowed(appWidgetManager,appWidgetId,
                                     new ComponentName("com.android.camera",
                                     "com.android.camera.PhotoAppWidgetProvider"));
                         } else if (favoriteType == Favorites.ITEM_TYPE_WIDGET_SEARCH) {
                             // TODO: check return value
-                            appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
+                            LennoxCompatibility.bindAppWidgetIdIfAllowed(appWidgetManager,appWidgetId,
                                     getSearchWidgetProvider());
                         }
                     } catch (RuntimeException ex) {
@@ -1086,7 +1086,7 @@ public class LauncherProvider extends ContentProvider {
                 allocatedAppWidgets = true;
 
                 // TODO: need to check return value
-                appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, cn);
+                LennoxCompatibility.bindAppWidgetIdIfAllowed(appWidgetManager, appWidgetId, cn);
 
                 // Send a broadcast to configure the widget
                 if (extras != null && !extras.isEmpty()) {

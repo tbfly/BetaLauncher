@@ -39,9 +39,11 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -306,20 +308,35 @@ public class Workspace extends SmoothPagedView
             TypedArray actionBarSizeTypedArray =
                 context.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
             final float actionBarHeight = actionBarSizeTypedArray.getDimension(0, 0f);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                Point minDims = new Point();
+                Point maxDims = new Point();
+                mLauncher.getWindowManager().getDefaultDisplay().getCurrentSizeRange(minDims, maxDims);
 
-            Point minDims = new Point();
-            Point maxDims = new Point();
-            mLauncher.getWindowManager().getDefaultDisplay().getCurrentSizeRange(minDims, maxDims);
+                cellCountX = 1;
+                while (CellLayout.widthInPortrait(res, cellCountX + 1) <= minDims.x) {
+                    cellCountX++;
+                }
 
-            cellCountX = 1;
-            while (CellLayout.widthInPortrait(res, cellCountX + 1) <= minDims.x) {
-                cellCountX++;
-            }
+                cellCountY = 1;
+                while (actionBarHeight + CellLayout.heightInLandscape(res, cellCountY + 1)
+                    <= minDims.y) {
+                    cellCountY++;
+                }
+            } else {
+                final float systemBarHeight = res.getDimension(R.dimen.status_bar_height);
+                final float smallestScreenDim = res.getConfiguration().smallestScreenWidthDp;
 
-            cellCountY = 1;
-            while (actionBarHeight + CellLayout.heightInLandscape(res, cellCountY + 1)
-                <= minDims.y) {
-                cellCountY++;
+                cellCountX = 1;
+                while (CellLayout.widthInPortrait(res, cellCountX + 1) <= smallestScreenDim) {
+                    cellCountX++;
+                }
+
+                cellCountY = 1;
+                while (actionBarHeight + CellLayout.heightInLandscape(res, cellCountY + 1)
+                    <= smallestScreenDim - systemBarHeight) {
+                    cellCountY++;
+                }
             }
         }
 
@@ -346,8 +363,10 @@ public class Workspace extends SmoothPagedView
         setMotionEventSplittingEnabled(true);
 
         // Unless otherwise specified this view is important for accessibility.
-        if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            }
         }
     }
 
@@ -836,12 +855,19 @@ public class Workspace extends SmoothPagedView
     }
 
     protected void setWallpaperDimension() {
-        Point minDims = new Point();
-        Point maxDims = new Point();
-        mLauncher.getWindowManager().getDefaultDisplay().getCurrentSizeRange(minDims, maxDims);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            Point minDims = new Point();
+            Point maxDims = new Point();
+            mLauncher.getWindowManager().getDefaultDisplay().getCurrentSizeRange(minDims, maxDims);
 
-        final int maxDim = Math.max(maxDims.x, maxDims.y);
-        final int minDim = Math.min(minDims.x, minDims.y);
+            final int maxDim = Math.max(maxDims.x, maxDims.y);
+            final int minDim = Math.min(minDims.x, minDims.y);
+        } else {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            mLauncher.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+            final int maxDim = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
+            final int minDim = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        }
 
         // We need to ensure that there is enough extra space in the wallpaper for the intended
         // parallax effects
@@ -2398,17 +2424,32 @@ public class Workspace extends SmoothPagedView
     static Rect getCellLayoutMetrics(Launcher launcher, int orientation) {
         Resources res = launcher.getResources();
         Display display = launcher.getWindowManager().getDefaultDisplay();
-        Point smallestSize = new Point();
-        Point largestSize = new Point();
-        display.getCurrentSizeRange(smallestSize, largestSize);
+        int maxDim, minDim;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            Point smallestSize = new Point();
+            Point largestSize = new Point();
+            display.getCurrentSizeRange(smallestSize, largestSize);
+            if (orientation == CellLayout.LANDSCAPE) {
+                maxDim = smallestSize.y;
+                minDim = largestSize.x;
+            } else {
+                maxDim = largestSize.y;
+                minDim = smallestSize.x;
+            }
+        } else {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            launcher.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+            maxDim = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
+            minDim = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        }
         if (orientation == CellLayout.LANDSCAPE) {
             if (mLandscapeCellLayoutMetrics == null) {
                 int paddingLeft = res.getDimensionPixelSize(R.dimen.workspace_left_padding_land);
                 int paddingRight = res.getDimensionPixelSize(R.dimen.workspace_right_padding_land);
                 int paddingTop = res.getDimensionPixelSize(R.dimen.workspace_top_padding_land);
                 int paddingBottom = res.getDimensionPixelSize(R.dimen.workspace_bottom_padding_land);
-                int width = largestSize.x - paddingLeft - paddingRight;
-                int height = smallestSize.y - paddingTop - paddingBottom;
+                int width = minDim - paddingLeft - paddingRight;
+                int height = maxDim - paddingTop - paddingBottom;
                 mLandscapeCellLayoutMetrics = new Rect();
                 CellLayout.getMetrics(mLandscapeCellLayoutMetrics, res,
                         width, height, LauncherModel.getCellCountX(), LauncherModel.getCellCountY(),
@@ -2421,8 +2462,8 @@ public class Workspace extends SmoothPagedView
                 int paddingRight = res.getDimensionPixelSize(R.dimen.workspace_right_padding_land);
                 int paddingTop = res.getDimensionPixelSize(R.dimen.workspace_top_padding_land);
                 int paddingBottom = res.getDimensionPixelSize(R.dimen.workspace_bottom_padding_land);
-                int width = smallestSize.x - paddingLeft - paddingRight;
-                int height = largestSize.y - paddingTop - paddingBottom;
+                int width = minDim - paddingLeft - paddingRight;
+                int height = maxDim - paddingTop - paddingBottom;
                 mPortraitCellLayoutMetrics = new Rect();
                 CellLayout.getMetrics(mPortraitCellLayoutMetrics, res,
                         width, height, LauncherModel.getCellCountX(), LauncherModel.getCellCountY(),
