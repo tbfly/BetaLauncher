@@ -286,4 +286,10 @@ s -->
     <string name="preferences_interface_homescreen_folder_style_category">Folder icon style</string>
     <string name="preferences_interface_homescreen_folder_style_title">Style</string>
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
+
+    <!-- Folder sort types -->
+    <string name="menu_folder_sort_none">None</string>
+    <string name="menu_folder_sort_ascending">Sort A->Z</string>
+    <string name="menu_folder_sort_descending">Sort Z->A</string>
+    <string name="menu_folder_sort_usage">Sort by usage</string>
 </resources>

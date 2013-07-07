@@ -57,6 +57,14 @@ class ShortcutInfo extends ItemInfo {
      */
     private Bitmap mIcon;
 
+    /**
+     * The shortcut folder information
+     *
+     * NOTE: For now only is filled when the shortcut is being dropped, so the shortcut
+     * can be restored if finally the item is not dropped. Only for internal use.
+     */
+    FolderInfo mFolderInfo = null;
+
     ShortcutInfo() {
         itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;
     }

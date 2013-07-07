@@ -1274,9 +1274,10 @@ public class LauncherModel extends BroadcastReceiver {
                             (LauncherSettings.Favorites.SPANX);
                     final int spanYIndex = c.getColumnIndexOrThrow(
                             LauncherSettings.Favorites.SPANY);
-                    //final int uriIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.URI);
-                    //final int displayModeIndex = c.getColumnIndexOrThrow(
-                    //        LauncherSettings.Favorites.DISPLAY_MODE);
+                    final int launchCountIndex = c.getColumnIndexOrThrow(
+                            LauncherSettings.Favorites.LAUNCH_COUNT);
+                    final int sortTypeIndex = c.getColumnIndexOrThrow(
+                            LauncherSettings.Favorites.SORT_TYPE);
 
                     ShortcutInfo info;
                     String intentDescription;
@@ -1328,6 +1329,7 @@ public class LauncherModel extends BroadcastReceiver {
                                     info.screen = c.getInt(screenIndex);
                                     info.cellX = c.getInt(cellXIndex);
                                     info.cellY = c.getInt(cellYIndex);
+                                    info.launchCount = c.getInt(launchCountIndex);
 
                                     // check & update map of what's occupied
                                     if (!checkItemPlacement(occupied, info)) {
@@ -1374,6 +1376,7 @@ public class LauncherModel extends BroadcastReceiver {
                                 folderInfo.screen = c.getInt(screenIndex);
                                 folderInfo.cellX = c.getInt(cellXIndex);
                                 folderInfo.cellY = c.getInt(cellYIndex);
+                                folderInfo.sortType = c.getInt(sortTypeIndex);
 
                                 // check & update map of what's occupied
                                 if (!checkItemPlacement(occupied, folderInfo)) {
