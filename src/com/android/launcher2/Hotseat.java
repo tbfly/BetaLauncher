@@ -16,15 +16,24 @@
 
 package com.android.launcher2;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+
+import com.lennox.utils.ThemeUtils;
 
 import com.android.launcher.R;
 
@@ -113,8 +122,35 @@ public class Hotseat extends FrameLayout {
         LayoutInflater inflater = LayoutInflater.from(context);
         BubbleTextView allAppsButton = (BubbleTextView)
                 inflater.inflate(R.layout.application, mContent, false);
-        allAppsButton.setCompoundDrawablesWithIntrinsicBounds(null,
-                context.getResources().getDrawable(R.drawable.all_apps_button_icon), null, null);
+
+        /*ImageView allAppsButton = new ImageView(context);
+
+        ActivityManager activityManager =
+                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        int mIconDpi = activityManager.getLauncherLargeIconDensity();*/
+
+        Drawable appDrawerIcon = null;
+        String[] possibleNames = { "all_apps_button_icon", "ic_allapps", "allapp" };
+        for ( String s : possibleNames ) {
+             appDrawerIcon = ThemeUtils.getDrawable(context, s);
+             if ( appDrawerIcon != null ) {
+                 break;
+             }
+        }
+        if ( appDrawerIcon == null ) {
+            appDrawerIcon  = context.getResources().getDrawable(R.drawable.all_apps_button_icon);
+        }
+
+        //Bitmap bitmap = ((BitmapDrawable)appDrawerIcon).getBitmap();
+        //int width=96;
+        //int height=96;
+        //Bitmap resizedbitmap=Bitmap.createScaledBitmap(bitmap, width, height, true);
+
+        //allAppsButton.setImageDrawable(appDrawerIcon);
+
+        //allAppsButton.setLayoutParams(new ViewGroup.LayoutParams(64,64));*/
+
+        allAppsButton.setCompoundDrawablesWithIntrinsicBounds(null,appDrawerIcon, null, null);
         allAppsButton.setContentDescription(context.getString(R.string.all_apps_button_label));
         allAppsButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
