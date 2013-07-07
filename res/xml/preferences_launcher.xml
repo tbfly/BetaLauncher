@@ -15,8 +15,19 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher2">
+    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher">
         <ListPreference
             android:key="icon_theme"
             android:title="@string/icon_theme" />
+
+    <PreferenceCategory android:title="@string/preferences_interface_homescreen_folder_style_category">
+        <ListPreference
+            android:key="ui_homescreen_folder_style"
+            android:title="@string/preferences_interface_homescreen_folder_style_title"
+            android:summary="@string/preferences_interface_homescreen_folder_style_summary"
+            android:entries="@array/folder_icon_style_names"
+            android:entryValues="@array/folder_icon_style_values"
+            android:defaultValue="0" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

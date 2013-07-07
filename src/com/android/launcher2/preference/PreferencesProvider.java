@@ -54,6 +54,14 @@ public final class PreferencesProvider {
     }
 
     public static class Interface {
+        public static class Homescreen {
+            public static class FolderIconStyle {
+                public static int getFolderIconStyle(Context context) {
+                    return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));
+                }
+            }
+        }
+
         public static class Drawer {
             public static String getHiddenApps() {
                 return getString("ui_drawer_hidden_apps", "");

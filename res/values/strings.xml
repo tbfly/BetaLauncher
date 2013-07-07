@@ -282,4 +282,8 @@ s -->
     <!--             -->
     <string name="preferences_title">Preferences</string>
     <string name="icon_theme">Icon theme</string>
+
+    <string name="preferences_interface_homescreen_folder_style_category">Folder icon style</string>
+    <string name="preferences_interface_homescreen_folder_style_title">Style</string>
+    <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
 </resources>
