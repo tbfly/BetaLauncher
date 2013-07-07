@@ -67,11 +67,6 @@ public class AppWidgetResizeFrame extends FrameLayout {
 
     private static Rect mTmpRect = new Rect();
 
-    public static final int LEFT = 0;
-    public static final int TOP = 1;
-    public static final int RIGHT = 2;
-    public static final int BOTTOM = 3;
-
     private Launcher mLauncher;
 
     public AppWidgetResizeFrame(Context context,
@@ -81,14 +76,14 @@ public class AppWidgetResizeFrame extends FrameLayout {
         mLauncher = (Launcher) context;
         mCellLayout = cellLayout;
         mWidgetView = widgetView;
-        mResizeMode = widgetView.getAppWidgetInfo().resizeMode;
+        mResizeMode = AppWidgetProviderInfo.RESIZE_BOTH;
         mDragLayer = dragLayer;
         mWorkspace = (Workspace) dragLayer.findViewById(R.id.workspace);
 
         final AppWidgetProviderInfo info = widgetView.getAppWidgetInfo();
         int[] result = Launcher.getMinSpanForWidget(mLauncher, info);
-        mMinHSpan = result[0];
-        mMinVSpan = result[1];
+        mMinHSpan = 1;
+        mMinVSpan = 1;
 
         setBackgroundResource(R.drawable.widget_resize_frame_holo);
         setPadding(0, 0, 0, 0);
@@ -125,14 +120,6 @@ public class AppWidgetResizeFrame extends FrameLayout {
         mWidgetPaddingRight = p.right;
         mWidgetPaddingBottom = p.bottom;
 
-        if (mResizeMode == AppWidgetProviderInfo.RESIZE_HORIZONTAL) {
-            mTopHandle.setVisibility(GONE);
-            mBottomHandle.setVisibility(GONE);
-        } else if (mResizeMode == AppWidgetProviderInfo.RESIZE_VERTICAL) {
-            mLeftHandle.setVisibility(GONE);
-            mRightHandle.setVisibility(GONE);
-        }
-
         final float density = mLauncher.getResources().getDisplayMetrics().density;
         mBackgroundPadding = (int) Math.ceil(density * BACKGROUND_PADDING);
         mTouchTargetWidth = 2 * mBackgroundPadding;
@@ -144,8 +131,8 @@ public class AppWidgetResizeFrame extends FrameLayout {
     }
 
     public boolean beginResizeIfPointInRegion(int x, int y) {
-        boolean horizontalActive = (mResizeMode & AppWidgetProviderInfo.RESIZE_HORIZONTAL) != 0;
-        boolean verticalActive = (mResizeMode & AppWidgetProviderInfo.RESIZE_VERTICAL) != 0;
+        boolean horizontalActive = true;
+        boolean verticalActive = true;
 
         mLeftBorderActive = (x < mTouchTargetWidth) && horizontalActive;
         mRightBorderActive = (x > getWidth() - mTouchTargetWidth) && horizontalActive;
@@ -458,13 +445,7 @@ public class AppWidgetResizeFrame extends FrameLayout {
                 }
             });
             AnimatorSet set = LauncherAnimUtils.createAnimatorSet();
-            if (mResizeMode == AppWidgetProviderInfo.RESIZE_VERTICAL) {
-                set.playTogether(oa, topOa, bottomOa);
-            } else if (mResizeMode == AppWidgetProviderInfo.RESIZE_HORIZONTAL) {
-                set.playTogether(oa, leftOa, rightOa);
-            } else {
-                set.playTogether(oa, leftOa, rightOa, topOa, bottomOa);
-            }
+            set.playTogether(oa, leftOa, rightOa, topOa, bottomOa);
 
             set.setDuration(SNAP_DURATION);
             set.start();
