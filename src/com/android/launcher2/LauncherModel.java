@@ -2366,7 +2366,7 @@ public class LauncherModel extends BroadcastReceiver {
                             iconResource.packageName);
                     final int id = resources.getIdentifier(iconResource.resourceName, null, null);
                     icon = Utilities.createIconBitmap(
-                            mIconCache.getFullResIcon(resources, id), context);
+                            mIconCache.getFullResIcon(iconResource.packageName, id), context);
                 } catch (Exception e) {
                     Log.w(TAG, "Could not load shortcut icon: " + extra);
                 }
@@ -2388,7 +2388,7 @@ public class LauncherModel extends BroadcastReceiver {
         info.title = name;
         info.intent = intent;
         info.customIcon = customIcon;
-        info.iconResource = iconResource;
+        info.iconResource = null;//iconResource;
 
         return info;
     }

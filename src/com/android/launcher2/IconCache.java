@@ -23,12 +23,29 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ScaleDrawable;
+import android.view.Gravity;
 
+import com.android.launcher.R;
+import com.lennox.utils.ThemeUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Cache of application icons.  Icons can be made from any thread.
@@ -50,6 +67,11 @@ public class IconCache {
     private final HashMap<ComponentName, CacheEntry> mCache =
             new HashMap<ComponentName, CacheEntry>(INITIAL_ICON_CACHE_CAPACITY);
     private int mIconDpi;
+    private XmlPullParser xrp;
+    private HashMap <String, String> iconThemeMap;
+    private ArrayList<String> iconBackList = null;
+    private ArrayList<String> iconFrontList = null;
+    private float scaleFactor = 1.0f;
 
     public IconCache(LauncherApplication context) {
         ActivityManager activityManager =
@@ -61,6 +83,7 @@ public class IconCache {
 
         // need to set mIconDpi before getting default icon
         mDefaultIcon = makeDefaultIcon();
+        setupIconThemeMap();
     }
 
     public Drawable getFullResDefaultActivityIcon() {
@@ -79,23 +102,177 @@ public class IconCache {
         return (d != null) ? d : getFullResDefaultActivityIcon();
     }
 
-    public Drawable getFullResIcon(String packageName, int iconId) {
-        Resources resources;
-        try {
-            resources = mPackageManager.getResourcesForApplication(packageName);
-        } catch (PackageManager.NameNotFoundException e) {
-            resources = null;
+    private void setupIconThemeMap() {
+        iconThemeMap = new HashMap<String, String>();
+        iconBackList = new ArrayList<String>();
+        iconFrontList = new ArrayList<String>();
+        if (xrp == null) {
+            xrp = ThemeUtils.getXml(mContext,"appfilter");
         }
-        if (resources != null) {
-            if (iconId != 0) {
-                return getFullResIcon(resources, iconId);
+        if ( xrp == null ) {
+            try {
+                Context otherContext = mContext.createPackageContext(ThemeUtils.getThemePackageName(mContext, mContext.getPackageName()), 0);
+                AssetManager am = otherContext.getAssets();
+                InputStream istr = am.open("appfilter.xml");
+                XmlPullParserFactory factory = XmlPullParserFactory.newInstance(); 
+                factory.setNamespaceAware(true); 
+                xrp = factory.newPullParser(); 
+                xrp.setInput(istr, "UTF-8");
+            } catch (PackageManager.NameNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+        }
+        if ( xrp == null ) {
+            return;
+        }
+        String componentInfo, drawableName;
+        try {
+            while (xrp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                if (xrp.getEventType() == XmlPullParser.START_TAG) {
+                    String s = xrp.getName();
+                    if (s.equals("item")) {
+                        componentInfo = xrp.getAttributeValue(null, "component");
+                        drawableName = xrp.getAttributeValue(null, "drawable");
+                        iconThemeMap.put(componentInfo, drawableName);
+                    } else if (s.equals("iconback")) {
+                        int length = xrp.getAttributeCount();
+                        for (int i = 0; i < length; i++) {
+                            String attributeName = xrp.getAttributeName(i);
+                            if (attributeName.startsWith("img")) {
+                                iconBackList.add(xrp.getAttributeValue(null, attributeName));
+                            }
+                        }
+                    } else if (s.equals("iconupon")) {
+                        int length = xrp.getAttributeCount();
+                        for (int i = 0; i < length; i++) {
+                            String attributeName = xrp.getAttributeName(i);
+                            if (attributeName.startsWith("img")) {
+                                iconFrontList.add(xrp.getAttributeValue(null, attributeName));
+                            }
+                        }
+                    } else if (s.equals("scale")) {
+                        scaleFactor = Float.parseFloat(xrp.getAttributeValue(null, "factor"));
+                    }
+                }
+                xrp.next();
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (XmlPullParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private Drawable getThemedIcon(Resources resources, int iconId, String packageName, String componentName) {
+        String hashkey = "ComponentInfo{" + packageName + "/" + componentName + "}";
+        Drawable themedIcon;
+        if (iconThemeMap.containsKey(hashkey)) {
+            String drawableName = iconThemeMap.get(hashkey);
+            themedIcon = ThemeUtils.getDrawable(mContext, drawableName);
+            if (themedIcon != null) {
+                return themedIcon;
+            }
+        }
+        if (iconBackList != null && iconBackList.size() > 0) {
+            Random r = new Random();
+            int iconBackListIndex = r.nextInt(iconBackList.size());
+            Drawable image = ThemeUtils.getDrawable(mContext,iconBackList.get(iconBackListIndex));
+            Drawable icon = getFullResIcon(resources, iconId);
+            android.util.Log.d("LX", packageName);
+            return createIconDrawable(image, icon);
+        } else {
+            return null;
+        }
+    }
+
+    /*private Drawable createIconDrawable(Drawable background, Drawable icon) {
+
+        int backgroundHeight = background.getIntrinsicHeight();
+        int backgroundWidth = background.getIntrinsicWidth();
+        int iconHeight = icon.getIntrinsicHeight();
+        int iconWidth = icon.getIntrinsicWidth();
+
+        float iconScale = 1.0f - ((float) backgroundHeight / (float) iconHeight);
+
+        ScaleDrawable scaledIcon = new ScaleDrawable(icon, Gravity.CENTER, iconScale, iconScale);
+
+        android.util.Log.d("LX", "iconscale " + iconScale + " scale " + scaleFactor);
+
+        if ( iconFrontList != null && iconFrontList.size() > 0) {
+            ScaleDrawable sd = new ScaleDrawable(scaledIcon, Gravity.CENTER, scaleFactor, scaleFactor);
+            sd.setLevel(8000);
+            Drawable[] layers = new Drawable[2 + iconFrontList.size()];
+            layers[0] = background;
+            layers[1] = (Drawable) sd;
+            for (int i = 0; i < iconFrontList.size(); i++) {
+                layers[2+i] = ThemeUtils.getDrawable(mContext, iconFrontList.get(i));
+            }
+            LayerDrawable layerDrawable = new LayerDrawable(layers);
+            return layerDrawable;
+        } else {
+            ScaleDrawable sd = new ScaleDrawable(scaledIcon, Gravity.CENTER, scaleFactor, scaleFactor);
+            sd.setLevel(8000);
+            Drawable[] layers = new Drawable[2];
+            layers[0] = background;
+            layers[1] = (Drawable) sd;
+            LayerDrawable layerDrawable = new LayerDrawable(layers);
+            return layerDrawable;
+        }
+    }*/
+
+    private Drawable createIconDrawable(Drawable background, Drawable icon) {
+
+        int iconScaleLevel = (int) ((float) scaleFactor * 10000);
+        if ( iconFrontList != null && iconFrontList.size() > 0) {
+            ScaleDrawable sd = new ScaleDrawable(icon, Gravity.CENTER, scaleFactor, scaleFactor);
+            sd.setLevel(iconScaleLevel);
+            Drawable[] layers = new Drawable[2 + iconFrontList.size()];
+            layers[0] = background;
+            layers[1] = (Drawable) sd;
+            for (int i = 0; i < iconFrontList.size(); i++) {
+                layers[2+i] = ThemeUtils.getDrawable(mContext, iconFrontList.get(i));
+            }
+            LayerDrawable layerDrawable = new LayerDrawable(layers);
+            return layerDrawable;
+        } else {
+            ScaleDrawable sd = new ScaleDrawable(icon, Gravity.CENTER, scaleFactor, scaleFactor);
+            sd.setLevel(iconScaleLevel);
+            Drawable[] layers = new Drawable[2];
+            layers[0] = background;
+            layers[1] = (Drawable) sd;
+            LayerDrawable layerDrawable = new LayerDrawable(layers);
+            return layerDrawable;
+        }
+    }
+
+    public Drawable getFullResIcon(String packageName, int iconId) {
+        android.content.pm.ApplicationInfo info = null;
+        try{
+            info = mPackageManager.getApplicationInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            info = null;
+        }
+        if (info != null) {
+            return getFullResIcon(info, packageName, iconId);
         }
         return getFullResDefaultActivityIcon();
     }
 
     public Drawable getFullResIcon(ResolveInfo info) {
         return getFullResIcon(info.activityInfo);
+    }
+
+    public Drawable getFullResIcon(ResolveInfo info, String className) {
+        return getFullResIcon(info.activityInfo, className);
     }
 
     public Drawable getFullResIcon(ActivityInfo info) {
@@ -110,7 +287,51 @@ public class IconCache {
         if (resources != null) {
             int iconId = info.getIconResource();
             if (iconId != 0) {
-                return getFullResIcon(resources, iconId);
+                Drawable dr = getThemedIcon(resources, iconId, info.packageName, info.targetActivity);
+                if (dr == null)
+                    dr = getFullResIcon(resources, iconId);
+                return dr;
+            }
+        }
+        return getFullResDefaultActivityIcon();
+    }
+
+    public Drawable getFullResIcon(ActivityInfo info, String className) {
+
+        Resources resources;
+        try {
+            resources = mPackageManager.getResourcesForApplication(
+                    info.applicationInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            resources = null;
+        }
+        if (resources != null) {
+            int iconId = info.getIconResource();
+            if (iconId != 0) {
+                Drawable dr = getThemedIcon(resources, iconId, info.packageName, className);
+                if (dr == null)
+                    dr = getFullResIcon(resources, iconId);
+                return dr;
+            }
+        }
+        return getFullResDefaultActivityIcon();
+    }
+
+    public Drawable getFullResIcon(android.content.pm.ApplicationInfo info,
+            String packageName, int iconId) {
+
+        Resources resources;
+        try {
+            resources = mPackageManager.getResourcesForApplication(info);
+        } catch (PackageManager.NameNotFoundException e) {
+            resources = null;
+        }
+        if (resources != null) {
+            if (iconId != 0) {
+                Drawable dr = getThemedIcon(resources, iconId, packageName, packageName);
+                if (dr == null)
+                    dr = getFullResIcon(resources, iconId);
+                return dr;
             }
         }
         return getFullResDefaultActivityIcon();
@@ -211,7 +432,7 @@ public class IconCache {
             }
 
             entry.icon = Utilities.createIconBitmap(
-                    getFullResIcon(info), mContext);
+                    getFullResIcon(info, componentName.getClassName()), mContext);
         }
         return entry;
     }
