@@ -130,7 +130,8 @@ public class Hotseat extends FrameLayout {
         int mIconDpi = activityManager.getLauncherLargeIconDensity();*/
 
         Drawable appDrawerIcon = null;
-        String[] possibleNames = { "all_apps_button_icon", "ic_allapps", "allapp" };
+        //String[] possibleNames = { "all_apps_button_icon", "ic_allapps", "allapp" };
+        String[] possibleNames = { "all_apps_button_icon", "ic_allapps" };
         for ( String s : possibleNames ) {
              appDrawerIcon = ThemeUtils.getDrawable(context, s);
              if ( appDrawerIcon != null ) {
