@@ -336,6 +336,7 @@ public class Workspace extends PagedView
     private boolean mFadeScrollingIndicator;
     private int mScrollingIndicatorPosition;
     private boolean mShowDockDivider;
+    private boolean mShowOutlines;
 
     private static final int SCROLLING_INDICATOR_DOCK = 0;
     private static final int SCROLLING_INDICATOR_TOP = 1;
@@ -377,8 +378,7 @@ public class Workspace extends PagedView
 
         mLauncher = (Launcher) context;
         final Resources res = getResources();
-        mWorkspaceFadeInAdjacentScreens = res.getBoolean(R.bool.config_workspaceFadeAdjacentScreens);
-        mFadeInAdjacentScreens = false;
+        mHandleFadeInAdjacentScreens = true;
         mWallpaperManager = WallpaperManager.getInstance(context);
 
         mUsePagingTouchSlop = false;
@@ -430,6 +430,10 @@ public class Workspace extends PagedView
         mScrollWallpaper = PreferencesProvider.Interface.Homescreen.Scrolling.getScrollWallpaper();
         mWallpaperHack = PreferencesProvider.Interface.Homescreen.Scrolling.getWallpaperHack(
                 res.getBoolean(R.bool.config_workspaceDefaultWallpaperHack));
+        mShowOutlines = PreferencesProvider.Interface.Homescreen.Scrolling.getShowOutlines(
+                res.getBoolean(R.bool.config_workspaceDefaultShowOutlines));
+        mFadeInAdjacentScreens = PreferencesProvider.Interface.Homescreen.Scrolling.getFadeInAdjacentScreens(
+                res.getBoolean(R.bool.config_workspaceFadeAdjacentScreens));
         mShowScrollingIndicator = PreferencesProvider.Interface.Homescreen.Indicator.getShowScrollingIndicator();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Homescreen.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Homescreen.Indicator.getScrollingIndicatorPosition();
@@ -934,15 +938,14 @@ public class Workspace extends PagedView
             }
         }
 
-        // Only show page outlines as we pan if we are on large screen
-        if (LauncherApplication.isScreenLarge()) {
+        if (mShowOutlines) {
             showOutlines();
-            mIsStaticWallpaper = mWallpaperManager.getWallpaperInfo() == null;
         }
+        mIsStaticWallpaper = mWallpaperManager.getWallpaperInfo() == null;
 
         // If we are not fading in adjacent screens, we still need to restore the alpha in case the
         // user scrolls while we are transitioning (should not affect dispatchDraw optimizations)
-        if (!mWorkspaceFadeInAdjacentScreens) {
+        if (!mFadeInAdjacentScreens) {
             for (int i = 0; i < getChildCount(); ++i) {
                 ((CellLayout) getPageAt(i)).setShortcutAndWidgetAlpha(1f);
             }
@@ -975,8 +978,8 @@ public class Workspace extends PagedView
                 mDragController.forceMoveEvent();
             }
         } else {
-            // If we are not mid-dragging, hide the page outlines if we are on a large screen
-            if (LauncherApplication.isScreenLarge()) {
+            // If we are not mid-dragging, hide the page outlines
+            if (mShowOutlines) {
                 hideOutlines();
             }
 
@@ -985,7 +988,6 @@ public class Workspace extends PagedView
                 hideScrollingIndicator(false);
             }
         }
-        mOverScrollMaxBackgroundAlpha = 0.0f;
 
         if (mDelayedResizeRunnable != null) {
             mDelayedResizeRunnable.run();
@@ -1328,7 +1330,7 @@ public class Workspace extends PagedView
     }
 
     void hideOutlines() {
-        if (!isSmall() && !mIsSwitchingState) {
+        if (!mIsSwitchingState) {
             if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
             if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
             mChildrenOutlineFadeOutAnimation = LauncherAnimUtils.ofFloat(this, "childrenOutlineAlpha", 0.0f);
@@ -2151,22 +2153,22 @@ public class Workspace extends PagedView
     private void initAnimationArrays() {
         final int childCount = getChildCount();
         if (mOldTranslationXs != null) return;
-        mOldTranslationXs = new float[childCount];
-        mOldTranslationYs = new float[childCount];
-        mOldScaleXs = new float[childCount];
-        mOldScaleYs = new float[childCount];
-        mOldBackgroundAlphas = new float[childCount];
-        mOldAlphas = new float[childCount];
-        mOldRotations = new float[childCount];
-        mOldRotationYs = new float[childCount];
-        mNewTranslationXs = new float[childCount];
-        mNewTranslationYs = new float[childCount];
-        mNewScaleXs = new float[childCount];
-        mNewScaleYs = new float[childCount];
-        mNewBackgroundAlphas = new float[childCount];
-        mNewAlphas = new float[childCount];
-        mNewRotations = new float[childCount];
-        mNewRotationYs = new float[childCount];
+        mOldTranslationXs = new float[MAX_HOMESCREENS];
+        mOldTranslationYs = new float[MAX_HOMESCREENS];
+        mOldScaleXs = new float[MAX_HOMESCREENS];
+        mOldScaleYs = new float[MAX_HOMESCREENS];
+        mOldBackgroundAlphas = new float[MAX_HOMESCREENS];
+        mOldAlphas = new float[MAX_HOMESCREENS];
+        mOldRotations = new float[MAX_HOMESCREENS];
+        mOldRotationYs = new float[MAX_HOMESCREENS];
+        mNewTranslationXs = new float[MAX_HOMESCREENS];
+        mNewTranslationYs = new float[MAX_HOMESCREENS];
+        mNewScaleXs = new float[MAX_HOMESCREENS];
+        mNewScaleYs = new float[MAX_HOMESCREENS];
+        mNewBackgroundAlphas = new float[MAX_HOMESCREENS];
+        mNewAlphas = new float[MAX_HOMESCREENS];
+        mNewRotations = new float[MAX_HOMESCREENS];
+        mNewRotationYs = new float[MAX_HOMESCREENS];
     }
 
     Animator getChangeStateAnimation(final State state, boolean animated) {
@@ -2218,7 +2220,7 @@ public class Workspace extends PagedView
             float translationX = 0f;
             float translationY = 0f;
             float scale = finalScaleFactor;
-            float finalAlpha = (!mWorkspaceFadeInAdjacentScreens || stateIsSpringLoaded ||
+            float finalAlpha = (!mFadeInAdjacentScreens || stateIsSpringLoaded ||
                     (i == mCurrentPage)) ? 1f : 0f;
             float initialAlpha = cl.getShortcutsAndWidgets().getAlpha();
 
@@ -2453,7 +2455,7 @@ public class Workspace extends PagedView
         // ensure that only the current page is visible during (and subsequently, after) the
         // transition animation.  If fade adjacent pages is disabled, then re-enable the page
         // visibility after the transition animation.
-        if (!mWorkspaceFadeInAdjacentScreens) {
+        if (!mFadeInAdjacentScreens) {
             for (int i = 0; i < getChildCount(); i++) {
                 final CellLayout cl = (CellLayout) getChildAt(i);
                 cl.setShortcutAndWidgetAlpha(1f);
@@ -3105,7 +3107,7 @@ public class Workspace extends PagedView
 
         // Because we don't have space in the Phone UI (the CellLayouts run to the edge) we
         // don't need to show the outlines
-        if (LauncherApplication.isScreenLarge()) {
+        if (mShowOutlines) {
             showOutlines();
         }
     }

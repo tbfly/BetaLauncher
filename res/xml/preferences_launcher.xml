@@ -46,6 +46,21 @@
             android:title="@string/preferences_interface_homescreen_general_hide_icon_labels_title"
             android:summary="@string/preferences_interface_homescreen_general_hide_icon_labels_summary"
             android:defaultValue="false" />
+        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_homescreen_icon_scale"
+            android:title="@string/preferences_interface_general_icon_scale_title"
+            android:summary="@string/preferences_interface_general_icon_scale_summary"
+            launcher:min="80"
+            launcher:max="120"
+            launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
+        <ListPreference
+            android:key="ui_homescreen_folder_style"
+            android:title="@string/preferences_interface_homescreen_folder_style_title"
+            android:summary="@string/preferences_interface_homescreen_folder_style_summary"
+            android:entries="@array/folder_icon_style_names"
+            android:entryValues="@array/folder_icon_style_values"
+            android:defaultValue="0" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preferences_interface_homescreen_scrolling_category">
         <CheckBoxPreference android:key="ui_homescreen_scrolling_scroll_wallpaper"
             android:title="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_summary"
@@ -60,19 +75,14 @@
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
-        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_homescreen_icon_scale"
-            android:title="@string/preferences_interface_general_icon_scale_title"
-            android:summary="@string/preferences_interface_general_icon_scale_summary"
-            launcher:min="80"
-            launcher:max="120"
-            launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
-        <ListPreference
-            android:key="ui_homescreen_folder_style"
-            android:title="@string/preferences_interface_homescreen_folder_style_title"
-            android:summary="@string/preferences_interface_homescreen_folder_style_summary"
-            android:entries="@array/folder_icon_style_names"
-            android:entryValues="@array/folder_icon_style_values"
-            android:defaultValue="0" />
+        <CheckBoxPreference android:key="ui_homescreen_scrolling_fade_adjacent_screens"
+            android:title="@string/preferences_interface_homescreen_scrolling_fade_adjacent_screens_title"
+            android:summary="@string/preferences_interface_homescreen_scrolling_fade_adjacent_screens_summary"
+            android:defaultValue="@bool/config_workspaceFadeAdjacentScreens" />
+        <CheckBoxPreference android:key="ui_homescreen_scrolling_show_outlines"
+            android:title="@string/preferences_interface_homescreen_scrolling_show_outlines_title"
+            android:summary="@string/preferences_interface_homescreen_scrolling_show_outlines_summary"
+            android:defaultValue="@bool/config_workspaceDefaultShowOutlines" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_indicator_category">
         <CheckBoxPreference android:key="ui_homescreen_indicator_enable"
@@ -125,18 +135,23 @@
             launcher:min="80"
             launcher:max="120"
             launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
-        <ListPreference android:key="ui_drawer_scrolling_transition_effect"
-            android:title="@string/preferences_interface_drawer_scrolling_transition_effect_title"
-            android:summary="@string/preferences_interface_drawer_scrolling_transition_effect_summary"
-            android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
-            android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
-            android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_transparency"
             android:title="@string/preferences_interface_drawer_transparency_title"
             android:summary="@string/preferences_interface_drawer_transparency_summary"
             launcher:min="0"
             launcher:max="100"
             android:defaultValue="50" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preferences_interface_drawer_scrolling_category">
+        <ListPreference android:key="ui_drawer_scrolling_transition_effect"
+            android:title="@string/preferences_interface_drawer_scrolling_transition_effect_title"
+            android:summary="@string/preferences_interface_drawer_scrolling_transition_effect_summary"
+            android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
+            android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
+            android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
+        <CheckBoxPreference android:key="ui_drawer_scrolling_fade_adjacent_screens"
+            android:title="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_title"
+            android:summary="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_summary" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_drawer_indicator_category">
         <CheckBoxPreference android:key="ui_drawer_indicator_enable"

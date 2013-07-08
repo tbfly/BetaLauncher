@@ -124,6 +124,12 @@ public final class PreferencesProvider {
                 public static boolean getWallpaperHack(boolean def) {
                     return getBoolean("ui_homescreen_scrolling_wallpaper_hack", def);
                 }
+                public static boolean getFadeInAdjacentScreens(boolean def) {
+                    return getBoolean("ui_homescreen_scrolling_fade_adjacent_screens", def);
+                }
+                public static boolean getShowOutlines(boolean def) {
+                    return getBoolean("ui_homescreen_scrolling_show_outlines", def);
+                }
             }
             public static class Indicator {
                 public static boolean getShowScrollingIndicator() {
@@ -221,6 +227,9 @@ public final class PreferencesProvider {
                     }
 
                     return AppsCustomizePagedView.TransitionEffect.Standard;
+                }
+                public static boolean getFadeInAdjacentScreens() {
+                    return getBoolean("ui_drawer_scrolling_fade_adjacent_screens", false);
                 }
             }
             public static class Indicator {

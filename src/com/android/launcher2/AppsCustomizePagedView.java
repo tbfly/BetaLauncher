@@ -359,7 +359,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mCanvas = new Canvas();
         mRunningTasks = new ArrayList<AppsCustomizeAsyncTask>();
 
-        // Save the default widget preview background
+        mHandleFadeInAdjacentScreens = true;
+
         Resources resources = context.getResources();
 
         mCameraDistance = resources.getInteger(R.integer.config_cameraDistance);
@@ -367,6 +368,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // Preferences
         mTransitionEffect = PreferencesProvider.Interface.Drawer.Scrolling.getTransitionEffect(
                 resources.getString(R.string.config_drawerDefaultTransitionEffect));
+        mFadeInAdjacentScreens = PreferencesProvider.Interface.Drawer.Scrolling.getFadeInAdjacentScreens();
         boolean showScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getShowScrollingIndicator();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Drawer.Indicator.getScrollingIndicatorPosition();
@@ -393,16 +395,15 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         a.recycle();
         mWidgetSpacingLayout = new PagedViewCellLayout(getContext());
 
-        // The padding on the non-matched dimension for the default widget preview icons
-        // (top + bottom)
-        mFadeInAdjacentScreens = false;
-
         // Unless otherwise specified this view is important for accessibility.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
                 setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             }
         }
+
+        // The padding on the non-matched dimension for the default widget preview icons
+        // (top + bottom)
         mWidgetPreviewIconPaddedDimension =
                 (int) (mAppIconSize * (1 + (2 * WIDGET_PREVIEW_ICON_PADDING_PERCENTAGE)));
     }
