@@ -378,7 +378,7 @@ public final class Launcher extends Activity
         // Load all preferences
         PreferencesProvider.load(this);
 
-        mIconScale = (float) PreferencesProvider.Interface.General.getIconScale(
+        mIconScale = (float) PreferencesProvider.Interface.Homescreen.getIconScale(
                 getResources().getInteger(R.integer.app_icon_scale_percentage)) / 100f;
 
         mAppWidgetManager = AppWidgetManager.getInstance(this);

@@ -119,7 +119,7 @@ public class Hotseat extends FrameLayout {
 
         float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(
                 getResources().getInteger(R.integer.hotseat_item_scale_percentage)) / 100f;
-        //mContent.setChildrenScale(childrenScale);
+        mContent.setChildrenScale(childrenScale);
 
         resetLayout();
     }

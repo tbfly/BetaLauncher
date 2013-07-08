@@ -95,6 +95,9 @@ public final class PreferencesProvider {
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
+            public static int getIconScale(int def) {
+                return getInt("ui_homescreen_icon_scale", def);
+            }
             public static boolean getHideIconLabels() {
                 return getBoolean("ui_homescreen_general_hide_icon_labels", false);
             }
@@ -139,14 +142,68 @@ public final class PreferencesProvider {
                     return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));
                 }
             }
+
+            public static class Gestures {
+                public static String getUpGestureAction() {
+                    return getString("ui_homescreen_up_gesture", "nothing");
+                }
+                public static String getDownGestureAction() {
+                    return getString("ui_homescreen_down_gesture", "nothing");
+                }
+                public static String getPinchGestureAction() {
+                    return getString("ui_homescreen_pinch_gesture", "nothing");
+                }
+                public static String getSpreadGestureAction() {
+                    return getString("ui_homescreen_spread_gesture", "nothing");
+                }
+            }
         }
 
         public static class Drawer {
+            public static int getCellCountX() {
+                int def = 5;
+                String[] values = getString("ui_drawer_grid", "0|" + def).split("\\|");
+                try {
+                    return Integer.parseInt(values[1]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
+            }
+            public static int getCellCountY() {
+                int def = 4;
+                String[] values = getString("ui_drawer_grid", def + "|0").split("\\|");
+                try {
+                    return Integer.parseInt(values[0]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
+            }
+            public static int getWidgetCountX() {
+                int def = 3;
+                String[] values = getString("ui_drawer_widget_grid", "0|" + def).split("\\|");
+                try {
+                    return Integer.parseInt(values[1]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
+            }
+            public static int getWidgetCountY() {
+                int def = 2;
+                String[] values = getString("ui_drawer_widget_grid", def + "|0").split("\\|");
+                try {
+                    return Integer.parseInt(values[0]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
+            }
             public static int getDrawerTransparency() {
-                return Integer.parseInt(getString("ui_drawer_transparency", "128"));
+                return Integer.parseInt(getString("ui_drawer_transparency", "50"));
             }
             public static String getHiddenApps() {
                 return getString("ui_drawer_hidden_apps", "");
+            }
+            public static int getIconScale(int def) {
+                return getInt("ui_drawer_icon_scale", def);
             }
             public static class Scrolling {
                 public static AppsCustomizePagedView.TransitionEffect getTransitionEffect(String def) {
@@ -184,8 +241,7 @@ public final class PreferencesProvider {
                 return getInt("ui_dock_icons", def);
             }
             public static int getIconScale(int def) {
-                //return getInt("ui_dock_icon_scale", def);
-                return getInt("ui_general_icon_scale", def);
+                return getInt("ui_dock_icon_scale", def);
             }
             public static boolean getShowBackground() {
                 return getBoolean("ui_dock_background", true);
@@ -195,11 +251,6 @@ public final class PreferencesProvider {
             }
         }
 
-        public static class General {
-            public static int getIconScale(int def) {
-                return getInt("ui_general_icon_scale", def);
-            }
-        }
     }
 
     public static class Application {

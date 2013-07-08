@@ -20,7 +20,9 @@
             android:key="icon_theme"
             android:title="@string/icon_theme" />
 
-    <PreferenceCategory android:title="@string/preferences_interface_homescreen_title">
+    <PreferenceScreen android:title="@string/preferences_interface_homescreen_title"
+        android:summary="@string/preferences_interface_homescreen_summary" >
+    <PreferenceCategory android:title="@string/preferences_interface_homescreen_general_category">
         <com.android.launcher2.preference.DoubleNumberPickerPreference android:key="ui_homescreen_grid"
             android:title="@string/preferences_interface_homescreen_general_grid_title"
             android:summary="@string/preferences_interface_homescreen_general_grid_summary"
@@ -28,9 +30,9 @@
             launcher:pickerTitle2="@string/preferences_interface_homescreen_general_grid_columns_title"
             launcher:defaultValue1="@integer/target_cell_count_x"
             launcher:defaultValue2="@integer/target_cell_count_y"
-            launcher:max1="7"
+            launcher:max1="10"
             launcher:min1="3"
-            launcher:max2="7"
+            launcher:max2="10"
             launcher:min2="3" />
         <CheckBoxPreference android:key="ui_homescreen_general_search"
             android:title="@string/preferences_interface_homescreen_general_search_title"
@@ -58,7 +60,7 @@
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
-        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_general_icon_scale"
+        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_homescreen_icon_scale"
             android:title="@string/preferences_interface_general_icon_scale_title"
             android:summary="@string/preferences_interface_general_icon_scale_summary"
             launcher:min="80"
@@ -72,7 +74,6 @@
             android:entryValues="@array/folder_icon_style_values"
             android:defaultValue="0" />
     </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_indicator_category">
         <CheckBoxPreference android:key="ui_homescreen_indicator_enable"
             android:title="@string/preferences_interface_homescreen_indicator_enable_title"
@@ -91,23 +92,52 @@
             android:defaultValue="0"
             android:dependency="ui_homescreen_indicator_enable" />
     </PreferenceCategory>
+    </PreferenceScreen>
 
-    <PreferenceCategory android:title="@string/preferences_interface_drawer_title">
+    <PreferenceScreen android:title="@string/preferences_interface_drawer_title"
+        android:summary="@string/preferences_interface_drawer_summary" >
+    <PreferenceCategory android:title="@string/preferences_interface_drawer_category_title">
+        <com.android.launcher2.preference.DoubleNumberPickerPreference android:key="ui_drawer_grid"
+            android:title="@string/preferences_interface_drawer_app_grid_title"
+            android:summary="@string/preferences_interface_drawer_app_grid_summary"
+            launcher:pickerTitle1="@string/preferences_interface_homescreen_general_grid_rows_title"
+            launcher:pickerTitle2="@string/preferences_interface_homescreen_general_grid_columns_title"
+            launcher:defaultValue1="5"
+            launcher:defaultValue2="4"
+            launcher:max1="10"
+            launcher:min1="3"
+            launcher:max2="10"
+            launcher:min2="3" />
+        <com.android.launcher2.preference.DoubleNumberPickerPreference android:key="ui_drawer_widget_grid"
+            android:title="@string/preferences_interface_drawer_widget_grid_title"
+            android:summary="@string/preferences_interface_drawer_widget_grid_summary"
+            launcher:pickerTitle1="@string/preferences_interface_homescreen_general_grid_rows_title"
+            launcher:pickerTitle2="@string/preferences_interface_homescreen_general_grid_columns_title"
+            launcher:defaultValue1="3"
+            launcher:defaultValue2="2"
+            launcher:max1="7"
+            launcher:min1="1"
+            launcher:max2="7"
+            launcher:min2="1" />
+        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_icon_scale"
+            android:title="@string/preferences_interface_general_icon_scale_title"
+            android:summary="@string/preferences_interface_general_icon_scale_summary"
+            launcher:min="80"
+            launcher:max="120"
+            launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
         <ListPreference android:key="ui_drawer_scrolling_transition_effect"
             android:title="@string/preferences_interface_drawer_scrolling_transition_effect_title"
             android:summary="@string/preferences_interface_drawer_scrolling_transition_effect_summary"
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
-        <ListPreference
-            android:key="ui_drawer_transparency"
+        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_transparency"
             android:title="@string/preferences_interface_drawer_transparency_title"
             android:summary="@string/preferences_interface_drawer_transparency_summary"
-            android:entries="@array/preferences_interface_drawer_transparency_names"
-            android:entryValues="@array/preferences_interface_drawer_transparency_values"
-            android:defaultValue="128" />
+            launcher:min="0"
+            launcher:max="100"
+            android:defaultValue="50" />
     </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/preferences_interface_drawer_indicator_category">
         <CheckBoxPreference android:key="ui_drawer_indicator_enable"
             android:title="@string/preferences_interface_drawer_indicator_enable_title"
@@ -126,8 +156,11 @@
             android:defaultValue="0"
             android:dependency="ui_drawer_indicator_enable" />
     </PreferenceCategory>
+    </PreferenceScreen>
 
-    <PreferenceCategory android:title="@string/preferences_interface_dock_title">
+    <PreferenceScreen android:title="@string/preferences_interface_dock_title"
+        android:summary="@string/preferences_interface_dock_summary" >
+    <PreferenceCategory android:title="@string/preferences_interface_dock_category_title">
         <CheckBoxPreference android:key="ui_dock_background"
             android:title="@string/preferences_interface_dock_background_title"
             android:summary="@string/preferences_interface_dock_background_summary"
@@ -136,5 +169,42 @@
             android:title="@string/preferences_interface_dock_divider_title"
             android:summary="@string/preferences_interface_dock_divider_summary"
             android:defaultValue="falsee" />
+        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_dock_icon_scale"
+            android:title="@string/preferences_interface_dock_icon_scale_title"
+            android:summary="@string/preferences_interface_dock_icon_scale_summary"
+            launcher:min="80"
+            launcher:max="120"
+            android:defaultValue="@integer/hotseat_item_scale_percentage" />
     </PreferenceCategory>
+    </PreferenceScreen>
+
+
+        <PreferenceScreen android:title="@string/preferences_interface_homescreen_gestures_title"
+                android:summary="@string/preferences_interface_homescreen_gestures_summary" >
+            <ListPreference android:key="ui_homescreen_up_gesture"
+                android:title="@string/preferences_interface_homescreen_gestures_up_gesture_title"
+                android:summary=""
+                android:entries="@array/gesture_target_names"
+                android:entryValues="@array/gesture_target_values"
+                android:defaultValue="nothing" />
+            <ListPreference android:key="ui_homescreen_down_gesture"
+                android:title="@string/preferences_interface_homescreen_gestures_down_gesture_title"
+                android:summary=""
+                android:entries="@array/gesture_target_names"
+                android:entryValues="@array/gesture_target_values"
+                android:defaultValue="nothing" />
+            <ListPreference android:key="ui_homescreen_pinch_gesture"
+                android:title="@string/preferences_interface_homescreen_gestures_pinch_gesture_title"
+                android:summary=""
+                android:entries="@array/gesture_target_names"
+                android:entryValues="@array/gesture_target_values"
+                android:defaultValue="nothing" />
+            <ListPreference android:key="ui_homescreen_spread_gesture"
+                android:title="@string/preferences_interface_homescreen_gestures_spread_gesture_title"
+                android:summary=""
+                android:entries="@array/gesture_target_names"
+                android:entryValues="@array/gesture_target_values"
+                android:defaultValue="nothing" />
+        </PreferenceScreen>
+
 </PreferenceScreen>

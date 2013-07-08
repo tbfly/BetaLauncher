@@ -146,7 +146,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
             mMaxNumItems = mMaxCountX * mMaxCountY;
         }
 
-        mIconScale = (float) PreferencesProvider.Interface.General.getIconScale(
+        mIconScale = (float) PreferencesProvider.Interface.Homescreen.getIconScale(
                 res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
 
         mInputMethodManager = (InputMethodManager)

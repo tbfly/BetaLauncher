@@ -377,19 +377,19 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
 
         // Save the default widget preview background
-        mIconScale = (float) PreferencesProvider.Interface.General.getIconScale(
+        mIconScale = (float) PreferencesProvider.Interface.Drawer.getIconScale(
                 resources.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
         mAppIconSize = (int)((float)resources.getDimensionPixelSize(R.dimen.app_icon_size) * mIconScale);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AppsCustomizePagedView, 0, 0);
-        mMaxAppCellCountX = a.getInt(R.styleable.AppsCustomizePagedView_maxAppCellCountX, -1);
-        mMaxAppCellCountY = a.getInt(R.styleable.AppsCustomizePagedView_maxAppCellCountY, -1);
+        mMaxAppCellCountX = PreferencesProvider.Interface.Drawer.getCellCountX();
+        mMaxAppCellCountY = PreferencesProvider.Interface.Drawer.getCellCountY();
         mWidgetWidthGap =
             a.getDimensionPixelSize(R.styleable.AppsCustomizePagedView_widgetCellWidthGap, 0);
         mWidgetHeightGap =
             a.getDimensionPixelSize(R.styleable.AppsCustomizePagedView_widgetCellHeightGap, 0);
-        mWidgetCountX = a.getInt(R.styleable.AppsCustomizePagedView_widgetCountX, 2);
-        mWidgetCountY = a.getInt(R.styleable.AppsCustomizePagedView_widgetCountY, 2);
+        mWidgetCountX = PreferencesProvider.Interface.Drawer.getWidgetCountX();
+        mWidgetCountY = PreferencesProvider.Interface.Drawer.getWidgetCountY();
         a.recycle();
         mWidgetSpacingLayout = new PagedViewCellLayout(getContext());
 
@@ -483,22 +483,9 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // Note that we transpose the counts in portrait so that we get a similar layout
         boolean isLandscape = getResources().getConfiguration().orientation ==
             Configuration.ORIENTATION_LANDSCAPE;
-        int maxCellCountX = Integer.MAX_VALUE;
-        int maxCellCountY = Integer.MAX_VALUE;
-        if (LauncherApplication.isScreenLarge()) {
-            maxCellCountX = (isLandscape ? LauncherModel.getWorkspaceCellCountX() :
-                LauncherModel.getWorkspaceCellCountY());
-            maxCellCountY = (isLandscape ? LauncherModel.getWorkspaceCellCountY() :
-                LauncherModel.getWorkspaceCellCountX());
-        }
-        if (mMaxAppCellCountX > -1) {
-            maxCellCountX = Math.min(maxCellCountX, mMaxAppCellCountX);
-        }
-        // Temp hack for now: only use the max cell count Y for widget layout
+        int maxCellCountX = mMaxAppCellCountX;
+        int maxCellCountY = mMaxAppCellCountY;
         int maxWidgetCellCountY = maxCellCountY;
-        if (mMaxAppCellCountY > -1) {
-            maxWidgetCellCountY = Math.min(maxWidgetCellCountY, mMaxAppCellCountY);
-        }
 
         // Now that the data is ready, we can calculate the content width, the number of cells to
         // use for each page
@@ -506,8 +493,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mWidgetSpacingLayout.setPadding(mPageLayoutPaddingLeft, mPageLayoutPaddingTop,
                 mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
         mWidgetSpacingLayout.calculateCellCount(width, height, maxCellCountX, maxCellCountY);
-        mCellCountX = mWidgetSpacingLayout.getCellCountX();
-        mCellCountY = mWidgetSpacingLayout.getCellCountY();
+        mCellCountX = mMaxAppCellCountX;
+        mCellCountY = mMaxAppCellCountY;
         updatePageCounts();
 
         // Force a measure to update recalculate the gaps

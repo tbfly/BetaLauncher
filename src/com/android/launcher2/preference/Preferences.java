@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Preferences extends PreferenceActivity implements
-        OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+       SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "Launcher.Preferences";
 
@@ -57,7 +57,7 @@ public class Preferences extends PreferenceActivity implements
                 Context.MODE_PRIVATE);
         addPreferencesFromResource(R.xml.preferences_launcher);
         mIconTheme = (ListPreference) findPreference("icon_theme");
-        mIconTheme.setOnPreferenceClickListener(this);
+
     }
 
     @Override
@@ -78,11 +78,6 @@ public class Preferences extends PreferenceActivity implements
     protected void onPause() {
         super.onPause();
         mPreferences.unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        return true;
     }
 
     @Override
