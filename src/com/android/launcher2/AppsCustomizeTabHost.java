@@ -58,6 +58,10 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
     private boolean mResetAfterTransition;
     private Runnable mRelayoutAndMakeVisible;
 
+    // Preferences
+    private boolean mJoinWidgetsApps;
+    private boolean mFadeScrollingIndicator;
+
     public AppsCustomizeTabHost(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLayoutInflater = LayoutInflater.from(context);
@@ -67,6 +71,9 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
                     mTabsContainer.setAlpha(1f);
                 }
             };
+
+        // Preferences
+        mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
     }
 
     /**
@@ -425,7 +432,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
             // prevent slowing down the animation)
             mAppsCustomizePane.loadAssociatedPages(mAppsCustomizePane.getCurrentPage());
 
-            if (!LauncherApplication.isScreenLarge()) {
+            if (!LauncherApplication.isScreenLarge() && mFadeScrollingIndicator) {
                 mAppsCustomizePane.hideScrollingIndicator(false);
             }
 

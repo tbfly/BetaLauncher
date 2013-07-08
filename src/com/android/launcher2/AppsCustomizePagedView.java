@@ -341,6 +341,13 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     RectCache mCachedAppWidgetPreviewDestRect = new RectCache();
     PaintCache mCachedAppWidgetPreviewPaint = new PaintCache();
 
+    // Preferences
+    private boolean mFadeScrollingIndicator;
+    private int mScrollingIndicatorPosition;
+
+    private static final int SCROLLING_INDICATOR_TOP = 1;
+    private static final int SCROLLING_INDICATOR_BOTTOM = 0;
+
     public AppsCustomizePagedView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLayoutInflater = LayoutInflater.from(context);
@@ -357,8 +364,18 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
         mCameraDistance = resources.getInteger(R.integer.config_cameraDistance);
 
+        // Preferences
         mTransitionEffect = PreferencesProvider.Interface.Drawer.Scrolling.getTransitionEffect(
                 resources.getString(R.string.config_drawerDefaultTransitionEffect));
+        boolean showScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getShowScrollingIndicator();
+        mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
+        mScrollingIndicatorPosition = PreferencesProvider.Interface.Drawer.Indicator.getScrollingIndicatorPosition();
+
+
+        if (!showScrollingIndicator) {
+            disableScrollingIndicator();
+        }
+
         // Save the default widget preview background
         mIconScale = (float) PreferencesProvider.Interface.General.getIconScale(
                 resources.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
@@ -500,7 +517,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mWidgetSpacingLayout.measure(widthSpec, heightSpec);
         mContentWidth = mWidgetSpacingLayout.getContentWidth();
 
-        AppsCustomizeTabHost host = (AppsCustomizeTabHost) getTabHost();
+        AppsCustomizeTabHost host = getTabHost();
         final boolean hostIsTransitioning = host.isTransitioning();
 
         // Restore the page
@@ -1962,12 +1979,33 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     @Override
     protected void onPageEndMoving() {
-        super.onPageEndMoving();
+        if (mFadeScrollingIndicator) {
+            hideScrollingIndicator(false);
+        }
         mForceDrawAllChildrenNextFrame = true;
 
         // We reset the save index when we change pages so that it will be recalculated on next
         // rotation
         mSaveInstanceStateItemIndex = -1;
+    }
+
+    @Override
+    protected int getScrollingIndicatorId() {
+        if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_BOTTOM) {
+            return R.id.paged_view_indicator_bottom;
+        } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_TOP) {
+            return R.id.paged_view_indicator_top;
+        }
+        return -1;
+    }
+
+    @Override
+    protected void flashScrollingIndicator(boolean animated) {
+        if (mFadeScrollingIndicator) {
+            super.flashScrollingIndicator(animated);
+        } else {
+            showScrollingIndicator(false);
+        }
     }
 
     /*
@@ -2144,8 +2182,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
      * We load an extra page on each side to prevent flashes from scrolling and loading of the
      * widget previews in the background with the AsyncTasks.
      */
-    final static int sLookBehindPageCount = 2;
-    final static int sLookAheadPageCount = 2;
+    final static int sLookBehindPageCount = 3;
+    final static int sLookAheadPageCount = 3;
     protected int getAssociatedLowerPageBound(int page) {
         final int count = getChildCount();
         int windowSize = Math.min(count, sLookBehindPageCount + sLookAheadPageCount + 1);

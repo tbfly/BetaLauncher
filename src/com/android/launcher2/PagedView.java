@@ -171,16 +171,22 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // All syncs and layout passes are deferred until data is ready.
     protected boolean mIsDataReady = false;
 
+    boolean mIsDragOccuring = false;
+
     // Scrolling indicator
     private ValueAnimator mScrollIndicatorAnimator;
     private View mScrollIndicator;
     private int mScrollIndicatorPaddingLeft;
+    private int mScrollIndicatorPaddingTop;
     private int mScrollIndicatorPaddingRight;
+    private int mScrollIndicatorPaddingBottom;
     private boolean mHasScrollIndicator = true;
     private boolean mShouldShowScrollIndicator = false;
     private boolean mShouldShowScrollIndicatorImmediately = false;
+    protected boolean mHandleScrollIndicator = false;
     protected static final int sScrollIndicatorFadeInDuration = 150;
     protected static final int sScrollIndicatorFadeOutDuration = 650;
+    protected static final int sScrollIndicatorFadeOutShortDuration = 150;
     protected static final int sScrollIndicatorFlashDuration = 650;
     private boolean mScrollingPaused = false;
 
@@ -219,8 +225,12 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 R.styleable.PagedView_pageLayoutHeightGap, 0);
         mScrollIndicatorPaddingLeft =
             a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingLeft, 0);
+        mScrollIndicatorPaddingTop =
+            a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingTop, 0);
         mScrollIndicatorPaddingRight =
             a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingRight, 0);
+        mScrollIndicatorPaddingBottom =
+            a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingBottom, 0);
         a.recycle();
 
         setHapticFeedbackEnabled(false);
@@ -1774,7 +1784,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected int getScrollingIndicatorId() {
-        return R.id.paged_view_indicator;
+        return R.id.paged_view_indicator_bottom;
     }
 
     Runnable hideScrollingIndicatorRunnable = new Runnable() {
@@ -1798,6 +1808,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mShouldShowScrollIndicatorImmediately = true;
         if (getChildCount() <= 1) return;
         if (!isScrollingIndicatorEnabled()) return;
+        if (mHandleScrollIndicator) return;
 
         mShouldShowScrollIndicator = false;
         getScrollingIndicator();
@@ -1829,6 +1840,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     protected void hideScrollingIndicator(boolean immediately, int duration) {
         if (getChildCount() <= 1) return;
         if (!isScrollingIndicatorEnabled()) return;
+        if (mHandleScrollIndicator) return;
 
         getScrollingIndicator();
         if (mScrollIndicator != null) {
@@ -1859,6 +1871,22 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     }
 
+    protected void enableScrollingIndicator() {
+        mHasScrollIndicator = true;
+        getScrollingIndicator();
+        if (mScrollIndicator != null) {
+            mScrollIndicator.setVisibility(View.VISIBLE);
+        }
+    }
+
+    protected void disableScrollingIndicator() {
+        if (mScrollIndicator != null) {
+            mScrollIndicator.setVisibility(View.GONE);
+        }
+        mHasScrollIndicator = false;
+        mScrollIndicator = null;
+    }
+
     /**
      * To be overridden by subclasses to determine whether the scroll indicator should stretch to
      * fill its space on the track or not.
@@ -1870,6 +1898,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private void updateScrollingIndicator() {
         if (getChildCount() <= 1) return;
         if (!isScrollingIndicatorEnabled()) return;
+        if (mHandleScrollIndicator) return;
 
         getScrollingIndicator();
         if (mScrollIndicator != null) {
@@ -1883,15 +1912,16 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private void updateScrollingIndicatorPosition() {
         if (!isScrollingIndicatorEnabled()) return;
         if (mScrollIndicator == null) return;
+        if (mHandleScrollIndicator) return;
         int numPages = getChildCount();
-        int pageWidth = getMeasuredWidth();
+        int pageSize = getMeasuredWidth();
         int lastChildIndex = Math.max(0, getChildCount() - 1);
-        int maxScrollX = getChildOffset(lastChildIndex) - getRelativeChildOffset(lastChildIndex);
-        int trackWidth = pageWidth - mScrollIndicatorPaddingLeft - mScrollIndicatorPaddingRight;
+        int maxScroll = getChildOffset(lastChildIndex) - getRelativeChildOffset(lastChildIndex);
+        int trackWidth = pageSize - mScrollIndicatorPaddingLeft - mScrollIndicatorPaddingRight;
         int indicatorWidth = mScrollIndicator.getMeasuredWidth() -
                 mScrollIndicator.getPaddingLeft() - mScrollIndicator.getPaddingRight();
 
-        float offset = Math.max(0f, Math.min(1f, (float) getScrollX() / maxScrollX));
+        float offset = Math.max(0f, Math.min(1f, (float) getScrollX() / maxScroll));
         int indicatorSpace = trackWidth / numPages;
         int indicatorPos = (int) (offset * (trackWidth - indicatorSpace)) + mScrollIndicatorPaddingLeft;
         if (hasElasticScrollIndicator()) {
@@ -1904,6 +1934,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             indicatorPos += indicatorCenterOffset;
         }
         mScrollIndicator.setTranslationX(indicatorPos);
+
     }
 
     public void showScrollIndicatorTrack() {

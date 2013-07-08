@@ -29,6 +29,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
@@ -39,12 +40,14 @@ import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -93,6 +96,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Advanceable;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -206,11 +210,8 @@ public final class Launcher extends Activity
     private static final int EXIT_SPRINGLOADED_MODE_SHORT_TIMEOUT = 300;
     private static final int EXIT_SPRINGLOADED_MODE_LONG_TIMEOUT = 600;
 
-    private static final Object sLock = new Object();
-    private static int sScreen = DEFAULT_SCREEN;
-
     // How long to wait before the new-shortcut animation automatically pans the workspace
-    private static int NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS = 10;
+    private static final int NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS = 10;
 
     private final BroadcastReceiver mCloseSystemDialogsReceiver
             = new CloseSystemDialogsIntentReceiver();
@@ -283,7 +284,7 @@ public final class Launcher extends Activity
 
     // Determines how long to wait after a rotation before restoring the screen orientation to
     // match the sensor state.
-    private final int mRestoreScreenOrientationDelay = 500;
+    private static final int RESTORE_SCREEN_ORIENTATION_DELAY = 500;
 
     // External icons saved in case of resource changes, orientation, etc.
     private static Drawable.ConstantState[] sGlobalSearchIcon = new Drawable.ConstantState[2];
@@ -313,6 +314,7 @@ public final class Launcher extends Activity
     // Preferences
     private boolean mShowSearchBar;
     private boolean mShowDockDivider;
+    private boolean mHideIconLabels;
 
     private boolean mWallpaperVisible;
 
@@ -390,6 +392,7 @@ public final class Launcher extends Activity
         // Preferences
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider();
+        mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
 
         if (PROFILE_STARTUP) {
             android.os.Debug.startMethodTracing(
@@ -966,6 +969,31 @@ public final class Launcher extends Activity
     }
 
     /**
+     * Starts shortcut rename dialog.
+     *
+     * @param info The shortcut to be edited
+     */
+    void updateShortcut(final ShortcutInfo info) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View layout = mInflater.inflate(R.layout.dialog_edit, null);
+        ImageView icon = (ImageView) layout.findViewById(R.id.dialog_edit_icon);
+        icon.setImageBitmap(info.getIcon(mIconCache));
+        final EditText title = (EditText) layout.findViewById(R.id.dialog_edit_text);
+        title.setText(info.title);
+        builder.setView(layout)
+                .setTitle(info.title)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        info.setTitle(title.getText());
+                        LauncherModel.updateItemInDatabase(Launcher.this, info);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+    }
+
+    /**
      * Creates a view representing a shortcut.
      *
      * @param info The data structure describing the shortcut.
@@ -990,7 +1018,11 @@ public final class Launcher extends Activity
         BubbleTextView favorite = (BubbleTextView) mInflater.inflate(layoutResId, parent, false);
         float scale = info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT ? 1.0f : mIconScale;
         favorite.applyFromShortcutInfo(info, mIconCache, scale);
+        if (mHideIconLabels) {
+            favorite.setTextVisible(false);
+        }
         favorite.setOnClickListener(this);
+        favorite.setOnTouchListener(this);
         return favorite;
     }
 
@@ -1024,6 +1056,87 @@ public final class Launcher extends Activity
         } else {
             Log.e(TAG, "Couldn't find ActivityInfo for selected application: " + data);
         }
+    }
+
+    private void restoreShortcut(ShortcutInfo info) {
+        final View view = createShortcut(info);
+        FolderInfo folderInfo = info.mFolderInfo;
+        if (info.container >= 0 && folderInfo  != null) {
+            // The shortcut was contained by a folder
+            // It's necessary to recreate the folder or just to add to the existing one?
+            CellLayout layout = getCellLayout(folderInfo.container, folderInfo.screen);
+            View v = layout.getChildAt(folderInfo.cellX, folderInfo.cellY);
+            if (v == null) {
+                // Weird. Should not there be a shortcut or folder here?
+                return;
+            }
+            if (v.getTag() != null && v.getTag() instanceof ShortcutInfo) {
+                // Create a new folder
+                ShortcutInfo target = (ShortcutInfo)v.getTag();
+                // Remove the target item to allow to be occupied by the folder
+                layout.removeView(v);
+
+                // Create the folder and its new items
+                FolderIcon fi = addFolder(
+                                    layout, folderInfo.container, folderInfo.screen,
+                                    folderInfo.cellX, folderInfo.cellY);
+                int cellX = info.cellX;
+                int cellY = info.cellY;
+                info.cellX = -1;
+                info.cellY = -1;
+                target.cellX = -1;
+                target.cellY = -1;
+                if (cellX == 0 && cellY == 0) {
+                    fi.addItem(info);
+                    fi.addItem(target);
+                } else {
+                    fi.addItem(target);
+                    fi.addItem(info);
+                }
+            }
+        } else if (info.container >= 0) {
+            // The shortcut was contained by a folder and the folder still exists
+            FolderIcon folderIcon = null;
+
+            // We need to find the container in the workspace, because the shortcut has lost
+            // its information
+            ArrayList<ShortcutAndWidgetContainer> allSwc =
+                    mWorkspace.getAllShortcutAndWidgetContainers();
+            for (ShortcutAndWidgetContainer swc : allSwc) {
+                int cc = swc.getChildCount();
+                for (int i = 0; i < cc; i++) {
+                    View v = swc.getChildAt(i);
+                    if (v instanceof FolderIcon) {
+                        FolderInfo fi = (FolderInfo)v.getTag();
+                        if (fi != null && fi.id == info.container) {
+                            folderIcon = (FolderIcon)v;
+                            break;
+                        }
+                    }
+                }
+                if (folderIcon != null) {
+                    break;
+                }
+            }
+
+            if (folderIcon != null) {
+                folderIcon.addItem(info);
+            }
+
+        } else {
+            // Just restore the shortcut in its last position
+            long container = info.container;
+            int screen = info.screen;
+            int cellX = info.cellX;
+            int cellY = info.cellY;
+            int spanX = info.spanX;
+            int spanY = info.spanY;
+            mWorkspace.addInScreen(view, container, screen, cellX, cellY,
+                    spanX, spanY, isWorkspaceLocked());
+        }
+
+        // The folder info is not needed any more
+        info.mFolderInfo = null;
     }
 
     /**
@@ -1845,6 +1958,9 @@ public final class Launcher extends Activity
         // Create the view
         FolderIcon newFolder =
             FolderIcon.fromXml(R.layout.folder_icon, this, layout, folderInfo);
+        if (mHideIconLabels) {
+            newFolder.setTextVisible(false);
+        }
         mWorkspace.addInScreen(newFolder, container, screen, cellX, cellY, 1, 1,
                 isWorkspaceLocked());
         return newFolder;
@@ -1973,6 +2089,7 @@ public final class Launcher extends Activity
         }
     }
 
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
         // this is an intercepted event being forwarded from mWorkspace;
         // clicking anywhere on the workspace causes the customization drawer to slide down
@@ -2063,6 +2180,36 @@ public final class Launcher extends Activity
                     Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             startActivity(intent);
         }
+    }
+
+    void startShortcutUninstallActivity(final ShortcutInfo shortcutInfo) {
+        PackageManager pm = getPackageManager();
+        ResolveInfo resolveInfo = pm.resolveActivity(shortcutInfo.intent, 0);
+        if ((resolveInfo.activityInfo.applicationInfo.flags &
+                android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) {
+            // System applications cannot be installed. For now, show a toast explaining that.
+            // We may give them the option of disabling apps this way.
+            int messageId = R.string.uninstall_system_app_text;
+            Toast.makeText(this, messageId, Toast.LENGTH_SHORT).show();
+        } else {
+            String packageName = shortcutInfo.intent.getComponent().getPackageName();
+            String className = shortcutInfo.intent.getComponent().getClassName();
+            Intent intent = new Intent(
+                    Intent.ACTION_DELETE, Uri.fromParts("package", packageName, className));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            startActivity(intent);
+        }
+
+        // Restore the shortcut view prior to uninstall. Otherwise if the
+        // use cancels the uninstall process, the shortcut was removed from
+        // the workspace
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                restoreShortcut(shortcutInfo);
+            }
+        });
     }
 
     boolean startActivity(View v, Intent intent, Object tag) {
@@ -2798,16 +2945,7 @@ public final class Launcher extends Activity
             mState = State.PREVIEW;
             showWorkspacePreviews(animated);
             mPreviewLayout.requestFocus();
-            final int duration = getResources().getInteger(R.integer.config_appsCustomizeZoomInTime);
-            if (mSearchDropTargetBar != null) {
-                mSearchDropTargetBar.hideSearchBar(true);
-            }
-            if (mWorkspace != null) {
-                mWorkspace.hideScrollingIndicator(true);
-            }
-            mDockDivider.animate().alpha(0f).setDuration(duration);
-            mWorkspace.animate().alpha(0f).setDuration(duration);
-            hideHotseat(true);
+            mSearchDropTargetBar.hideSearchBar(animated);
             closeFolder();
         }
     }
@@ -2825,16 +2963,14 @@ public final class Launcher extends Activity
             else
                 hideAppsCustomizeHelper(State.WORKSPACE, animated, onCompleteRunnable);
 
-            final int duration = getResources().getInteger(R.integer.config_appsCustomizeZoomInTime);
+            // Show the search bar (only animate if we were showing the drop target bar in spring
+            // loaded mode)
             if (mSearchDropTargetBar != null) {
-                mSearchDropTargetBar.showSearchBar(true);
+                mSearchDropTargetBar.showSearchBar(wasInSpringLoadedMode);
             }
-            if (mWorkspace != null) {
-                mWorkspace.showScrollingIndicator(true);
-            }
-            mDockDivider.animate().alpha(1f).setDuration(duration);
-            mWorkspace.animate().alpha(1f).setDuration(duration);
-            showHotseat(true);
+
+            // We only need to animate in the dock divider if we're going from spring loaded mode
+            showDockDivider(animated && wasInSpringLoadedMode);
         }
 
         mWorkspace.flashScrollingIndicator(animated);
@@ -3344,6 +3480,7 @@ public final class Launcher extends Activity
             switch (item.itemType) {
                 case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
+                case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
                     ShortcutInfo info = (ShortcutInfo) item;
                     String uri = info.intent.toUri(0).toString();
                     View shortcut = createShortcut(info);
@@ -3370,6 +3507,9 @@ public final class Launcher extends Activity
                     FolderIcon newFolder = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
                             (FolderInfo) item);
+                    if (!mHideIconLabels) {
+                        newFolder.setTextVisible(false);
+                    }
                     workspace.addInScreen(newFolder, item.container, item.screen, item.cellX,
                             item.cellY, 1, 1, false);
                     break;
@@ -3704,7 +3844,7 @@ public final class Launcher extends Activity
                     public void run() {
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
-                }, mRestoreScreenOrientationDelay);
+                }, RESTORE_SCREEN_ORIENTATION_DELAY);
             }
         }
     }

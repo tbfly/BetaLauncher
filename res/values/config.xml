@@ -95,6 +95,9 @@
     <integer name="default_cell_count_x">4</integer>
     <integer name="default_cell_count_y">4</integer>
 
+    <!-- Whether or not to use the wallpaper hack by default -->
+    <bool name="config_workspaceDefaultWallpaperHack">false</bool>
+
 <!-- Hotseat -->
     <bool name="hotseat_transpose_layout_with_orientation">true</bool>
     <integer name="hotseat_cell_count">5</integer>

@@ -95,6 +95,9 @@ public final class PreferencesProvider {
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
+            public static boolean getHideIconLabels() {
+                return getBoolean("ui_homescreen_general_hide_icon_labels", false);
+            }
             public static class Scrolling {
                 public static Workspace.TransitionEffect getTransitionEffect(String def) {
                     try {
@@ -112,7 +115,25 @@ public final class PreferencesProvider {
 
                     return Workspace.TransitionEffect.Standard;
                 }
+                public static boolean getScrollWallpaper() {
+                    return getBoolean("ui_homescreen_scrolling_scroll_wallpaper", true);
+                }
+                public static boolean getWallpaperHack(boolean def) {
+                    return getBoolean("ui_homescreen_scrolling_wallpaper_hack", def);
+                }
             }
+            public static class Indicator {
+                public static boolean getShowScrollingIndicator() {
+                    return getBoolean("ui_homescreen_indicator_enable", true);
+                }
+                public static boolean getFadeScrollingIndicator() {
+                    return getBoolean("ui_homescreen_indicator_fade", true);
+                }
+                public static int getScrollingIndicatorPosition() {
+                    return Integer.parseInt(getString("ui_homescreen_indicator_position", "0"));
+                }
+            }
+
             public static class FolderIconStyle {
                 public static int getFolderIconStyle(Context context) {
                     return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));
@@ -143,6 +164,17 @@ public final class PreferencesProvider {
                     }
 
                     return AppsCustomizePagedView.TransitionEffect.Standard;
+                }
+            }
+            public static class Indicator {
+                public static boolean getShowScrollingIndicator() {
+                    return getBoolean("ui_drawer_indicator_enable", true);
+                }
+                public static boolean getFadeScrollingIndicator() {
+                    return getBoolean("ui_drawer_indicator_fade", true);
+                }
+                public static int getScrollingIndicatorPosition() {
+                    return Integer.parseInt(getString("ui_drawer_indicator_position", "0"));
                 }
             }
         }

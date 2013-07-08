@@ -271,8 +271,21 @@ s -->
     <string name="preferences_interface_homescreen_general_grid_columns_title">Columns</string>
     <string name="preferences_interface_homescreen_general_stretch_screens_title">Stretch screens</string>
     <string name="preferences_interface_homescreen_general_stretch_screens_summary">Expand homescreens to fill the size of display</string>
+    <string name="preferences_interface_homescreen_general_hide_icon_labels_title">Hide icon labels</string>
+    <string name="preferences_interface_homescreen_general_hide_icon_labels_summary">Hide homescreen icon labels</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_summary">Scrolling effect when scrolling homescreens</string>
+    <string name="preferences_interface_homescreen_scrolling_scroll_wallpaper_title">Scroll wallpaper</string>
+    <string name="preferences_interface_homescreen_scrolling_scroll_wallpaper_summary">Scroll wallpaper when scrolling homescreens</string>
+    <string name="preferences_interface_homescreen_scrolling_wallpaper_hack_title">Wallpaper quick render</string>
+    <string name="preferences_interface_homescreen_scrolling_wallpaper_hack_summary">Use wallpaper hack that increases smoothness on static image wallpapers</string>
+    <string name="preferences_interface_homescreen_indicator_category">Indicator</string>
+    <string name="preferences_interface_homescreen_indicator_enable_title">Show page indicator</string>
+    <string name="preferences_interface_homescreen_indicator_enable_summary">Show current page indicator on the screen</string>
+    <string name="preferences_interface_homescreen_indicator_fade_title">Fade indicator</string>
+    <string name="preferences_interface_homescreen_indicator_fade_summary">Fade away the indicator after the homescreen has changed</string>
+    <string name="preferences_interface_homescreen_indicator_position_title">Indicator position</string>
+    <string name="preferences_interface_homescreen_indicator_position_summary">Choose where to show the indicator on the screen</string>
     <string name="preferences_interface_homescreen_folder_style_title">Style</string>
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
 
@@ -280,6 +293,13 @@ s -->
     <string name="preferences_interface_drawer_title">Drawer</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>
+    <string name="preferences_interface_drawer_indicator_category">Indicator</string>
+    <string name="preferences_interface_drawer_indicator_enable_title">Show page indicator</string>
+    <string name="preferences_interface_drawer_indicator_enable_summary">Show current page indicator at the bottom of the screen</string>
+    <string name="preferences_interface_drawer_indicator_fade_title">Fade indicator</string>
+    <string name="preferences_interface_drawer_indicator_fade_summary">Fade away the indicator after the page has changed</string>
+    <string name="preferences_interface_drawer_indicator_position_title">Indicator position</string>
+    <string name="preferences_interface_drawer_indicator_position_summary">Choose where to show the indicator on the screen</string>
     <string name="preferences_interface_drawer_transparency_title">Transparency</string>
     <string name="preferences_interface_drawer_transparency_summary">Set transparency of app drawer background</string>
 
