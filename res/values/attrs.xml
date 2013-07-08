@@ -34,13 +34,6 @@
         <attr name="sourceViewId" format="integer" />
     </declare-styleable>
 
-    <!-- Cling specific attributes. These attributes are used to customize
-         the cling in XML files. -->
-    <declare-styleable name="Cling">
-        <!-- Used to identify how to draw the cling bg -->
-        <attr name="drawIdentifier" format="string"  />
-    </declare-styleable>
-
     <!-- Workspace specific attributes. These attributes are used to customize
          the workspace in XML files. -->
     <declare-styleable name="Workspace">
@@ -126,10 +119,6 @@
         <attr name="widgetCountX" format="integer" />
         <!-- Number of widgets vertically -->
         <attr name="widgetCountY" format="integer" />
-        <!-- The x index of the item to be focused in the cling -->
-        <attr name="clingFocusedX" format="integer" />
-        <!-- The y index of the item to be focused in the cling -->
-        <attr name="clingFocusedY" format="integer" />
     </declare-styleable>
 
     <!-- HandleView specific attributes. These attributes are used to customize
@@ -158,9 +147,4 @@
         <attr name="value" format="string" />
     </declare-styleable>
 
-    <!-- Only used in the device overlays -->
-    <declare-styleable name="CustomClingTitleText">
-    </declare-styleable>
-    <declare-styleable name="CustomClingText">
-    </declare-styleable>
 </resources>

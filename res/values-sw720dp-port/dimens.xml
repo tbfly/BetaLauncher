@@ -40,9 +40,6 @@
     <!-- We offset the proxy to overlap with the voice icon -->
     <dimen name="qsb_voice_proxy_padding_right">100dp</dimen>
 
-    <integer name="apps_customize_cling_focused_x">2</integer>
-    <integer name="apps_customize_cling_focused_y">2</integer>
-
     <!-- Divider width set to match the qsb width -->
     <dimen name="workspace_divider_padding_left">72dp</dimen>
     <dimen name="workspace_divider_padding_right">72dp</dimen>
@@ -53,8 +50,4 @@
     <dimen name="button_bar_height_plus_padding">126dp</dimen>
     <dimen name="button_bar_height_bottom_padding">32dp</dimen>
 
-<!-- Cling -->
-    <!-- The offset for the text in the cling -->
-    <dimen name="cling_text_block_offset_x">80dp</dimen>
-    <dimen name="cling_text_block_offset_y">160dp</dimen>
 </resources>

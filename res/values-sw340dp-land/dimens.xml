@@ -15,9 +15,6 @@
 -->
 
 <resources>
-<!-- Clings -->
-    <dimen name="folderClingMarginTop">50dp</dimen>
-
 <!-- Workspace -->
     <dimen name="workspace_divider_padding_top">6dp</dimen>
     <dimen name="workspace_divider_padding_bottom">6dp</dimen>

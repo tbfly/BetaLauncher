@@ -418,10 +418,6 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         }
 
         if (!toWorkspace) {
-            // Dismiss the workspace cling
-            l.dismissWorkspaceCling(null);
-            // Show the all apps cling (if not already shown)
-            mAppsCustomizePane.showAllAppsCling();
             // Make sure adjacent pages are loaded (we wait until after the transition to
             // prevent slowing down the animation)
             mAppsCustomizePane.loadAssociatedPages(mAppsCustomizePane.getCurrentPage());
@@ -432,7 +428,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
 
             // Going from Workspace -> All Apps
             // NOTE: We should do this at the end since we check visibility state in some of the
-            // cling initialization/dismiss code above.
+            // initialization/dismiss code above.
             setVisibilityOfSiblingsWithLowerZOrder(INVISIBLE);
         }
     }

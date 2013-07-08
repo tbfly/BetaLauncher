@@ -67,8 +67,6 @@
                 launcher:widgetCellHeightGap="@dimen/apps_customize_widget_cell_height_gap"
                 launcher:widgetCountX="@integer/apps_customize_widget_cell_count_x"
                 launcher:widgetCountY="@integer/apps_customize_widget_cell_count_y"
-                launcher:clingFocusedX="@integer/apps_customize_cling_focused_x"
-                launcher:clingFocusedY="@integer/apps_customize_cling_focused_y"
                 launcher:maxGap="@dimen/workspace_max_gap" />
             <FrameLayout
                 android:id="@+id/animation_buffer"
@@ -86,9 +84,4 @@
         </FrameLayout>
     </LinearLayout>
 
-    <include layout="@layout/all_apps_cling"
-        android:id="@+id/all_apps_cling"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
 </com.android.launcher2.AppsCustomizeTabHost>

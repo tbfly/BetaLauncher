@@ -104,8 +104,7 @@ public class HideFromAccessibilityHelper implements OnHierarchyChangeListener {
     }
 
     private boolean includeView(View v) {
-        return !hasAncestorOfType(v, Cling.class) &&
-                (!mOnlyAllApps || hasAncestorOfType(v, AppsCustomizeTabHost.class));
+        return (!mOnlyAllApps || hasAncestorOfType(v, AppsCustomizeTabHost.class));
     }
 
     private boolean hasAncestorOfType(View v, Class c) {

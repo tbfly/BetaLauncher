@@ -227,29 +227,6 @@ s -->
     <!-- The format string for AppsCustomize Apps page scroll text [CHAR_LIMIT=none] -->
     <string name="apps_customize_widgets_scroll_format">Widgets page %1$d of %2$d</string>
 
-    <!-- Clings -->
-    <!-- The title text for the workspace cling [CHAR_LIMIT=none] -->
-    <string name="workspace_cling_title">Make yourself at home</string>
-    <!-- The description of how to use the workspace [CHAR_LIMIT=none] -->
-    <string name="workspace_cling_move_item">You can put your favorite apps here.</string>
-    <!-- The description of how to open all apps from the workspace [CHAR_LIMIT=none] -->
-    <string name="workspace_cling_open_all_apps">To see all your apps, touch the circle.</string>
-    <!-- The title text for the All Apps cling [CHAR_LIMIT=none] -->
-    <string name="all_apps_cling_title">Choose some apps</string>
-    <!-- The description of how to pick up and add an item to the workspace [CHAR_LIMIT=none] -->
-    <string name="all_apps_cling_add_item">To add an app to your Home screen, touch &amp; hold it.</string>
-    <!-- The title text for the Folder cling [CHAR_LIMIT=none] -->
-    <string name="folder_cling_title">Organize your apps with folders</string>
-    <!-- The description of how to move an app [CHAR_LIMIT=none] -->
-    <string name="folder_cling_move_item">To move an app, touch &amp; hold it.</string>
-    <!-- The description of how to create a folder [CHAR_LIMIT=none] -->
-    <string name="folder_cling_create_folder">To make a new folder on your Home screen, stack one app on top of another.</string>
-    <!-- The text on the button to dismiss a cling [CHAR_LIMIT=none] -->
-    <string name="cling_dismiss">OK</string>
-    <!-- Error message on dummy custom cling layout [DO NOT TRANSLATE] -->
-    <string name="dummy_custom_cling_error_message">Error: custom workspace layout passed in but custom cling was not overwritten</string>
-    <add-resource type="string" name="default_folder_name" />
-
     <!-- Folder accessibility -->
     <!-- The format string for when a folder is opened, speaks the dimensions -->
     <string name="folder_opened">Folder opened, <xliff:g id="width" example="5">%1$d</xliff:g> by <xliff:g id="height" example="3">%2$d</xliff:g></string>
@@ -265,16 +242,6 @@ s -->
     <string name="folder_name_format">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g></string>
 
     <!-- Strings used in device overlays -->
-
-    <!-- Clings -->
-    <!-- Dummy string [CHAR_LIMIT=40] -->
-    <string name="custom_workspace_cling_title_1"></string>
-    <!-- Dummy string [CHAR_LIMIT=60] -->
-    <string name="custom_workspace_cling_description_1"></string>
-    <!-- Dummy string [CHAR_LIMIT=40] -->
-    <string name="custom_workspace_cling_title_2"></string>
-    <!-- Dummy string [CHAR_LIMIT=60] -->
-    <string name="custom_workspace_cling_description_2"></string>
 
     <skip />
     <!--             -->
