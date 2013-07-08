@@ -55,6 +55,24 @@ public final class PreferencesProvider {
 
     public static class Interface {
         public static class Homescreen {
+            public static int getNumberHomescreens() {
+                return getInt("ui_homescreen_screens", 7);
+            }
+            public static void setNumberHomescreens(Context context, int count) {
+                final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
+                Editor editor = preferences.edit();
+                editor.putInt("ui_homescreen_screens", count);
+                editor.commit();
+            }
+            public static int getDefaultHomescreen(int def) {
+                return getInt("ui_homescreen_default_screen", def + 1) - 1;
+            }
+            public static void setDefaultHomescreen(Context context, int def) {
+                final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
+                Editor editor = preferences.edit();
+                editor.putInt("ui_homescreen_default_screen", def);
+                editor.commit();
+            }
             public static int getCellCountX(int def) {
                 String[] values = getString("ui_homescreen_grid", "0|" + def).split("\\|");
                 try {
@@ -70,6 +88,9 @@ public final class PreferencesProvider {
                 } catch (NumberFormatException e) {
                     return def;
                 }
+            }
+            public static boolean getStretchScreens() {
+                return getBoolean("ui_homescreen_stretch_screens", true);
             }
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
@@ -134,8 +155,11 @@ public final class PreferencesProvider {
                 //return getInt("ui_dock_icon_scale", def);
                 return getInt("ui_general_icon_scale", def);
             }
+            public static boolean getShowBackground() {
+                return getBoolean("ui_dock_background", true);
+            }
             public static boolean getShowDivider() {
-                return getBoolean("ui_dock_divider", true);
+                return getBoolean("ui_dock_divider", false);
             }
         }
 

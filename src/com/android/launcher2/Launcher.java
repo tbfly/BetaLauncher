@@ -1433,10 +1433,16 @@ public final class Launcher extends Activity
                     closeFolder();
                     exitSpringLoadedDragMode();
 
-                    // If we are already on home, then just animate back to the workspace,
-                    // otherwise, just wait until onResume to set the state back to Workspace
+                    // If we are already on home, then we animate to the default homescreen,
+                    // if we are not on it, otherwise we show the previews
                     if (alreadyOnHome) {
-                        showWorkspace(true);
+                        if (mState == State.WORKSPACE) {
+                            //if (mWorkspace.getCurrentPage() == mWorkspace.getDefaultHomescreen())
+                            //    showPreviewLayout(true);
+                            //else
+                                mWorkspace.moveToDefaultScreen(true);
+                        } else
+                            showWorkspace(true);
                     } else {
                         mOnResumeState = State.WORKSPACE;
                     }

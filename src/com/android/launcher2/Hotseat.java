@@ -74,6 +74,11 @@ public class Hotseat extends FrameLayout {
             Configuration.ORIENTATION_LANDSCAPE;
         mCellCount = a.getInt(R.styleable.Hotseat_cellCount, DEFAULT_CELL_COUNT);
         mCellCount = PreferencesProvider.Interface.Dock.getNumberIcons(mCellCount);
+  
+        if (!PreferencesProvider.Interface.Dock.getShowBackground()) {
+            Drawable background = getBackground();
+            background.setAlpha(0);
+        }
 
     }
 

@@ -1817,6 +1817,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
                     v.setPivotX(v.getMeasuredWidth() * 0.5f);
                     v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                    v.setCameraDistance(mDensity * mCameraDistance);
                     v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
                     v.setRotationY(rotation);
                     if (v.getVisibility() != VISIBLE) {
@@ -1831,6 +1832,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 }
             }
         }
+        invalidate();
     }
 
     private void screenScrolledCylinder(int screenScroll, boolean in) {

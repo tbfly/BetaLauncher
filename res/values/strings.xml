@@ -259,6 +259,10 @@ s -->
     <!-- UI -->
     <!-- Homescreen -->
     <string name="preferences_interface_homescreen_title">Homescreen</string>
+    <string name="preferences_interface_homescreen_general_screens_title">Homescreens</string>
+    <string name="preferences_interface_homescreen_general_screens_summary">Number of screens on the homescreen</string>
+    <string name="preferences_interface_homescreen_general_default_screen_title">Default screen</string>
+    <string name="preferences_interface_homescreen_general_default_screen_summary">Choose the default homescreen</string>
     <string name="preferences_interface_homescreen_general_search_title">Search bar</string>
     <string name="preferences_interface_homescreen_general_search_summary">Enable persistent search bar</string>
     <string name="preferences_interface_homescreen_general_grid_title">Grid size</string>
@@ -283,6 +287,8 @@ s -->
     <string name="preferences_interface_dock_title">Dock</string>
     <string name="preferences_interface_dock_enabled_title">Show dock</string>
     <string name="preferences_interface_dock_enabled_summary">Show the dock underneath the homescreen</string>
+    <string name="preferences_interface_dock_background_title">Show dock background</string>
+    <string name="preferences_interface_dock_background_summary">Show background behind dock</string>
     <string name="preferences_interface_dock_divider_title">Show dock divider</string>
     <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
 

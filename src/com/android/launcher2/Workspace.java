@@ -48,6 +48,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,8 +115,6 @@ public class Workspace extends SmoothPagedView
     private float mWallpaperScroll;
     private IBinder mWindowToken;
     private static final float WALLPAPER_SCREENS_SPAN = 2f;
-
-    private int mDefaultPage;
 
     /**
      * CellInfo for the cell that is currently being dragged
@@ -300,6 +299,9 @@ public class Workspace extends SmoothPagedView
         }
     };
     // Preferences
+    private int mNumberHomescreens;
+    private int mDefaultHomescreen;
+    private boolean mStretchScreens;
     private boolean mShowSearchBar;
     private boolean mShowDockDivider;
 
@@ -354,7 +356,6 @@ public class Workspace extends SmoothPagedView
         // if the value is manually specified, use that instead
         cellCountX = a.getInt(R.styleable.Workspace_cellCountX, cellCountX);
         cellCountY = a.getInt(R.styleable.Workspace_cellCountY, cellCountY);
-        mDefaultPage = a.getInt(R.styleable.Workspace_defaultScreen, 1);
         a.recycle();
 
         setOnHierarchyChangeListener(this);
@@ -368,6 +369,14 @@ public class Workspace extends SmoothPagedView
         LauncherModel.updateWorkspaceLayoutCells(cellCountX, cellCountY);
         setHapticFeedbackEnabled(false);
 
+        // Preferences
+        mNumberHomescreens = PreferencesProvider.Interface.Homescreen.getNumberHomescreens();
+        mDefaultHomescreen = PreferencesProvider.Interface.Homescreen.getDefaultHomescreen(mNumberHomescreens / 2);
+        if (mDefaultHomescreen >= mNumberHomescreens) {
+            mDefaultHomescreen = mNumberHomescreens / 2;
+        }
+
+        mStretchScreens = PreferencesProvider.Interface.Homescreen.getStretchScreens();
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mTransitionEffect = PreferencesProvider.Interface.Homescreen.Scrolling.getTransitionEffect(
                 res.getString(R.string.config_workspaceDefaultTransitionEffect));
@@ -466,8 +475,7 @@ public class Workspace extends SmoothPagedView
      */
     protected void initWorkspace() {
         Context context = getContext();
-        mCurrentPage = mDefaultPage;
-        Launcher.setScreen(mCurrentPage);
+        mCurrentPage = mDefaultHomescreen;
         LauncherApplication app = (LauncherApplication)context.getApplicationContext();
         mIconCache = app.getIconCache();
         setWillNotDraw(false);
@@ -476,6 +484,18 @@ public class Workspace extends SmoothPagedView
         final Resources res = getResources();
         final float iconScale = (float)PreferencesProvider.Interface.General.getIconScale(
                 res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
+
+        LayoutInflater inflater =
+                (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < mNumberHomescreens; i++) {
+            CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
+            screen.setChildrenScale(iconScale);
+            if (mStretchScreens) {
+                screen.setCellGaps(-1, -1);
+                screen.setPadding(0, 0, 0, 0);
+            }
+            addView(screen);
+        }
 
         try {
             mBackground = res.getDrawable(R.drawable.apps_customize_bg);
@@ -4309,12 +4329,12 @@ public class Workspace extends SmoothPagedView
     void moveToDefaultScreen(boolean animate) {
         if (!isSmall()) {
             if (animate) {
-                snapToPage(mDefaultPage);
+                snapToPage(mDefaultHomescreen);
             } else {
-                setCurrentPage(mDefaultPage);
+                setCurrentPage(mDefaultHomescreen);
             }
         }
-        getChildAt(mDefaultPage).requestFocus();
+        getChildAt(mDefaultHomescreen).requestFocus();
     }
 
     @Override
@@ -4351,4 +4371,30 @@ public class Workspace extends SmoothPagedView
         if (dockDivider != null && mShowDockDivider) dockDivider.setAlpha(reducedFade);
         scrollIndicator.setAlpha(1 - fade);
     }
+
+    public int getDefaultHomescreen() {
+        return mDefaultHomescreen;
+    }
+
+    void setDefaultScreenTo(int index) {
+        if (index <= getChildCount() - 1) {
+            mDefaultHomescreen = index;
+            //Launcher.setScreen(index);
+        }
+    }
+
+    public void addScreen(int index) {
+        if (index <= getChildCount()) {
+            LayoutInflater inflater = (LayoutInflater)getContext()
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            CellLayout screen = (CellLayout)inflater.inflate(R.layout.workspace_screen, null);
+            if (mStretchScreens) {
+                screen.setCellGaps(-1, -1);
+            }
+            addView(screen, index);
+            mNumberHomescreens++;
+        }
+    }
+
 }

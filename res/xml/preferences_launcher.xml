@@ -74,9 +74,13 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_interface_dock_title">
+        <CheckBoxPreference android:key="ui_dock_background"
+            android:title="@string/preferences_interface_dock_background_title"
+            android:summary="@string/preferences_interface_dock_background_summary"
+            android:defaultValue="true" />
         <CheckBoxPreference android:key="ui_dock_divider"
             android:title="@string/preferences_interface_dock_divider_title"
             android:summary="@string/preferences_interface_dock_divider_summary"
-            android:defaultValue="true" />
+            android:defaultValue="falsee" />
     </PreferenceCategory>
 </PreferenceScreen>
