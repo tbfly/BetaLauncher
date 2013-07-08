@@ -68,6 +68,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -112,6 +113,7 @@ public class Workspace extends SmoothPagedView
     private int mOriginalPageSpacing;
 
     private final WallpaperManager mWallpaperManager;
+    private Bitmap mWallpaperBitmap;
     private float mWallpaperScroll;
     private IBinder mWindowToken;
     private static final float WALLPAPER_SCREENS_SPAN = 2f;
@@ -382,6 +384,7 @@ public class Workspace extends SmoothPagedView
                 res.getString(R.string.config_workspaceDefaultTransitionEffect));
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider();
         initWorkspace();
+        checkWallpaper();
 
         // Disable multitouch across the workspace/all apps/customize tray
         setMotionEventSplittingEnabled(true);
@@ -517,6 +520,24 @@ public class Workspace extends SmoothPagedView
 
         mMaxDistanceForFolderCreation = (0.55f * res.getDimensionPixelSize(R.dimen.app_icon_size));
         mFlingThresholdVelocity = (int) (FLING_THRESHOLD_VELOCITY * mDensity);
+    }
+
+    protected void checkWallpaper() {
+        /*if (mWallpaperHack) {
+            if (mWallpaperBitmap != null) {
+                mWallpaperBitmap = null;
+            }
+            if (mWallpaperManager.getWallpaperInfo() == null) {
+                Drawable wallpaper = mWallpaperManager.getDrawable();
+                if (wallpaper instanceof BitmapDrawable) {
+                    mWallpaperBitmap = ((BitmapDrawable) wallpaper).getBitmap();
+                }
+            }
+        }*/
+        mLauncher.setWallpaperVisibility(mWallpaperBitmap == null);
+
+        // Make sure wallpaper gets redrawn to avoid ghost wallpapers
+        invalidate();
     }
 
     @Override
@@ -887,12 +908,6 @@ public class Workspace extends SmoothPagedView
             mDelayedSnapToPageRunnable = null;
         }
     }
-
-    @Override
-    protected void notifyPageSwitchListener() {
-        super.notifyPageSwitchListener();
-        Launcher.setScreen(mCurrentPage);
-    };
 
     // As a ratio of screen height, the total distance we want the parallax effect to span
     // horizontally
@@ -1811,7 +1826,7 @@ public class Workspace extends SmoothPagedView
         }
     }
 
-    private void enableHwLayersOnVisiblePages() {
+    void enableHwLayersOnVisiblePages() {
         if (mChildrenLayersEnabled) {
             final int screenCount = getChildCount();
             getVisiblePages(mTempVisiblePagesRange);
@@ -1984,10 +1999,6 @@ public class Workspace extends SmoothPagedView
     }
 
     Animator getChangeStateAnimation(final State state, boolean animated, int delay) {
-        if (mState == state) {
-            return null;
-        }
-
         // Initialize animation arrays for the first time if necessary
         initAnimationArrays();
 
@@ -3968,12 +3979,6 @@ public class Workspace extends SmoothPagedView
     }
 
     @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        super.onRestoreInstanceState(state);
-        Launcher.setScreen(mCurrentPage);
-    }
-
-    @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         // We don't dispatch restoreInstanceState to our children using this code path.
         // Some pages will be restored immediately as their items are bound immediately, and 
@@ -4395,6 +4400,125 @@ public class Workspace extends SmoothPagedView
             addView(screen, index);
             mNumberHomescreens++;
         }
+    }
+
+    public void moveScreen(int from, int to) {
+        ViewGroup cl = (ViewGroup)getChildAt(from);
+        removeViewAt(from);
+        addView(cl, to);
+        if (from > to) {
+            if (mDefaultHomescreen >= to && mDefaultHomescreen <= from)
+                if (mDefaultHomescreen == from)
+                    mDefaultHomescreen = to;
+                else
+                    mDefaultHomescreen++;
+            if (mCurrentPage >= to && mCurrentPage <= from)
+                if (mCurrentPage == from)
+                    mCurrentPage = to;
+                else
+                    mCurrentPage++;
+        } else {
+            if (mDefaultHomescreen >= from && mDefaultHomescreen <= to)
+                if (mDefaultHomescreen == from)
+                    mDefaultHomescreen = to;
+                else
+                    mDefaultHomescreen--;
+            if (mCurrentPage >= from && mCurrentPage <= to)
+                if (mCurrentPage == from)
+                    mCurrentPage = to;
+                else
+                    mCurrentPage--;
+        }
+
+        updateScreenIndexForItemsInOtherScreens(from, to);
+        // store the defualt homescreen in case it changed position
+        PreferencesProvider.Interface.Homescreen.setDefaultHomescreen(getContext(), mDefaultHomescreen + 1);
+        // in case the current page moved during this, reposition to the new current
+        setCurrentPage(mCurrentPage);
+    }
+
+    public void removeScreen(int index) {
+        if (index < getChildCount()) {
+            if (getChildCount() <= 1)
+                return;
+            ViewGroup cl = (ViewGroup)getChildAt(index);
+            if (((cl instanceof CellLayout)) && (((CellLayout)cl).getShortcutsAndWidgets().getChildCount() == 0)) {
+                removeViewAt(index);
+                resetDefaultHomeScreen(index);
+                resetCurrentScreen(index);
+                updateScreenIndexForItemsInOtherScreens(index);
+            }
+        }
+    }
+
+    private void resetDefaultHomeScreen(int index)
+    {
+        if (index < mDefaultHomescreen)
+            mDefaultHomescreen--;
+        if (mDefaultHomescreen >= getPageCount()) {
+            if (getPageCount() <= 1)
+                mDefaultHomescreen = 0;
+            else
+                mDefaultHomescreen = getPageCount() - 1;
+        }
+        PreferencesProvider.Interface.Homescreen.setDefaultHomescreen(mLauncher, mDefaultHomescreen);
+    }
+
+    private void resetCurrentScreen(int index) {
+        if (index < mCurrentPage)
+            mCurrentPage--;
+        if (mCurrentPage >= getPageCount())
+            if (getPageCount() <= 1)
+                mCurrentPage = 0;
+            else
+                mCurrentPage = getPageCount() - 1;
+    }
+
+    private void updateScreenIndexForItemsInOtherScreens(int index) {
+        Iterator localIterator = LauncherModel.sBgItemsIdMap.entrySet().iterator();
+        while (localIterator.hasNext()) {
+            ItemInfo itemInfo = (ItemInfo)((Map.Entry)localIterator.next()).getValue();
+            if ((itemInfo.container == LauncherSettings.Favorites.CONTAINER_DESKTOP)
+                    && (itemInfo.screen > index))
+                LauncherModel.moveItemInDatabase(mLauncher, itemInfo, itemInfo.container,
+                        itemInfo.screen - 1, itemInfo.cellX, itemInfo.cellY);
+        }
+    }
+
+    private void updateScreenIndexForItemsInOtherScreens(int from, int to) {
+        Iterator localIterator = LauncherModel.sBgItemsIdMap.entrySet().iterator();
+        while (localIterator.hasNext()) {
+            ItemInfo itemInfo = (ItemInfo)((Map.Entry)localIterator.next()).getValue();
+            if (itemInfo.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
+                if (from < to && (itemInfo.screen >= from && itemInfo.screen <= to)) {
+                    if (itemInfo.screen == from)
+                        LauncherModel.moveItemInDatabase(mLauncher, itemInfo, itemInfo.container,
+                                to, itemInfo.cellX, itemInfo.cellY);
+                    else
+                        LauncherModel.moveItemInDatabase(mLauncher, itemInfo, itemInfo.container,
+                                itemInfo.screen - 1, itemInfo.cellX, itemInfo.cellY);
+                } else if(itemInfo.screen >= to && itemInfo.screen <= from) {
+                    if (itemInfo.screen == from)
+                        LauncherModel.moveItemInDatabase(mLauncher, itemInfo, itemInfo.container,
+                                to, itemInfo.cellX, itemInfo.cellY);
+                    else
+                        LauncherModel.moveItemInDatabase(mLauncher, itemInfo, itemInfo.container,
+                                itemInfo.screen + 1, itemInfo.cellX, itemInfo.cellY);
+                }
+            }
+        }
+    }
+ 
+    public void snapToScreen(int index) {
+        ViewGroup cl = (ViewGroup)getChildAt(index);
+        cl.setTranslationX(0f);
+        cl.setTranslationY(0f);
+        cl.setRotationX(0f);
+        cl.setRotationY(0f);
+        cl.setScaleX(1f);
+        cl.setScaleY(1f);
+        cl.setAlpha(1f);
+        setCurrentPage(index);
     }
 
 }

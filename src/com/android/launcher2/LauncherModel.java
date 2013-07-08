@@ -1211,22 +1211,7 @@ public class LauncherModel extends BroadcastReceiver {
         private boolean checkItemPlacement(ItemInfo occupied[][][], ItemInfo item) {
             int containerIndex = item.screen;
             if (item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
-                // Return early if we detect that an item is under the hotseat button
-                if (mCallbacks == null || mCallbacks.get().isAllAppsButtonRank(item.screen)) {
-                    return false;
-                }
-
-                // We use the last index to refer to the hotseat and the screen as the rank, so
-                // test and update the occupied state accordingly
-                if (occupied[Launcher.SCREEN_COUNT][item.screen][0] != null) {
-                    Log.e(TAG, "Error loading shortcut into hotseat " + item
-                        + " into position (" + item.screen + ":" + item.cellX + "," + item.cellY
-                        + ") occupied by " + occupied[Launcher.SCREEN_COUNT][item.screen][0]);
-                    return false;
-                } else {
-                    occupied[Launcher.SCREEN_COUNT][item.screen][0] = item;
-                    return true;
-                }
+                containerIndex += Launcher.MAX_WORKSPACE_SCREEN_COUNT;
             } else if (item.container != LauncherSettings.Favorites.CONTAINER_DESKTOP) {
                 // Skip further checking if it is not the hotseat or workspace container
                 return true;
@@ -1278,11 +1263,10 @@ public class LauncherModel extends BroadcastReceiver {
                 final Cursor c = contentResolver.query(
                         LauncherSettings.Favorites.CONTENT_URI, null, null, null, null);
 
-                // +1 for the hotseat (it can be larger than the workspace)
                 // Load workspace in reverse order to ensure that latest items are loaded first (and
                 // before any earlier duplicates)
                 final ItemInfo occupied[][][] =
-                        new ItemInfo[Launcher.SCREEN_COUNT + 1][Math.max(sWorkspaceCellCountX, sHotseatCellCount)]
+                        new ItemInfo[Launcher.MAX_SCREEN_COUNT][Math.max(sWorkspaceCellCountX, sHotseatCellCount)]
                                 [Math.max(sWorkspaceCellCountY, sHotseatCellCount)];
 
                 try {
@@ -1517,7 +1501,7 @@ public class LauncherModel extends BroadcastReceiver {
                     Log.d(TAG, "workspace layout: ");
                     for (int y = 0; y < sWorkspaceCellCountY; y++) {
                         String line = "";
-                        for (int s = 0; s < Launcher.SCREEN_COUNT; s++) {
+                        for (int s = 0; s < Launcher.MAX_SCREEN_COUNT; s++) {
                             if (s > 0) {
                                 line += " | ";
                             }
@@ -1641,7 +1625,7 @@ public class LauncherModel extends BroadcastReceiver {
                     int cellCountX = LauncherModel.getWorkspaceCellCountX();
                     int cellCountY = LauncherModel.getWorkspaceCellCountY();
                     int screenOffset = cellCountX * cellCountY;
-                    int containerOffset = screenOffset * (Launcher.SCREEN_COUNT + 1); // +1 hotseat
+                    int containerOffset = screenOffset * (Launcher.MAX_SCREEN_COUNT + 1); // +1 hotseat
                     long lr = (lhs.container * containerOffset + lhs.screen * screenOffset +
                             lhs.cellY * cellCountX + lhs.cellX);
                     long rr = (rhs.container * containerOffset + rhs.screen * screenOffset +
