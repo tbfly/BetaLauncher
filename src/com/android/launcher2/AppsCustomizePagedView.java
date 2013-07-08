@@ -269,7 +269,6 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     private int mMaxAppCellCountX, mMaxAppCellCountY;
     private int mWidgetCountX, mWidgetCountY;
     private int mWidgetWidthGap, mWidgetHeightGap;
-    private final float sWidgetPreviewIconPaddingPercentage = 0.25f;
     private final int mWidgetPreviewIconPaddedDimension;
     private static final float WIDGET_PREVIEW_ICON_PADDING_PERCENTAGE = 0.25f;
     private PagedViewCellLayout mWidgetSpacingLayout;
@@ -1028,9 +1027,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         updateCurrentTab(whichPage);
 
         // Update the thread priorities given the direction lookahead
-        Iterator<AppsCustomizeAsyncTask> iter = mRunningTasks.iterator();
-        while (iter.hasNext()) {
-            AppsCustomizeAsyncTask task = (AppsCustomizeAsyncTask) iter.next();
+        for (AppsCustomizeAsyncTask task : mRunningTasks) {
             int pageIndex = task.page;
             if ((mNextPage > mCurrentPage && pageIndex >= mCurrentPage) ||
                 (mNextPage < mCurrentPage && pageIndex <= mCurrentPage)) {
@@ -1092,7 +1089,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         setVisibilityOnChildren(layout, View.VISIBLE);
     }
 
-    public void syncAppsPageItems(int page, boolean immediate) {
+    public void syncAppsPageItems(int page) {
         // ensure that we have the right number of items on the pages
         int numCells = mCellCountX * mCellCountY;
         int startIndex = page * numCells;
@@ -1100,8 +1097,6 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         PagedViewCellLayout layout = (PagedViewCellLayout) getPageAt(page);
 
         layout.removeAllViewsOnPage();
-        ArrayList<Object> items = new ArrayList<Object>();
-        ArrayList<Bitmap> images = new ArrayList<Bitmap>();
         for (int i = startIndex; i < endIndex; ++i) {
             ApplicationInfo info = mApps.get(i);
             PagedViewIcon icon = (PagedViewIcon) mLayoutInflater.inflate(
@@ -1115,10 +1110,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             int index = i - startIndex;
             int x = index % mCellCountX;
             int y = index / mCellCountX;
-            layout.addViewToCellLayout(icon, -1, i, new PagedViewCellLayout.LayoutParams(x,y, 1,1));
-
-            items.add(info);
-            images.add(info.iconBitmap);
+            layout.addViewToCellLayout(icon, -1, i, new PagedViewCellLayout.LayoutParams(x, y, 1, 1));
         }
 
         layout.createHardwareLayers();
@@ -1353,7 +1345,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             c.setBitmap(null);
 
             // Draw the icon in the top left corner
-            int minOffset = (int) (mAppIconSize * sWidgetPreviewIconPaddingPercentage);
+            int minOffset = (int) (mAppIconSize * WIDGET_PREVIEW_ICON_PADDING_PERCENTAGE);
             int smallestSide = Math.min(bitmapWidth, bitmapHeight);
             float iconScale = Math.min((float) smallestSide
                     / (mAppIconSize + 2 * minOffset), 1f);
@@ -1611,7 +1603,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     @Override
     public void syncPageItems(int page, boolean immediate) {
         if (page < mNumAppsPages) {
-            syncAppsPageItems(page, immediate);
+            syncAppsPageItems(page);
         } else {
             syncWidgetPageItems(page, immediate);
         }
