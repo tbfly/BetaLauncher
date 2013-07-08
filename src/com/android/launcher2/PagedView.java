@@ -404,25 +404,23 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mUnboundedScrollX = x;
 
         if (x < 0) {
-            super.scrollTo(0, y);
+            scrollTo(0, y);
             if (mAllowOverScroll) {
                 overScroll(x);
             }
         } else if (x > mMaxScrollX) {
-            super.scrollTo(mMaxScrollX, y);
+            scrollTo(mMaxScrollX, y);
             if (mAllowOverScroll) {
                 overScroll(x - mMaxScrollX);
             }
         } else {
             mOverScrollX = x;
-            super.scrollTo(x, y);
+            scrollTo(x, y);
         }
-
         mTouchX = x;
         mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
     }
 
-    // we moved this functionality to a helper function so SmoothPagedView can reuse it
     protected boolean computeScrollHelper() {
         if (mScroller.computeScrollOffset()) {
             // Don't bother scrolling if the page does not need to be moved
@@ -578,7 +576,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
         final int pageCount = getChildCount();
         for (int i = 0; i < pageCount; i++) {
-            View page = (View) getPageAt(i);
+            View page = getPageAt(i);
             page.setX(page.getX() + delta);
         }
         setCurrentPage(newCurrentPage);

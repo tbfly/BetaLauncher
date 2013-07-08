@@ -57,6 +57,21 @@ public class PagedViewIcon extends TextView {
         mIcon = info.iconBitmap;
         mPressedCallback = cb;
         setCompoundDrawablesWithIntrinsicBounds(null, new FastBitmapDrawable(mIcon), null, null);
+        setCompoundDrawablePadding(0);
+        setText(info.title);
+        setTag(info);
+    }
+
+    public void applyFromApplicationInfo(ApplicationInfo info, float scale, boolean scaleUp,
+            PagedViewIcon.PressedCallback cb) {
+        mIcon = info.iconBitmap;
+        int width = (int)((float)mIcon.getWidth() * scale);
+        int height = (int)((float)mIcon.getHeight() * scale);
+        FastBitmapDrawable d = new FastBitmapDrawable(Bitmap.createScaledBitmap(mIcon,
+                width, height, true));
+        mPressedCallback = cb;
+        setCompoundDrawablesWithIntrinsicBounds(null, d, null, null);
+        setCompoundDrawablePadding(0);
         setText(info.title);
         setTag(info);
     }
