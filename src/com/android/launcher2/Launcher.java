@@ -2631,7 +2631,7 @@ public final class Launcher extends Activity
                 startAnimRunnable.run();
             }
             mDockDivider.animate().alpha(0f).setDuration(duration);
-            toView.animate().alpha(0f).setDuration(duration);
+            fromView.animate().alpha(0f).setDuration(duration);
             hideHotseat(true);
         } else {
             toView.setTranslationX(0.0f);
