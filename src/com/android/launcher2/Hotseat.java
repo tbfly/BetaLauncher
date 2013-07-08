@@ -39,18 +39,19 @@ import com.lennox.utils.ThemeUtils;
 import com.android.launcher.R;
 
 public class Hotseat extends FrameLayout {
+    private int mCellCount;
     @SuppressWarnings("unused")
     private static final String TAG = "Hotseat";
 
     private Launcher mLauncher;
     private CellLayout mContent;
 
-    private int mCellCountX;
-    private int mCellCountY;
     private int mAllAppsButtonRank;
 
     private boolean mTransposeLayoutWithOrientation;
     private boolean mIsLandscape;
+
+    private static final int DEFAULT_CELL_COUNT = 5;
 
     public Hotseat(Context context) {
         this(context, null);
@@ -66,13 +67,13 @@ public class Hotseat extends FrameLayout {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Hotseat, defStyle, 0);
         Resources r = context.getResources();
-        mCellCountX = a.getInt(R.styleable.Hotseat_cellCountX, -1);
-        mCellCountY = a.getInt(R.styleable.Hotseat_cellCountY, -1);
         mAllAppsButtonRank = r.getInteger(R.integer.hotseat_all_apps_index);
         mTransposeLayoutWithOrientation = 
                 r.getBoolean(R.bool.hotseat_transpose_layout_with_orientation);
         mIsLandscape = context.getResources().getConfiguration().orientation ==
             Configuration.ORIENTATION_LANDSCAPE;
+        mCellCount = a.getInt(R.styleable.Hotseat_cellCount, DEFAULT_CELL_COUNT);
+        mCellCount = PreferencesProvider.Interface.Dock.getNumberIcons(mCellCount);
 
     }
 
@@ -107,15 +108,13 @@ public class Hotseat extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        if (mCellCountX < 0) mCellCountX = LauncherModel.getCellCountX();
-        if (mCellCountY < 0) mCellCountY = LauncherModel.getCellCountY();
         mContent = (CellLayout) findViewById(R.id.layout);
-        mContent.setGridSize(mCellCountX, mCellCountY);
+        mContent.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1));
         mContent.setIsHotseat(true);
 
         float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(
                 getResources().getInteger(R.integer.hotseat_item_scale_percentage)) / 100f;
-        mContent.setChildrenScale(childrenScale);
+        //mContent.setChildrenScale(childrenScale);
 
         resetLayout();
     }

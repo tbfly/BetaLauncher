@@ -342,43 +342,9 @@ public class Workspace extends SmoothPagedView
                 R.styleable.Workspace, defStyle, 0);
 
         if (LauncherApplication.isScreenLarge()) {
-            // Determine number of rows/columns dynamically
-            // TODO: This code currently fails on tablets with an aspect ratio < 1.3.
-            // Around that ratio we should make cells the same size in portrait and
-            // landscape
-            TypedArray actionBarSizeTypedArray =
-                context.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
-            final float actionBarHeight = actionBarSizeTypedArray.getDimension(0, 0f);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                Point minDims = new Point();
-                Point maxDims = new Point();
-                mLauncher.getWindowManager().getDefaultDisplay().getCurrentSizeRange(minDims, maxDims);
-
-                cellCountX = 1;
-                while (CellLayout.widthInPortrait(res, cellCountX + 1) <= minDims.x) {
-                    cellCountX++;
-                }
-
-                cellCountY = 1;
-                while (actionBarHeight + CellLayout.heightInLandscape(res, cellCountY + 1)
-                    <= minDims.y) {
-                    cellCountY++;
-                }
-            } else {
-                final float systemBarHeight = res.getDimension(R.dimen.status_bar_height);
-                final float smallestScreenDim = res.getConfiguration().smallestScreenWidthDp;
-
-                cellCountX = 1;
-                while (CellLayout.widthInPortrait(res, cellCountX + 1) <= smallestScreenDim) {
-                    cellCountX++;
-                }
-
-                cellCountY = 1;
-                while (actionBarHeight + CellLayout.heightInLandscape(res, cellCountY + 1)
-                    <= smallestScreenDim - systemBarHeight) {
-                    cellCountY++;
-                }
-            }
+            int[] cellCount = getCellCountsForLarge(context);
+            cellCountX = cellCount[0];
+            cellCountY = cellCount[1];
         }
 
         mSpringLoadedShrinkFactor =
@@ -392,6 +358,12 @@ public class Workspace extends SmoothPagedView
         a.recycle();
 
         setOnHierarchyChangeListener(this);
+
+        // if there is a value set it the preferences, use that instead
+        if (!LauncherApplication.isScreenLarge()) {
+            cellCountX = PreferencesProvider.Interface.Homescreen.getCellCountX(cellCountX);
+            cellCountY = PreferencesProvider.Interface.Homescreen.getCellCountY(cellCountY);
+        }
 
         LauncherModel.updateWorkspaceLayoutCells(cellCountX, cellCountY);
         setHapticFeedbackEnabled(false);
@@ -411,6 +383,35 @@ public class Workspace extends SmoothPagedView
                 setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             }
         }
+    }
+
+    public static int[] getCellCountsForLarge(Context context) {
+        int[] cellCount = new int[2];
+
+        final Resources res = context.getResources();
+        // Determine number of rows/columns dynamically
+        // TODO: This code currently fails on tablets with an aspect ratio < 1.3.
+        // Around that ratio we should make cells the same size in portrait and
+        // landscape
+        TypedArray actionBarSizeTypedArray =
+            context.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
+        DisplayMetrics displayMetrics = res.getDisplayMetrics();
+        final float actionBarHeight = actionBarSizeTypedArray.getDimension(0, 0f);
+        final float systemBarHeight = res.getDimension(R.dimen.status_bar_height);
+        final float smallestScreenDim = res.getConfiguration().smallestScreenWidthDp *
+            displayMetrics.density;
+
+        cellCount[0] = 1;
+        while (CellLayout.widthInPortrait(res, cellCount[0] + 1) <= smallestScreenDim) {
+            cellCount[0]++;
+        }
+
+        cellCount[1] = 1;
+        while (actionBarHeight + CellLayout.heightInLandscape(res, cellCount[1] + 1)
+                <= smallestScreenDim - systemBarHeight) {
+            cellCount[1]++;
+        }
+        return cellCount;
     }
 
     // estimate the size of a widget with spans hSpan, vSpan. return MAX_VALUE for each
@@ -629,7 +630,7 @@ public class Workspace extends SmoothPagedView
         }
 
         // Get the canonical child id to uniquely represent this view in this screen
-        int childId = LauncherModel.getCellLayoutChildId(container, screen, x, y, spanX, spanY);
+        int childId = LauncherModel.getCellLayoutChildId(container, screen, x, y);
         boolean markCellsAsOccupied = !(child instanceof Folder);
         if (!layout.addViewToCellLayout(child, insert ? 0 : -1, childId, lp, markCellsAsOccupied)) {
             // TODO: This branch occurs when the workspace is adding views
@@ -2773,16 +2774,7 @@ public class Workspace extends SmoothPagedView
                     lp.cellVSpan = item.spanY;
                     lp.isLockedToGrid = true;
                     cell.setId(LauncherModel.getCellLayoutChildId(container, mDragInfo.screen,
-                            mTargetCell[0], mTargetCell[1], mDragInfo.spanX, mDragInfo.spanY));
-
-                    if (cell instanceof BubbleTextView) {
-                        ((BubbleTextView)cell).setIconScale(dropTargetLayout.getChildrenScale());
-                        if (container == Favorites.CONTAINER_HOTSEAT) {
-                            cell.setScaleX(dropTargetLayout.getChildrenScale());
-                            cell.setScaleY(dropTargetLayout.getChildrenScale());
-                            cell.invalidate();
-                        }
-                    }
+                            mTargetCell[0], mTargetCell[1]));
 
                     if (container != LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
                             cell instanceof LauncherAppWidgetHostView) {
@@ -2791,15 +2783,13 @@ public class Workspace extends SmoothPagedView
                         // in its final location
 
                         final LauncherAppWidgetHostView hostView = (LauncherAppWidgetHostView) cell;
-                        AppWidgetProviderInfo pinfo = hostView.getAppWidgetInfo();
-                        if (pinfo != null) {
-                            final Runnable addResizeFrame = new Runnable() {
+                        final Runnable addResizeFrame = new Runnable() {
                                 public void run() {
                                     DragLayer dragLayer = mLauncher.getDragLayer();
-                                    dragLayer.addResizeFrame(info, hostView, cellLayout);
+                                    dragLayer.addResizeFrame(hostView, cellLayout);
                                 }
-                            };
-                            resizeRunnable = (new Runnable() {
+                        };
+                        resizeRunnable = new Runnable() {
                                 public void run() {
                                     if (!isPageMoving()) {
                                         addResizeFrame.run();
@@ -2807,8 +2797,7 @@ public class Workspace extends SmoothPagedView
                                         mDelayedResizeRunnable = addResizeFrame;
                                     }
                                 }
-                            });
-                        }
+                        };
                     }
 
                     LauncherModel.moveItemInDatabase(mLauncher, info, container, screen, lp.cellX,
@@ -2941,7 +2930,7 @@ public class Workspace extends SmoothPagedView
                 int height = maxDim - paddingTop - paddingBottom;
                 mLandscapeCellLayoutMetrics = new Rect();
                 CellLayout.getMetrics(mLandscapeCellLayoutMetrics, res,
-                        width, height, LauncherModel.getCellCountX(), LauncherModel.getCellCountY(),
+                        width, height, LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY(),
                         orientation);
             }
             return mLandscapeCellLayoutMetrics;
@@ -2955,7 +2944,7 @@ public class Workspace extends SmoothPagedView
                 int height = maxDim - paddingTop - paddingBottom;
                 mPortraitCellLayoutMetrics = new Rect();
                 CellLayout.getMetrics(mPortraitCellLayoutMetrics, res,
-                        width, height, LauncherModel.getCellCountX(), LauncherModel.getCellCountY(),
+                        width, height, LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY(),
                         orientation);
             }
             return mPortraitCellLayoutMetrics;
@@ -3678,14 +3667,6 @@ public class Workspace extends SmoothPagedView
                         null, mTargetCell, null, CellLayout.MODE_ON_DROP_EXTERNAL);
             } else {
                 cellLayout.findCellForSpan(mTargetCell, 1, 1);
-            }
-            if (view instanceof BubbleTextView) {
-                ((BubbleTextView)view).setIconScale(cellLayout.getChildrenScale());
-                if (container == Favorites.CONTAINER_HOTSEAT) {
-                    view.setScaleX(cellLayout.getChildrenScale());
-                    view.setScaleY(cellLayout.getChildrenScale());
-                    view.invalidate();
-                }
             }
             addInScreen(view, container, screen, mTargetCell[0], mTargetCell[1], info.spanX,
                     info.spanY, insertAtFirst);

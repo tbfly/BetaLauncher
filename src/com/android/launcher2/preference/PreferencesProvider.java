@@ -55,6 +55,22 @@ public final class PreferencesProvider {
 
     public static class Interface {
         public static class Homescreen {
+            public static int getCellCountX(int def) {
+                String[] values = getString("ui_homescreen_grid", "0|" + def).split("\\|");
+                try {
+                    return Integer.parseInt(values[1]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
+            }
+            public static int getCellCountY(int def) {
+                String[] values = getString("ui_homescreen_grid", def + "|0").split("\\|");
+                try {
+                    return Integer.parseInt(values[0]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
+            }
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
@@ -111,6 +127,9 @@ public final class PreferencesProvider {
         }
 
         public static class Dock {
+            public static int getNumberIcons(int def) {
+                return getInt("ui_dock_icons", def);
+            }
             public static int getIconScale(int def) {
                 //return getInt("ui_dock_icon_scale", def);
                 return getInt("ui_general_icon_scale", def);

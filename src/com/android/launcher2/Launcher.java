@@ -3524,7 +3524,7 @@ public final class Launcher extends Activity
             public int compare(View a, View b) {
                 CellLayout.LayoutParams alp = (CellLayout.LayoutParams) a.getLayoutParams();
                 CellLayout.LayoutParams blp = (CellLayout.LayoutParams) b.getLayoutParams();
-                int cellCountX = LauncherModel.getCellCountX();
+                int cellCountX = LauncherModel.getWorkspaceCellCountX();
                 return (alp.cellY * cellCountX + alp.cellX) - (blp.cellY * cellCountX + blp.cellX);
             }
         });

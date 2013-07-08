@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.TextView;
@@ -119,6 +120,9 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
 
     public void setIconScale(float scale) {
         Drawable d = getCompoundDrawables()[1];
+        if ( d instanceof StateListDrawable ) {
+            return;
+        }
         Bitmap b = ((FastBitmapDrawable)d).getBitmap();
         int width = (int)((float)b.getWidth() * scale);
         int height = (int)((float)b.getHeight() * scale);

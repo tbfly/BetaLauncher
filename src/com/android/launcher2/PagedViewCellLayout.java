@@ -66,8 +66,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
             resources.getDimensionPixelSize(R.dimen.apps_customize_cell_width);
         mOriginalCellHeight = mCellHeight =
             resources.getDimensionPixelSize(R.dimen.apps_customize_cell_height);
-        mCellCountX = LauncherModel.getCellCountX();
-        mCellCountY = LauncherModel.getCellCountY();
+        mCellCountX = LauncherModel.getWorkspaceCellCountX();
+        mCellCountY = LauncherModel.getWorkspaceCellCountY();
         mOriginalWidthGap = mOriginalHeightGap = mWidthGap = mHeightGap = -1;
         mMaxGap = resources.getDimensionPixelSize(R.dimen.apps_customize_max_gap);
 
@@ -400,25 +400,21 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         /**
          * Horizontal location of the item in the grid.
          */
-        @ViewDebug.ExportedProperty
         public int cellX;
 
         /**
          * Vertical location of the item in the grid.
          */
-        @ViewDebug.ExportedProperty
         public int cellY;
 
         /**
          * Number of cells spanned horizontally by the item.
          */
-        @ViewDebug.ExportedProperty
         public int cellHSpan;
 
         /**
          * Number of cells spanned vertically by the item.
          */
-        @ViewDebug.ExportedProperty
         public int cellVSpan;
 
         /**
@@ -430,10 +426,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         private Object mTag;
 
         // X coordinate of the view in the layout.
-        @ViewDebug.ExportedProperty
         int x;
         // Y coordinate of the view in the layout.
-        @ViewDebug.ExportedProperty
         int y;
 
         public LayoutParams() {

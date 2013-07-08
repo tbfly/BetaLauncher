@@ -169,11 +169,8 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
      public boolean onInterceptTouchEvent(MotionEvent ev) {
          // If we are mid transitioning to the workspace, then intercept touch events here so we
          // can ignore them, otherwise we just let all apps handle the touch events.
-         if (mInTransition && mTransitioningToWorkspace) {
-             return true;
-         }
-         return super.onInterceptTouchEvent(ev);
-     };
+         return mInTransition && mTransitioningToWorkspace || super.onInterceptTouchEvent(ev);
+     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -224,13 +221,12 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
                     reloadCurrentPage();
                     return;
                 }
-
                 // Take the visible pages and re-parent them temporarily to mAnimatorBuffer
                 // and then cross fade to the new pages
                 int[] visiblePageRange = new int[2];
                 mAppsCustomizePane.getVisiblePages(visiblePageRange);
                 if (visiblePageRange[0] == -1 && visiblePageRange[1] == -1) {
-                    // If we can't get the visible page ranges, then just skip the animation
+                // If we can't get the visible page ranges, then just skip the animation
                     reloadCurrentPage();
                     return;
                 }
@@ -238,7 +234,6 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
                 for (int i = visiblePageRange[0]; i <= visiblePageRange[1]; i++) {
                     visiblePages.add(mAppsCustomizePane.getPageAt(i));
                 }
-
                 // We want the pages to be rendered in exactly the same way as they were when
                 // their parent was mAppsCustomizePane -- so set the scroll on mAnimationBuffer
                 // to be exactly the same as mAppsCustomizePane, and below, set the left/top
@@ -261,7 +256,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
                     mAnimationBuffer.setVisibility(View.VISIBLE);
                     LayoutParams p = new FrameLayout.LayoutParams(child.getMeasuredWidth(),
                             child.getMeasuredHeight());
-                    p.setMargins((int) child.getLeft(), (int) child.getTop(), 0, 0);
+                    p.setMargins(child.getLeft(), child.getTop(), 0, 0);
                     mAnimationBuffer.addView(child, p);
                 }
 
