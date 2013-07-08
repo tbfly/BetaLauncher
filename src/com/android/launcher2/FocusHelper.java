@@ -86,7 +86,6 @@ public class FocusHelper {
     static boolean handleAppsCustomizeTabKeyEvent(View v, int keyCode, KeyEvent e) {
         final TabHost tabHost = findTabHostParent(v);
         final ViewGroup contents = tabHost.getTabContentView();
-        final View shop = tabHost.findViewById(R.id.market_button);
 
         final int action = e.getAction();
         final boolean handleKeyEvent = (action != KeyEvent.ACTION_UP);
@@ -94,20 +93,13 @@ public class FocusHelper {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (handleKeyEvent) {
-                    // Select the shop button if we aren't on it
-                    if (v != shop) {
-                        shop.requestFocus();
-                    }
+                    contents.requestFocus();
                 }
                 wasHandled = true;
                 break;
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (handleKeyEvent) {
-                    // Select the content view (down is handled by the tab key handler otherwise)
-                    if (v == shop) {
-                        contents.requestFocus();
-                        wasHandled = true;
-                    }
+                    contents.requestFocus();
                 }
                 break;
             default: break;

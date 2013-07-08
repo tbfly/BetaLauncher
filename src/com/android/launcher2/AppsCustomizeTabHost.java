@@ -133,8 +133,10 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         AppsCustomizeTabKeyEventListener keyListener = new AppsCustomizeTabKeyEventListener();
         View lastTab = tabs.getChildTabViewAt(tabs.getTabCount() - 1);
         lastTab.setOnKeyListener(keyListener);
-        View shopButton = findViewById(R.id.market_button);
-        shopButton.setOnKeyListener(keyListener);
+
+        // Soft menu button
+        View overflowMenuButton = findViewById(R.id.overflow_menu_button);
+        overflowMenuButton.setOnKeyListener(keyListener);
 
         // Hide the tab bar until we measure
         mTabsContainer.setAlpha(0f);

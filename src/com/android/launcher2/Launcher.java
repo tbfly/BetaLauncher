@@ -94,6 +94,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Advanceable;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -131,8 +132,10 @@ public final class Launcher extends Activity
     static final boolean DEBUG_STRICT_MODE = false;
 
     private static final int MENU_GROUP_WALLPAPER = 1;
+    private static final int MENU_GROUP_APPDRAWER = 2;
     private static final int MENU_WALLPAPER_SETTINGS = Menu.FIRST + 1;
-    private static final int MENU_MANAGE_APPS = MENU_WALLPAPER_SETTINGS + 1;
+    private static final int MENU_PLAY_STORE = MENU_WALLPAPER_SETTINGS + 1;
+    private static final int MENU_MANAGE_APPS = MENU_PLAY_STORE + 1;
     private static final int MENU_PREFERENCES = MENU_MANAGE_APPS + 1;
     private static final int MENU_SYSTEM_SETTINGS = MENU_PREFERENCES + 1;
     private static final int MENU_HELP = MENU_SYSTEM_SETTINGS + 1;
@@ -267,8 +270,6 @@ public final class Launcher extends Activity
 
     private static HashMap<Long, FolderInfo> sFolders = new HashMap<Long, FolderInfo>();
 
-    private Intent mAppMarketIntent = null;
-
     // Related to the auto-advancing of widgets
     private final int ADVANCE_MSG = 1;
     private final int mAdvanceInterval = 20000;
@@ -285,7 +286,6 @@ public final class Launcher extends Activity
     // External icons saved in case of resource changes, orientation, etc.
     private static Drawable.ConstantState[] sGlobalSearchIcon = new Drawable.ConstantState[2];
     private static Drawable.ConstantState[] sVoiceSearchIcon = new Drawable.ConstantState[2];
-    private static Drawable.ConstantState[] sAppMarketIcon = new Drawable.ConstantState[2];
 
     private Drawable mWorkspaceBackgroundDrawable;
     private Drawable mBlackBackgroundDrawable;
@@ -441,9 +441,7 @@ public final class Launcher extends Activity
         boolean voiceVisible = false;
         // If we have a saved version of these external icons, we load them up immediately
         int coi = getCurrentOrientationIndexForGlobalIcons();
-        if (sGlobalSearchIcon[coi] == null || sVoiceSearchIcon[coi] == null ||
-                sAppMarketIcon[coi] == null) {
-            updateAppMarketIcon();
+        if (sGlobalSearchIcon[coi] == null || sVoiceSearchIcon[coi] == null) {
             searchVisible = updateGlobalSearchIcon();
             voiceVisible = updateVoiceSearchIcon(searchVisible);
         }
@@ -454,9 +452,6 @@ public final class Launcher extends Activity
         if (sVoiceSearchIcon[coi] != null) {
             updateVoiceSearchIcon(sVoiceSearchIcon[coi]);
             voiceVisible = true;
-        }
-        if (sAppMarketIcon[coi] != null) {
-            updateAppMarketIcon(sAppMarketIcon[coi]);
         }
         if (mSearchDropTargetBar != null) {
             mSearchDropTargetBar.onSearchPackagesChanged(searchVisible, voiceVisible);
@@ -1294,9 +1289,6 @@ public final class Launcher extends Activity
                     }
                 });
             }
-            // When Launcher comes back to foreground, a different Activity might be responsible for
-            // the app market intent, so refresh the icon
-            updateAppMarketIcon();
             clearTypedText();
         }
     }
@@ -1630,6 +1622,9 @@ public final class Launcher extends Activity
         Intent manageApps = new Intent(Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS);
         manageApps.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        Intent playStore = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_MARKET);
+        manageApps.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         Intent preferences = new Intent().setClass(this, Preferences.class);
         preferences.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
@@ -1644,6 +1639,10 @@ public final class Launcher extends Activity
         menu.add(MENU_GROUP_WALLPAPER, MENU_WALLPAPER_SETTINGS, 0, R.string.menu_wallpaper)
             .setIcon(android.R.drawable.ic_menu_gallery)
             .setAlphabeticShortcut('W');
+        menu.add(MENU_GROUP_APPDRAWER, MENU_PLAY_STORE, 0, R.string.menu_play_store)
+            .setIcon(R.drawable.ic_launcher_market_holo)
+            .setIntent(playStore)
+            .setAlphabeticShortcut('S');
         menu.add(0, MENU_MANAGE_APPS, 0, R.string.menu_manage_apps)
             .setIcon(android.R.drawable.ic_menu_manage)
             .setIntent(manageApps)
@@ -1674,6 +1673,7 @@ public final class Launcher extends Activity
         }
         boolean allAppsVisible = (mAppsCustomizeTabHost.getVisibility() == View.VISIBLE);
         menu.setGroupVisible(MENU_GROUP_WALLPAPER, !allAppsVisible);
+        menu.setGroupVisible(MENU_GROUP_APPDRAWER, allAppsVisible);
 
         return true;
     }
@@ -2044,13 +2044,14 @@ public final class Launcher extends Activity
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
-    public void onClickAppMarketButton(View v) {
-        if (mAppMarketIntent != null) {
-            startActivitySafely(v, mAppMarketIntent, "app market");
-        } else {
-            Log.e(TAG, "Invalid app market intent.");
-        }
+    public void onClickOverflowMenuButton(View v) {
+        final PopupMenu popupMenu = new PopupMenu(this, v);
+        final Menu menu = popupMenu.getMenu();
+        onCreateOptionsMenu(menu);
+        onPrepareOptionsMenu(menu);
+        popupMenu.show();
     }
+
 
     void startApplicationDetailsActivity(ComponentName componentName) {
         String packageName = componentName.getPackageName();
@@ -3178,41 +3179,6 @@ public final class Launcher extends Activity
         invalidatePressedFocusedStates(voiceButtonContainer, voiceButton);
     }
 
-    /**
-     * Sets the app market icon
-     */
-    private void updateAppMarketIcon() {
-        final View marketButton = findViewById(R.id.market_button);
-        Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_MARKET);
-        // Find the app market activity by resolving an intent.
-        // (If multiple app markets are installed, it will return the ResolverActivity.)
-        ComponentName activityName = intent.resolveActivity(getPackageManager());
-        if (activityName != null) {
-            int coi = getCurrentOrientationIndexForGlobalIcons();
-            mAppMarketIntent = intent;
-            sAppMarketIcon[coi] = updateTextButtonWithIconFromExternalActivity(
-                    R.id.market_button, activityName, R.drawable.ic_launcher_market_holo,
-                    TOOLBAR_ICON_METADATA_NAME);
-            marketButton.setVisibility(View.VISIBLE);
-        } else {
-            // We should hide and disable the view so that we don't try and restore the visibility
-            // of it when we swap between drag & normal states from IconDropTarget subclasses.
-            marketButton.setVisibility(View.GONE);
-            marketButton.setEnabled(false);
-        }
-    }
-
-    private void updateAppMarketIcon(Drawable.ConstantState d) {
-        // Ensure that the new drawable we are creating has the approprate toolbar icon bounds
-        Resources r = getResources();
-        Drawable marketIconDrawable = d.newDrawable(r);
-        int w = r.getDimensionPixelSize(R.dimen.toolbar_external_icon_width);
-        int h = r.getDimensionPixelSize(R.dimen.toolbar_external_icon_height);
-        marketIconDrawable.setBounds(0, 0, w, h);
-
-        updateTextButtonWithDrawable(R.id.market_button, marketIconDrawable);
-    }
-
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         final boolean result = super.dispatchPopulateAccessibilityEvent(event);
@@ -3225,6 +3191,11 @@ public final class Launcher extends Activity
             text.add(getString(R.string.all_apps_home_button_label));
         }
         return result;
+    }
+
+    private void updateOverflowMenuButton() {
+        final View overflowMenuButton = findViewById(R.id.overflow_menu_button);
+        overflowMenuButton.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -3444,10 +3415,6 @@ public final class Launcher extends Activity
         }
         sPendingAddList.clear();
 
-        // Update the market app icon as necessary (the other icons will be managed in response to
-        // package changes in bindSearchablesChanged()
-        updateAppMarketIcon();
-
         // Animate up any icons as necessary
         if (mVisible || mWorkspaceLoading) {
             Runnable newAppsRunnable = new Runnable() {
@@ -3545,6 +3512,9 @@ public final class Launcher extends Activity
                             .commit();
             }
         }.start();
+
+        // Hide overflow menu on devices with a hardkey
+        updateOverflowMenuButton();
     }
 
     @Override

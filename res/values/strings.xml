@@ -45,6 +45,8 @@
     <!-- Market button text.  The market button text is removed in Launcher.java 
          in the Phone UI. [CHAR LIMIT=32] -->
     <string name="market">Shop</string>
+    <!-- Menu button text. -->
+    <string name="menu">Menu</string>
     <!-- The format string for the dimensions of a widget in the drawer -->
     <string name="widget_dims_format" translatable="false">%1$d x %2$d</string>
 
@@ -149,6 +151,8 @@ s -->
     <string name="menu_notifications">Notifications</string>
     <!-- Noun, menu item used to show the system settings -->
     <string name="menu_settings">System settings</string>
+    <!-- Noun, menu item used to launch the play store -->
+    <string name="menu_play_store">Play Store</string>
     <!-- Noun, menu item used to show the launcher preferences -->
     <string name="menu_preferences">Launcher settings</string>
     <!-- Noun, menu item used to show help. [CHAR_LIMIT=none] -->
