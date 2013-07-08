@@ -282,6 +282,11 @@ s -->
     <string name="preferences_interface_dock_divider_title">Show dock divider</string>
     <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
 
+    <!-- General -->
+    <string name="preferences_interface_general_title">General</string>
+    <string name="preferences_interface_general_icon_scale_title">Icon scale</string>
+    <string name="preferences_interface_general_icon_scale_summary">Scale of icons in homescreens and app drawer</string>
+
     <!-- Folder sort types -->
     <string name="menu_folder_sort_none">None</string>
     <string name="menu_folder_sort_ascending">Sort A->Z</string>

@@ -33,8 +33,7 @@ import android.widget.TextView;
  * because we want to make the bubble taller than the text and TextView's clip is
  * too aggressive.
  */
-public class BubbleTextView extends TextView {
-    static final float CORNER_RADIUS = 4.0f;
+public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutListener {
     static final float SHADOW_LARGE_RADIUS = 4.0f;
     static final float SHADOW_SMALL_RADIUS = 1.75f;
     static final float SHADOW_Y_OFFSET = 2.0f;
@@ -60,6 +59,9 @@ public class BubbleTextView extends TextView {
 
     private boolean mStayPressed;
     private CheckLongPressHelper mLongPressHelper;
+
+    private boolean mTextVisible = true;
+    private CharSequence mVisibleText;
 
     public BubbleTextView(Context context) {
         super(context);
@@ -93,8 +95,36 @@ public class BubbleTextView extends TextView {
         setCompoundDrawablesWithIntrinsicBounds(null,
                 new FastBitmapDrawable(b),
                 null, null);
+        setCompoundDrawablePadding(0);
         setText(info.title);
         setTag(info);
+        info.setListener(this);
+    }
+
+    public void applyFromShortcutInfo(ShortcutInfo info, IconCache iconCache, float scale) {
+        Bitmap b = info.getIcon(iconCache);
+
+        int width = (int)((float)b.getWidth() * scale);
+        int height = (int)((float)b.getHeight() * scale);
+        FastBitmapDrawable d = new FastBitmapDrawable(b);
+        d.setBounds(new Rect(0, 0, width, height));
+
+        setCompoundDrawables(null,
+                d, null, null);
+        setCompoundDrawablePadding(0);
+        setText(info.title);
+        setTag(info);
+        info.setListener(this);
+    }
+
+    public void setIconScale(float scale) {
+        Drawable d = getCompoundDrawables()[1];
+        Bitmap b = ((FastBitmapDrawable)d).getBitmap();
+        int width = (int)((float)b.getWidth() * scale);
+        int height = (int)((float)b.getHeight() * scale);
+        d.setBounds(new Rect(0, 0, width, height));
+        setCompoundDrawables(null,
+                d, null, null);
     }
 
     @Override
@@ -156,6 +186,15 @@ public class BubbleTextView extends TextView {
             d.setState(getDrawableState());
         }
         super.drawableStateChanged();
+    }
+
+    @Override
+    public void onTitleChanged(CharSequence title) {
+        if (mTextVisible) {
+            setText(title);
+        } else {
+            mVisibleText = title;
+        }
     }
 
     /**
@@ -338,5 +377,16 @@ public class BubbleTextView extends TextView {
         super.cancelLongPress();
 
         mLongPressHelper.cancelLongPress();
+    }
+
+    public void setTextVisible(boolean visible) {
+        if (mTextVisible == visible) return;
+        mTextVisible = visible;
+        if (visible) {
+            setText(mVisibleText);
+        } else {
+            mVisibleText = getText();
+            setText("");
+        }
     }
 }

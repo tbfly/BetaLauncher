@@ -31,6 +31,12 @@
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
+        <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_general_icon_scale"
+            android:title="@string/preferences_interface_general_icon_scale_title"
+            android:summary="@string/preferences_interface_general_icon_scale_summary"
+            launcher:min="80"
+            launcher:max="120"
+            launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
         <ListPreference
             android:key="ui_homescreen_folder_style"
             android:title="@string/preferences_interface_homescreen_folder_style_title"

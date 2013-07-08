@@ -50,6 +50,7 @@ import android.widget.TextView;
 
 import com.android.launcher.R;
 import com.android.launcher2.FolderInfo.FolderListener;
+import com.android.launcher2.preference.PreferencesProvider;
 
 import java.util.*;
 
@@ -144,6 +145,9 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
             mMaxCountY = LauncherModel.getCellCountY();
             mMaxNumItems = mMaxCountX * mMaxCountY;
         }
+
+        mIconScale = (float) PreferencesProvider.Interface.General.getIconScale(
+                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
 
         mInputMethodManager = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);

@@ -17,6 +17,7 @@
 package com.android.launcher2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -33,6 +34,12 @@ class ShortcutInfo extends ItemInfo {
      * The intent used to start the application.
      */
     Intent intent;
+
+    /**
+     * Indicates whether the title comes from an application's resource (if false)
+     * or from a custom title (if true.)
+     */
+    boolean customTitle;
 
     /**
      * Indicates whether the icon comes from an application's resource (if false)
@@ -56,6 +63,11 @@ class ShortcutInfo extends ItemInfo {
      * The application icon.
      */
     private Bitmap mIcon;
+
+    /**
+     * Title change listener
+     */
+    private ShortcutListener mListener;
 
     /**
      * The shortcut folder information
@@ -127,11 +139,24 @@ class ShortcutInfo extends ItemInfo {
         itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_APPLICATION;
     }
 
+    public void setTitle(CharSequence title) {
+        this.title = title;
+        this.customTitle = true;
+        if (mListener != null) {
+            mListener.onTitleChanged(title);
+        }
+    }
+
+    void setListener(ShortcutListener listener) {
+        mListener = listener;
+    }
+
     @Override
     void onAddToDatabase(ContentValues values) {
         super.onAddToDatabase(values);
 
-        String titleStr = title != null ? title.toString() : null;
+        String titleStr = title != null && (customTitle || itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT) ?
+                title.toString() : null;
         values.put(LauncherSettings.BaseLauncherColumns.TITLE, titleStr);
 
         String uri = intent != null ? intent.toUri(0) : null;
@@ -161,7 +186,7 @@ class ShortcutInfo extends ItemInfo {
         return "ShortcutInfo(title=" + title.toString() + "intent=" + intent + "id=" + this.id
                 + " type=" + this.itemType + " container=" + this.container + " screen=" + screen
                 + " cellX=" + cellX + " cellY=" + cellY + " spanX=" + spanX + " spanY=" + spanY
-                + " dropPos=" + dropPos + ")";
+                + " dropPos=" + Arrays.toString(dropPos) + ")";
     }
 
     public static void dumpShortcutInfoList(String tag, String label,
@@ -171,6 +196,10 @@ class ShortcutInfo extends ItemInfo {
             Log.d(tag, "   title=\"" + info.title + " icon=" + info.mIcon
                     + " customIcon=" + info.customIcon);
         }
+    }
+
+    interface ShortcutListener {
+        public void onTitleChanged(CharSequence title);
     }
 }
 

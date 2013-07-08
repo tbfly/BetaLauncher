@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.launcher2.preference.PreferencesProvider;
 import com.lennox.utils.ThemeUtils;
 
 import com.android.launcher.R;
@@ -72,6 +73,7 @@ public class Hotseat extends FrameLayout {
                 r.getBoolean(R.bool.hotseat_transpose_layout_with_orientation);
         mIsLandscape = context.getResources().getConfiguration().orientation ==
             Configuration.ORIENTATION_LANDSCAPE;
+
     }
 
     public void setup(Launcher launcher) {
@@ -110,6 +112,10 @@ public class Hotseat extends FrameLayout {
         mContent = (CellLayout) findViewById(R.id.layout);
         mContent.setGridSize(mCellCountX, mCellCountY);
         mContent.setIsHotseat(true);
+
+        float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(
+                getResources().getInteger(R.integer.hotseat_item_scale_percentage)) / 100f;
+        mContent.setChildrenScale(childrenScale);
 
         resetLayout();
     }

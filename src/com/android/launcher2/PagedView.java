@@ -58,9 +58,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // the min drag distance for a fling to register, to prevent random page shifts
     private static final int MIN_LENGTH_FOR_FLING = 25;
 
-    protected static final int PAGE_SNAP_ANIMATION_DURATION = 550;
-    protected static final int MAX_PAGE_SNAP_DURATION = 750;
-    protected static final int SLOW_PAGE_SNAP_ANIMATION_DURATION = 950;
+    protected static final int PAGE_SNAP_ANIMATION_DURATION = 400;
+    protected static final int MAX_PAGE_SNAP_DURATION = 550;
+    protected static final int SLOW_PAGE_SNAP_ANIMATION_DURATION = 750;
     protected static final float NANOTIME_DIV = 1000000000.0f;
 
     private static final float OVERSCROLL_ACCELERATE_FACTOR = 2;
@@ -99,7 +99,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     protected float mLastMotionXRemainder;
     protected float mLastMotionY;
     protected float mTotalMotionX;
-    private int mLastScreenCenter = -1;
+    private int mLastScreenScroll = -1;
     private int[] mChildOffsets;
     private int[] mChildRelativeOffsets;
     private int[] mChildOffsetsWithLayoutScale;
@@ -233,7 +233,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     protected void init() {
         mDirtyPageContent = new ArrayList<Boolean>();
         mDirtyPageContent.ensureCapacity(32);
-        mScroller = new Scroller(getContext(), new ScrollInterpolator());
+        mScroller = new Scroller(getContext(), getScrollInterpolator());
         mCurrentPage = 0;
         mCenterPagesVertically = true;
 
@@ -297,13 +297,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
      * the previous tab page.
      */
     protected void updateCurrentPageScroll() {
-        // If the current page is invalid, just reset the scroll position to zero
-        int newX = 0;
-        if (0 <= mCurrentPage && mCurrentPage < getPageCount()) {
-            int offset = getChildOffset(mCurrentPage);
-            int relOffset = getRelativeChildOffset(mCurrentPage);
-            newX = offset - relOffset;
-        }
+        int newX = getChildOffset(mCurrentPage) - getRelativeChildOffset(mCurrentPage);
         scrollTo(newX, 0);
         mScroller.setFinalX(newX);
         mScroller.forceFinished(true);
@@ -404,18 +398,18 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mUnboundedScrollX = x;
 
         if (x < 0) {
-            scrollTo(0, y);
+            super.scrollTo(0, y);
             if (mAllowOverScroll) {
                 overScroll(x);
             }
         } else if (x > mMaxScrollX) {
-            scrollTo(mMaxScrollX, y);
+            super.scrollTo(mMaxScrollX, y);
             if (mAllowOverScroll) {
                 overScroll(x - mMaxScrollX);
             }
         } else {
             mOverScrollX = x;
-            scrollTo(x, y);
+            super.scrollTo(x, y);
         }
         mTouchX = x;
         mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
@@ -656,7 +650,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     }
 
-    protected void screenScrolled(int screenCenter) {
+    protected void screenScrolled(int screenScroll) {
         if (isScrollingIndicatorEnabled()) {
             updateScrollingIndicator();
         }
@@ -666,7 +660,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             for (int i = 0; i < getChildCount(); i++) {
                 View child = getChildAt(i);
                 if (child != null) {
-                    float scrollProgress = getScrollProgress(screenCenter, child, i);
+                    float scrollProgress = getScrollProgress(screenScroll, child, i);
                     float alpha = 1 - Math.abs(scrollProgress);
                     child.setAlpha(alpha);
                 }
@@ -742,6 +736,13 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     }
 
+    protected int getScaledRelativeChildOffset(int index) {
+        int offset;
+        final int padding = getPaddingLeft() + getPaddingRight();
+        return  getPaddingLeft() + (getMeasuredWidth() - padding -
+                    getScaledMeasuredWidth(getPageAt(index))) / 2;
+    }
+
     protected int getScaledMeasuredWidth(View child) {
         // This functions are called enough times that it actually makes a difference in the
         // profiler -- so just inline the max() here
@@ -755,22 +756,22 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         final int pageCount = getChildCount();
 
         if (pageCount > 0) {
+            final int pageWidth = getScaledMeasuredWidth(getPageAt(0));
             final int screenWidth = getMeasuredWidth();
+            int x = getScaledRelativeChildOffset(0) + pageWidth;
             int leftScreen = 0;
             int rightScreen = 0;
-            View currPage = getPageAt(leftScreen);
             while (leftScreen < pageCount - 1 &&
-                    currPage.getX() + currPage.getWidth() -
-                    currPage.getPaddingRight() < getScrollX()) {
+                    x + getPageAt(leftScreen).getTranslationX() <= getScrollX()) {
                 leftScreen++;
-                currPage = getPageAt(leftScreen);
+                x += getScaledMeasuredWidth(getPageAt(leftScreen)) + mPageSpacing;
             }
             rightScreen = leftScreen;
-            currPage = getPageAt(rightScreen + 1);
+
             while (rightScreen < pageCount - 1 &&
-                    currPage.getX() - currPage.getPaddingLeft() < getScrollX() + screenWidth) {
+                    x + getPageAt(rightScreen + 1).getTranslationX() < getScrollX() + screenWidth) {
                 rightScreen++;
-                currPage = getPageAt(rightScreen + 1);
+               x += getScaledMeasuredWidth(getPageAt(rightScreen)) + mPageSpacing;
             }
             range[0] = leftScreen;
             range[1] = rightScreen;
@@ -781,22 +782,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected boolean shouldDrawChild(View child) {
-        return child.getAlpha() > 0;
+        return child.getAlpha() > 0 && child.getVisibility() == VISIBLE;
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        int halfScreenSize = getMeasuredWidth() / 2;
-        // mOverScrollX is equal to getScrollX() when we're within the normal scroll range.
-        // Otherwise it is equal to the scaled overscroll position.
-        int screenCenter = mOverScrollX + halfScreenSize;
-
-        if (screenCenter != mLastScreenCenter || mForceScreenScrolled) {
-            // set mForceScreenScrolled before calling screenScrolled so that screenScrolled can
-            // set it for the next frame
+        if (mOverScrollX != mLastScreenScroll || mForceScreenScrolled) {
+            screenScrolled(mOverScrollX);
+            mLastScreenScroll = mOverScrollX;
             mForceScreenScrolled = false;
-            screenScrolled(screenCenter);
-            mLastScreenCenter = screenCenter;
         }
 
         // Find out which screens are visible; as an optimization we only call draw on them
@@ -1074,7 +1068,6 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 mLastMotionX = x;
                 mLastMotionXRemainder = 0;
                 mTouchX = getScrollX();
-                mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
                 pageBeginMoving();
             }
             // Either way, cancel any pending longpress
@@ -1095,8 +1088,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     }
 
-    protected float getScrollProgress(int screenCenter, View v, int page) {
+    protected float getScrollProgress(int screenScroll, View v, int page) {
         final int halfScreenSize = getMeasuredWidth() / 2;
+        int screenCenter = screenScroll + getMeasuredWidth() / 2;
 
         int totalDistance = getScaledMeasuredWidth(v) + mPageSpacing;
         int delta = screenCenter - (getChildOffset(page) -
@@ -1442,14 +1436,52 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         snapToPage(getPageNearestToCenterOfScreen(), PAGE_SNAP_ANIMATION_DURATION);
     }
 
-    private static class ScrollInterpolator implements Interpolator {
-        public ScrollInterpolator() {
+    public static class QuintInterpolator implements Interpolator {
+        public QuintInterpolator() {
         }
 
         public float getInterpolation(float t) {
             t -= 1.0f;
             return t*t*t*t*t + 1;
         }
+    }
+
+    public static class QuadInterpolator implements Interpolator {
+        public QuadInterpolator() {
+        }
+
+        public float getInterpolation(float t) {
+            t -= 1.0f;
+            return -(t*t*t*t - 1);
+        }
+    }
+
+    public static class OvershootInterpolator implements Interpolator {
+        private static final float DEFAULT_TENSION = 1.3f;
+        private float mTension;
+
+        public OvershootInterpolator() {
+            mTension = DEFAULT_TENSION;
+        }
+
+        public void setDistance(int distance) {
+            mTension = distance > 0 ? DEFAULT_TENSION / distance : DEFAULT_TENSION;
+        }
+
+        public void disableSettle() {
+            mTension = 0.f;
+        }
+
+        public float getInterpolation(float t) {
+            // _o(t) = t * t * ((tension + 1) * t + tension)
+            // o(t) = _o(t - 1) + 1
+            t -= 1.0f;
+            return t * t * ((mTension + 1) * t + mTension) + 1.0f;
+        }
+    }
+
+    protected Interpolator getScrollInterpolator() {
+        return new QuintInterpolator();
     }
 
     // We want the duration of the page snap animation to be influenced by the distance that
@@ -1727,7 +1759,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         if (mHasScrollIndicator && mScrollIndicator == null) {
             ViewGroup parent = (ViewGroup) getParent();
             if (parent != null) {
-                mScrollIndicator = (View) (parent.findViewById(R.id.paged_view_indicator));
+                mScrollIndicator = parent.findViewById(getScrollingIndicatorId());
                 mHasScrollIndicator = mScrollIndicator != null;
                 if (mHasScrollIndicator) {
                     mScrollIndicator.setVisibility(View.VISIBLE);
@@ -1739,6 +1771,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     protected boolean isScrollingIndicatorEnabled() {
         return true;
+    }
+
+    protected int getScrollingIndicatorId() {
+        return R.id.paged_view_indicator;
     }
 
     Runnable hideScrollingIndicatorRunnable = new Runnable() {
@@ -1754,6 +1790,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void showScrollingIndicator(boolean immediately) {
+        showScrollingIndicator(immediately, sScrollIndicatorFadeInDuration);
+    }
+
+    protected void showScrollingIndicator(boolean immediately, int duration) {
         mShouldShowScrollIndicator = true;
         mShouldShowScrollIndicatorImmediately = true;
         if (getChildCount() <= 1) return;
@@ -1770,7 +1810,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 mScrollIndicator.setAlpha(1f);
             } else {
                 mScrollIndicatorAnimator = LauncherAnimUtils.ofFloat(mScrollIndicator, "alpha", 1f);
-                mScrollIndicatorAnimator.setDuration(sScrollIndicatorFadeInDuration);
+                mScrollIndicatorAnimator.setDuration(duration);
                 mScrollIndicatorAnimator.start();
             }
         }
@@ -1783,6 +1823,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void hideScrollingIndicator(boolean immediately) {
+        hideScrollingIndicator(immediately, sScrollIndicatorFadeOutDuration);
+    }
+
+    protected void hideScrollingIndicator(boolean immediately, int duration) {
         if (getChildCount() <= 1) return;
         if (!isScrollingIndicatorEnabled()) return;
 
@@ -1796,7 +1840,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 mScrollIndicator.setAlpha(0f);
             } else {
                 mScrollIndicatorAnimator = LauncherAnimUtils.ofFloat(mScrollIndicator, "alpha", 0f);
-                mScrollIndicatorAnimator.setDuration(sScrollIndicatorFadeOutDuration);
+                mScrollIndicatorAnimator.setDuration(duration);
                 mScrollIndicatorAnimator.addListener(new AnimatorListenerAdapter() {
                     private boolean cancelled = false;
                     @Override

@@ -111,11 +111,20 @@ public final class PreferencesProvider {
         }
 
         public static class Dock {
+            public static int getIconScale(int def) {
+                //return getInt("ui_dock_icon_scale", def);
+                return getInt("ui_general_icon_scale", def);
+            }
             public static boolean getShowDivider() {
                 return getBoolean("ui_dock_divider", true);
             }
         }
 
+        public static class General {
+            public static int getIconScale(int def) {
+                return getInt("ui_general_icon_scale", def);
+            }
+        }
     }
 
     public static class Application {

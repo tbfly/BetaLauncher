@@ -111,6 +111,7 @@ public class Workspace extends SmoothPagedView
     private int mOriginalPageSpacing;
 
     private final WallpaperManager mWallpaperManager;
+    private float mWallpaperScroll;
     private IBinder mWindowToken;
     private static final float WALLPAPER_SCREENS_SPAN = 2f;
 
@@ -199,7 +200,7 @@ public class Workspace extends SmoothPagedView
 
     int mWallpaperWidth;
     int mWallpaperHeight;
-    WallpaperOffsetInterpolator mWallpaperOffset;
+    WallpaperOffsetInterpolator mWallpaperInterpolator;
     boolean mUpdateWallpaperOffsetImmediately = false;
     private Runnable mDelayedResizeRunnable;
     private Runnable mDelayedSnapToPageRunnable;
@@ -472,6 +473,9 @@ public class Workspace extends SmoothPagedView
         setChildrenDrawnWithCacheEnabled(true);
 
         final Resources res = getResources();
+        final float iconScale = (float)PreferencesProvider.Interface.General.getIconScale(
+                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
+
         try {
             mBackground = res.getDrawable(R.drawable.apps_customize_bg);
         } catch (Resources.NotFoundException e) {
@@ -484,7 +488,7 @@ public class Workspace extends SmoothPagedView
             setPadding(paddingLeft, paddingTop, getPaddingRight(), getPaddingBottom());
         }
 
-        mWallpaperOffset = new WallpaperOffsetInterpolator();
+        mWallpaperInterpolator = new WallpaperOffsetInterpolator();
         Display display = mLauncher.getWindowManager().getDefaultDisplay();
         display.getSize(mDisplaySize);
         mWallpaperTravelWidth = (int) (mDisplaySize.x *
@@ -970,7 +974,7 @@ public class Workspace extends SmoothPagedView
     private void syncWallpaperOffsetWithScroll() {
         final boolean enableWallpaperEffects = isHardwareAccelerated();
         if (enableWallpaperEffects) {
-            mWallpaperOffset.setFinalX(wallpaperOffsetForCurrentScroll());
+            mWallpaperInterpolator.setFinalX(wallpaperOffsetForCurrentScroll());
         }
     }
 
@@ -979,20 +983,20 @@ public class Workspace extends SmoothPagedView
     }
 
     private void updateWallpaperOffsets() {
-        boolean updateNow = false;
-        boolean keepUpdating = true;
+        boolean updateNow;
+        boolean keepUpdating;
         if (mUpdateWallpaperOffsetImmediately) {
             updateNow = true;
             keepUpdating = false;
-            mWallpaperOffset.jumpToFinal();
+            mWallpaperInterpolator.jumpToFinal();
             mUpdateWallpaperOffsetImmediately = false;
         } else {
-            updateNow = keepUpdating = mWallpaperOffset.computeScrollOffset();
+            updateNow = keepUpdating = mWallpaperInterpolator.computeScrollOffset();
         }
         if (updateNow) {
+            mWallpaperScroll = mWallpaperInterpolator.getCurrX();
             if (mWindowToken != null) {
-                mWallpaperManager.setWallpaperOffsets(mWindowToken,
-                        mWallpaperOffset.getCurrX(), mWallpaperOffset.getCurrY());
+                mWallpaperManager.setWallpaperOffsets(mWindowToken, mWallpaperScroll, 0);
             }
         }
         if (keepUpdating) {
@@ -1042,16 +1046,18 @@ public class Workspace extends SmoothPagedView
         }
     }
 
+    @Override
+    protected Interpolator getScrollInterpolator() {
+        return new PagedView.QuadInterpolator();
+    }
+
     class WallpaperOffsetInterpolator {
         float mFinalHorizontalWallpaperOffset = 0.0f;
-        float mFinalVerticalWallpaperOffset = 0.5f;
         float mHorizontalWallpaperOffset = 0.0f;
-        float mVerticalWallpaperOffset = 0.5f;
         long mLastWallpaperOffsetUpdateTime;
         boolean mIsMovingFast;
         boolean mOverrideHorizontalCatchupConstant;
         float mHorizontalCatchupConstant = 0.35f;
-        float mVerticalCatchupConstant = 0.35f;
 
         public WallpaperOffsetInterpolator() {
         }
@@ -1064,16 +1070,18 @@ public class Workspace extends SmoothPagedView
             mHorizontalCatchupConstant = f;
         }
 
-        public void setVerticalCatchupConstant(float f) {
-            mVerticalCatchupConstant = f;
-        }
-
         public boolean computeScrollOffset() {
-            if (Float.compare(mHorizontalWallpaperOffset, mFinalHorizontalWallpaperOffset) == 0 &&
-                    Float.compare(mVerticalWallpaperOffset, mFinalVerticalWallpaperOffset) == 0) {
+            if (Float.compare(mHorizontalWallpaperOffset, mFinalHorizontalWallpaperOffset) == 0) {
                 mIsMovingFast = false;
                 return false;
             }
+
+            // Don't have any lag between workspace and wallpaper on non-large devices
+            if (!LauncherApplication.isScreenLarge()) {
+                mHorizontalWallpaperOffset = mFinalHorizontalWallpaperOffset;
+                return true;
+            }
+
             boolean isLandscape = mDisplaySize.x > mDisplaySize.y;
 
             long currentTime = System.currentTimeMillis();
@@ -1095,28 +1103,19 @@ public class Workspace extends SmoothPagedView
                 // slow
                 fractionToCatchUpIn1MsHorizontal = isLandscape ? 0.27f : 0.5f;
             }
-            float fractionToCatchUpIn1MsVertical = mVerticalCatchupConstant;
 
             fractionToCatchUpIn1MsHorizontal /= 33f;
-            fractionToCatchUpIn1MsVertical /= 33f;
 
             final float UPDATE_THRESHOLD = 0.00001f;
             float hOffsetDelta = mFinalHorizontalWallpaperOffset - mHorizontalWallpaperOffset;
-            float vOffsetDelta = mFinalVerticalWallpaperOffset - mVerticalWallpaperOffset;
-            boolean jumpToFinalValue = Math.abs(hOffsetDelta) < UPDATE_THRESHOLD &&
-                Math.abs(vOffsetDelta) < UPDATE_THRESHOLD;
+            boolean jumpToFinalValue = Math.abs(hOffsetDelta) < UPDATE_THRESHOLD;
 
-            // Don't have any lag between workspace and wallpaper on non-large devices
             if (!LauncherApplication.isScreenLarge() || jumpToFinalValue) {
                 mHorizontalWallpaperOffset = mFinalHorizontalWallpaperOffset;
-                mVerticalWallpaperOffset = mFinalVerticalWallpaperOffset;
             } else {
-                float percentToCatchUpVertical =
-                    Math.min(1.0f, timeSinceLastUpdate * fractionToCatchUpIn1MsVertical);
                 float percentToCatchUpHorizontal =
                     Math.min(1.0f, timeSinceLastUpdate * fractionToCatchUpIn1MsHorizontal);
                 mHorizontalWallpaperOffset += percentToCatchUpHorizontal * hOffsetDelta;
-                mVerticalWallpaperOffset += percentToCatchUpVertical * vOffsetDelta;
             }
 
             mLastWallpaperOffsetUpdateTime = System.currentTimeMillis();
@@ -1131,25 +1130,12 @@ public class Workspace extends SmoothPagedView
             return mFinalHorizontalWallpaperOffset;
         }
 
-        public float getCurrY() {
-            return mVerticalWallpaperOffset;
-        }
-
-        public float getFinalY() {
-            return mFinalVerticalWallpaperOffset;
-        }
-
         public void setFinalX(float x) {
             mFinalHorizontalWallpaperOffset = Math.max(0f, Math.min(x, 1.0f));
         }
 
-        public void setFinalY(float y) {
-            mFinalVerticalWallpaperOffset = Math.max(0f, Math.min(y, 1.0f));
-        }
-
         public void jumpToFinal() {
             mHorizontalWallpaperOffset = mFinalHorizontalWallpaperOffset;
-            mVerticalWallpaperOffset = mFinalVerticalWallpaperOffset;
         }
     }
 
@@ -1557,7 +1543,7 @@ public class Workspace extends SmoothPagedView
         }
     }
 
-    /*@Override
+    @Override
     protected void screenScrolled(int screenScroll) {
         super.screenScrolled(screenScroll);
         enableHwLayersOnVisiblePages();
@@ -1592,49 +1578,6 @@ public class Workspace extends SmoothPagedView
                     ((CellLayout) getChildAt(getChildCount() - 1)).resetOverscrollTransforms();
                 }
 
-                switch (mTransitionEffect) {
-                    case Standard:
-                        screenScrolledStandard(scroll);
-                        break;
-                    case Tablet:
-                        screenScrolledTablet(scroll);
-                        break;
-                    case Accordion:
-                        screenScrolledAccordion(scroll);
-                        break;
-                    case CylinderIn:
-                        screenScrolledCylinder(scroll, true);
-                        break;
-                    case CylinderOut:
-                        screenScrolledCylinder(scroll, false);
-                        break;
-                }
-                mScrollTransformsDirty = false;
-            }
-
-            if (isInOverscroll) {
-                int index = mOverScrollX < 0 ? 0 : getChildCount() - 1;
-                CellLayout cl = (CellLayout) getChildAt(index);
-                if (getChildCount() > 1) {
-                    float scrollProgress = getScrollProgress(screenScroll, cl, index);
-                    cl.setOverScrollAmount(Math.abs(scrollProgress), index == 0);
-                    float rotation = -WORKSPACE_OVERSCROLL_ROTATION * scrollProgress;
-                    cl.setRotationY(rotation);
-                    setFadeForOverScroll(Math.abs(scrollProgress));
-                    if (!mOverscrollTransformsDirty) {
-                        mOverscrollTransformsDirty = true;
-                        cl.setCameraDistance(mDensity * mCameraDistance);
-                        cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
-                        cl.setPivotX(cl.getMeasuredWidth() * (index == 0 ? 0.75f : 0.25f));
-                        cl.setOverscrollTransformsDirty(true);
-                    }
-                }
-            }
-        }
-    }*/
-
-    protected void screenScrolled(int screenScroll) {
-        int scroll = screenScroll;
                 switch (mTransitionEffect) {
                     case Standard:
                         screenScrolledStandard(scroll);
@@ -1679,8 +1622,29 @@ public class Workspace extends SmoothPagedView
                         screenScrolledCylinder(scroll, false);
                         break;
                 }
-    }
+                mScrollTransformsDirty = false;
+            }
 
+            if (isInOverscroll) {
+                int index = mOverScrollX < 0 ? 0 : getChildCount() - 1;
+                CellLayout cl = (CellLayout) getChildAt(index);
+                if (getChildCount() > 1) {
+                    float scrollProgress = getScrollProgress(screenScroll, cl, index);
+                    cl.setOverScrollAmount(Math.abs(scrollProgress), index == 0);
+                    float rotation = -WORKSPACE_OVERSCROLL_ROTATION * scrollProgress;
+                    cl.setRotationY(rotation);
+                    setFadeForOverScroll(Math.abs(scrollProgress));
+                    if (!mOverscrollTransformsDirty) {
+                        mOverscrollTransformsDirty = true;
+                        cl.setCameraDistance(mDensity * mCameraDistance);
+                        cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
+                        cl.setPivotX(cl.getMeasuredWidth() * (index == 0 ? 0.75f : 0.25f));
+                        cl.setOverscrollTransformsDirty(true);
+                    }
+                }
+            }
+        }
+    }
 
     private void setCellLayoutFadeAdjacent(CellLayout child, float scrollProgress) {
         float alpha = 1 - Math.abs(scrollProgress);
@@ -2273,7 +2237,7 @@ public class Workspace extends SmoothPagedView
     @Override
     public void onLauncherTransitionEnd(Launcher l, boolean animated, boolean toWorkspace) {
         mIsSwitchingState = false;
-        mWallpaperOffset.setOverrideHorizontalCatchupConstant(false);
+        mWallpaperInterpolator.setOverrideHorizontalCatchupConstant(false);
         updateChildrenLayersEnabled(false);
         // The code in getChangeStateAnimation to determine initialAlpha and finalAlpha will ensure
         // ensure that only the current page is visible during (and subsequently, after) the
@@ -2810,6 +2774,15 @@ public class Workspace extends SmoothPagedView
                     lp.isLockedToGrid = true;
                     cell.setId(LauncherModel.getCellLayoutChildId(container, mDragInfo.screen,
                             mTargetCell[0], mTargetCell[1], mDragInfo.spanX, mDragInfo.spanY));
+
+                    if (cell instanceof BubbleTextView) {
+                        ((BubbleTextView)cell).setIconScale(dropTargetLayout.getChildrenScale());
+                        if (container == Favorites.CONTAINER_HOTSEAT) {
+                            cell.setScaleX(dropTargetLayout.getChildrenScale());
+                            cell.setScaleY(dropTargetLayout.getChildrenScale());
+                            cell.invalidate();
+                        }
+                    }
 
                     if (container != LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
                             cell instanceof LauncherAppWidgetHostView) {
@@ -3706,6 +3679,14 @@ public class Workspace extends SmoothPagedView
             } else {
                 cellLayout.findCellForSpan(mTargetCell, 1, 1);
             }
+            if (view instanceof BubbleTextView) {
+                ((BubbleTextView)view).setIconScale(cellLayout.getChildrenScale());
+                if (container == Favorites.CONTAINER_HOTSEAT) {
+                    view.setScaleX(cellLayout.getChildrenScale());
+                    view.setScaleY(cellLayout.getChildrenScale());
+                    view.invalidate();
+                }
+            }
             addInScreen(view, container, screen, mTargetCell[0], mTargetCell[1], info.spanX,
                     info.spanY, insertAtFirst);
             cellLayout.onDropChild(view);
@@ -4310,6 +4291,8 @@ public class Workspace extends SmoothPagedView
     }
 
     void updateShortcuts(ArrayList<ApplicationInfo> apps) {
+        float iconScale = (float) PreferencesProvider.Interface.General.getIconScale(
+                getResources().getInteger(R.integer.app_icon_scale_percentage)) / 100f;
         ArrayList<ShortcutAndWidgetContainer> childrenLayouts = getAllShortcutAndWidgetContainers();
         for (ShortcutAndWidgetContainer layout: childrenLayouts) {
             int childCount = layout.getChildCount();
@@ -4322,15 +4305,18 @@ public class Workspace extends SmoothPagedView
                     // return null for some shortcuts (for instance, for shortcuts to
                     // web pages.)
                     final Intent intent = info.intent;
-                    final ComponentName name = intent.getComponent();
-                    if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION &&
-                            Intent.ACTION_MAIN.equals(intent.getAction()) && name != null) {
+                    if (intent != null && info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION &&
+                            Intent.ACTION_MAIN.equals(intent.getAction())) {
+                        final ComponentName name = intent.getComponent();
+                        if (name == null) {
+                            continue;
+                        }
                         for (ApplicationInfo app : apps) {
                             if (app.componentName.equals(name)) {
                                 BubbleTextView shortcut = (BubbleTextView) view;
                                 info.updateIcon(mIconCache);
                                 info.title = app.title.toString();
-                                shortcut.applyFromShortcutInfo(info, mIconCache);
+                                shortcut.applyFromShortcutInfo(info, mIconCache, iconScale);
                             }
                         }
                     }

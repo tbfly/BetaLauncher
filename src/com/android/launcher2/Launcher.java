@@ -315,6 +315,8 @@ public final class Launcher extends Activity
     private boolean mShowSearchBar;
     private boolean mShowDockDivider;
 
+    private float mIconScale = 1.0f;
+
     private Runnable mBuildLayersRunnable = new Runnable() {
         public void run() {
             if (mWorkspace != null) {
@@ -369,6 +371,9 @@ public final class Launcher extends Activity
 
         // Load all preferences
         PreferencesProvider.load(this);
+
+        mIconScale = (float) PreferencesProvider.Interface.General.getIconScale(
+                getResources().getInteger(R.integer.app_icon_scale_percentage)) / 100f;
 
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
@@ -1016,7 +1021,8 @@ public final class Launcher extends Activity
      */
     View createShortcut(int layoutResId, ViewGroup parent, ShortcutInfo info) {
         BubbleTextView favorite = (BubbleTextView) mInflater.inflate(layoutResId, parent, false);
-        favorite.applyFromShortcutInfo(info, mIconCache);
+        float scale = info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT ? 1.0f : mIconScale;
+        favorite.applyFromShortcutInfo(info, mIconCache, scale);
         favorite.setOnClickListener(this);
         return favorite;
     }
