@@ -20,15 +20,17 @@
             android:key="icon_theme"
             android:title="@string/icon_theme" />
 
-    <PreferenceCategory android:title="@string/preferences_interface_homescreen_scrolling_category">
+    <PreferenceCategory android:title="@string/preferences_interface_homescreen_title">
+        <CheckBoxPreference android:key="ui_homescreen_general_search"
+            android:title="@string/preferences_interface_homescreen_general_search_title"
+            android:summary="@string/preferences_interface_homescreen_general_search_summary"
+            android:defaultValue="true" />
         <ListPreference android:key="ui_homescreen_scrolling_transition_effect"
             android:title="@string/preferences_interface_homescreen_scrolling_transition_effect_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_transition_effect_summary"
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/preferences_interface_homescreen_folder_style_category">
         <ListPreference
             android:key="ui_homescreen_folder_style"
             android:title="@string/preferences_interface_homescreen_folder_style_title"
@@ -37,14 +39,27 @@
             android:entryValues="@array/folder_icon_style_values"
             android:defaultValue="0" />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/preferences_interface_drawer_title">
+        <ListPreference android:key="ui_drawer_scrolling_transition_effect"
+            android:title="@string/preferences_interface_drawer_scrolling_transition_effect_title"
+            android:summary="@string/preferences_interface_drawer_scrolling_transition_effect_summary"
+            android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
+            android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
+            android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
         <ListPreference
             android:key="ui_drawer_transparency"
             android:title="@string/preferences_interface_drawer_transparency_title"
             android:summary="@string/preferences_interface_drawer_transparency_summary"
             android:entries="@array/preferences_interface_drawer_transparency_names"
             android:entryValues="@array/preferences_interface_drawer_transparency_values"
-            android:defaultValue="0" />
+            android:defaultValue="128" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/preferences_interface_dock_title">
+        <CheckBoxPreference android:key="ui_dock_divider"
+            android:title="@string/preferences_interface_dock_divider_title"
+            android:summary="@string/preferences_interface_dock_divider_summary"
+            android:defaultValue="true" />
+    </PreferenceCategory>
 </PreferenceScreen>

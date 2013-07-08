@@ -55,6 +55,9 @@ public final class PreferencesProvider {
 
     public static class Interface {
         public static class Homescreen {
+            public static boolean getShowSearchBar() {
+                return getBoolean("ui_homescreen_general_search", true);
+            }
             public static class Scrolling {
                 public static Workspace.TransitionEffect getTransitionEffect(String def) {
                     try {
@@ -87,7 +90,32 @@ public final class PreferencesProvider {
             public static String getHiddenApps() {
                 return getString("ui_drawer_hidden_apps", "");
             }
+            public static class Scrolling {
+                public static AppsCustomizePagedView.TransitionEffect getTransitionEffect(String def) {
+                    try {
+                        return AppsCustomizePagedView.TransitionEffect.valueOf(
+                                getString("ui_drawer_scrolling_transition_effect", def));
+                    } catch (IllegalArgumentException iae) {
+                        // Continue
+                    }
+
+                    try {
+                        return AppsCustomizePagedView.TransitionEffect.valueOf(def);
+                    } catch (IllegalArgumentException iae) {
+                        // Continue
+                    }
+
+                    return AppsCustomizePagedView.TransitionEffect.Standard;
+                }
+            }
         }
+
+        public static class Dock {
+            public static boolean getShowDivider() {
+                return getBoolean("ui_dock_divider", true);
+            }
+        }
+
     }
 
     public static class Application {

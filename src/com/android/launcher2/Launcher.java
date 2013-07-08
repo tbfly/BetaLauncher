@@ -311,6 +311,9 @@ public final class Launcher extends Activity
 
     private HideFromAccessibilityHelper mHideFromAccessibilityHelper
         = new HideFromAccessibilityHelper();
+    // Preferences
+    private boolean mShowSearchBar;
+    private boolean mShowDockDivider;
 
     private Runnable mBuildLayersRunnable = new Runnable() {
         public void run() {
@@ -375,6 +378,9 @@ public final class Launcher extends Activity
         // this also ensures that any synchronous binding below doesn't re-trigger another
         // LauncherModel load.
         mPaused = false;
+        // Preferences
+        mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
+        mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider();
 
         if (PROFILE_STARTUP) {
             android.os.Debug.startMethodTracing(
@@ -962,6 +968,15 @@ public final class Launcher extends Activity
         // Get the search/delete bar
         mSearchDropTargetBar = (SearchDropTargetBar) mDragLayer.findViewById(R.id.qsb_bar);
 
+        // Hide the search divider if we are hiding search bar
+        if (!mShowSearchBar && mQsbDivider != null && getCurrentOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+            mQsbDivider.setVisibility(View.GONE);
+        }
+
+        if (!mShowDockDivider && mDockDivider != null) {
+            mDockDivider.setVisibility(View.GONE);
+        }
+
         // Setup AppsCustomize
         mAppsCustomizeTabHost = (AppsCustomizeTabHost) findViewById(R.id.apps_customize_pane);
         mAppsCustomizeContent = (AppsCustomizePagedView)
@@ -1050,7 +1065,7 @@ public final class Launcher extends Activity
         int[] touchXY = mPendingAddInfo.dropPos;
         CellLayout layout = getCellLayout(container, screen);
 
-        boolean foundCellSpan = false;
+        boolean foundCellSpan;
 
         ShortcutInfo info = mModel.infoFromShortcutIntent(this, data, null);
         if (info == null) {
@@ -1147,7 +1162,7 @@ public final class Launcher extends Activity
         int[] cellXY = mTmpAddItemCellCoordinates;
         int[] touchXY = mPendingAddInfo.dropPos;
         int[] finalSpan = new int[2];
-        boolean foundCellSpan = false;
+        boolean foundCellSpan;
         if (mPendingAddInfo.cellX >= 0 && mPendingAddInfo.cellY >= 0) {
             cellXY[0] = mPendingAddInfo.cellX;
             cellXY[1] = mPendingAddInfo.cellY;
@@ -1546,7 +1561,7 @@ public final class Launcher extends Activity
 
     /**
      * Indicates that we want global search for this activity by setting the globalSearch
-     * argument for {@link #startSearch} to true.
+     * argument for startSearch to true.
      */
     @Override
     public void startSearch(String initialQuery, boolean selectInitialQuery,
@@ -1790,7 +1805,7 @@ public final class Launcher extends Activity
             appWidgetId = getAppWidgetHost().allocateAppWidgetId();
             Bundle options = info.bindOptions;
 
-            boolean success = false;
+            boolean success;
             if (options != null) {
                 success = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
                         info.componentName, options);
@@ -2631,6 +2646,12 @@ public final class Launcher extends Activity
             } else {
                 startAnimRunnable.run();
             }
+            if (mSearchDropTargetBar != null) {
+                mSearchDropTargetBar.hideSearchBar(true);
+            }
+            if (mWorkspace != null) {
+                mWorkspace.hideScrollingIndicator(true);
+            }
             mDockDivider.animate().alpha(0f).setDuration(duration);
             fromView.animate().alpha(0f).setDuration(duration);
             hideHotseat(true);
@@ -2658,6 +2679,12 @@ public final class Launcher extends Activity
             dispatchOnLauncherTransitionPrepare(toView, animated, false);
             dispatchOnLauncherTransitionStart(toView, animated, false);
             dispatchOnLauncherTransitionEnd(toView, animated, false);
+            if (mSearchDropTargetBar != null) {
+                mSearchDropTargetBar.hideSearchBar(false);
+            }
+            if (mWorkspace != null) {
+                mWorkspace.hideScrollingIndicator(false);
+            }
             mDockDivider.setAlpha(0f);
             fromView.setAlpha(0f);
             hideHotseat(false);
@@ -2758,6 +2785,12 @@ public final class Launcher extends Activity
                     mStateAnimation.start();
                 }
             });
+            if (mSearchDropTargetBar != null) {
+                mSearchDropTargetBar.showSearchBar(true);
+            }
+            if (mWorkspace != null) {
+                mWorkspace.showScrollingIndicator(true);
+            }
             mDockDivider.animate().alpha(1f).setDuration(duration);
             toView.animate().alpha(1f).setDuration(duration);
         } else {
@@ -2769,6 +2802,12 @@ public final class Launcher extends Activity
             dispatchOnLauncherTransitionStart(toView, animated, true);
             dispatchOnLauncherTransitionEnd(toView, animated, true);
             mWorkspace.hideScrollingIndicator(false);
+            if (mSearchDropTargetBar != null) {
+                mSearchDropTargetBar.showSearchBar(false);
+            }
+            if (mWorkspace != null) {
+                mWorkspace.showScrollingIndicator(false);
+            }
             mDockDivider.setAlpha(1.0f);
             toView.setAlpha(1.0f);
         }
@@ -2887,15 +2926,23 @@ public final class Launcher extends Activity
 
     void hideDockDivider() {
         if (mQsbDivider != null && mDockDivider != null) {
-            mQsbDivider.setVisibility(View.INVISIBLE);
-            mDockDivider.setVisibility(View.INVISIBLE);
+            if (mShowSearchBar) {
+                mQsbDivider.setVisibility(View.INVISIBLE);
+            }
+            if (mShowDockDivider) {
+                mDockDivider.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
     void showDockDivider(boolean animated) {
         if (mQsbDivider != null && mDockDivider != null) {
-            mQsbDivider.setVisibility(View.VISIBLE);
-            mDockDivider.setVisibility(View.VISIBLE);
+            if (mShowSearchBar) {
+                mQsbDivider.setVisibility(View.VISIBLE);
+            }
+            if (mShowDockDivider) {
+                mDockDivider.setVisibility(View.VISIBLE);
+            }
             if (mDividerAnimator != null) {
                 mDividerAnimator.cancel();
                 mQsbDivider.setAlpha(1f);
@@ -2904,8 +2951,10 @@ public final class Launcher extends Activity
             }
             if (animated) {
                 mDividerAnimator = LauncherAnimUtils.createAnimatorSet();
-                mDividerAnimator.playTogether(LauncherAnimUtils.ofFloat(mQsbDivider, "alpha", 1f),
-                        LauncherAnimUtils.ofFloat(mDockDivider, "alpha", 1f));
+                if (mShowSearchBar && mShowDockDivider) {
+                    mDividerAnimator.playTogether(LauncherAnimUtils.ofFloat(mQsbDivider, "alpha", 1f),
+                            LauncherAnimUtils.ofFloat(mDockDivider, "alpha", 1f));
+                }
                 int duration = 0;
                 if (mSearchDropTargetBar != null) {
                     duration = mSearchDropTargetBar.getTransitionInDuration();
@@ -2972,10 +3021,14 @@ public final class Launcher extends Activity
         }
     }
 
+    public int getCurrentOrientation() {
+        return getResources().getConfiguration().orientation;
+    }
+
     /** Maps the current orientation to an index for referencing orientation correct global icons */
     private int getCurrentOrientationIndexForGlobalIcons() {
         // default - 0, landscape - 1
-        switch (getResources().getConfiguration().orientation) {
+        switch (getCurrentOrientation()) {
         case Configuration.ORIENTATION_LANDSCAPE:
             return 1;
         default:
@@ -3086,7 +3139,7 @@ public final class Launcher extends Activity
         final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         ComponentName activityName = searchManager.getGlobalSearchActivity();
-        if (activityName != null) {
+        if (activityName != null && mShowSearchBar) {
             int coi = getCurrentOrientationIndexForGlobalIcons();
             sGlobalSearchIcon[coi] = updateButtonWithIconFromExternalActivity(
                     R.id.search_button, activityName, R.drawable.ic_home_search_normal_holo,

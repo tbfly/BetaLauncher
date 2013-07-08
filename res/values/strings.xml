@@ -153,6 +153,8 @@ s -->
     <string name="menu_settings">System settings</string>
     <!-- Noun, menu item used to launch the play store -->
     <string name="menu_play_store">Play Store</string>
+    <!-- Noun, menu item used to show the system settings -->
+    <string name="menu_preview">Preview</string>
     <!-- Noun, menu item used to show the launcher preferences -->
     <string name="menu_preferences">Launcher settings</string>
     <!-- Noun, menu item used to show help. [CHAR_LIMIT=none] -->
@@ -257,17 +259,28 @@ s -->
     <!-- UI -->
     <!-- Homescreen -->
     <string name="preferences_interface_homescreen_title">Homescreen</string>
-    <string name="preferences_interface_homescreen_scrolling_category">Scrolling</string>
+    <string name="preferences_interface_homescreen_general_search_title">Search bar</string>
+    <string name="preferences_interface_homescreen_general_search_summary">Enable persistent search bar</string>
+    <string name="preferences_interface_homescreen_general_stretch_screens_title">Stretch screens</string>
+    <string name="preferences_interface_homescreen_general_stretch_screens_summary">Expand homescreens to fill the size of display</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_summary">Scrolling effect when scrolling homescreens</string>
-    <string name="preferences_interface_homescreen_folder_style_category">Folder icon style</string>
     <string name="preferences_interface_homescreen_folder_style_title">Style</string>
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
 
     <!-- Drawer -->
     <string name="preferences_interface_drawer_title">Drawer</string>
+    <string name="preferences_interface_drawer_scrolling_transition_effect_title">Transition effect</string>
+    <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>
     <string name="preferences_interface_drawer_transparency_title">Transparency</string>
     <string name="preferences_interface_drawer_transparency_summary">Set transparency of app drawer background</string>
+
+    <!-- Dock -->
+    <string name="preferences_interface_dock_title">Dock</string>
+    <string name="preferences_interface_dock_enabled_title">Show dock</string>
+    <string name="preferences_interface_dock_enabled_summary">Show the dock underneath the homescreen</string>
+    <string name="preferences_interface_dock_divider_title">Show dock divider</string>
+    <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
 
     <!-- Folder sort types -->
     <string name="menu_folder_sort_none">None</string>

@@ -7,6 +7,8 @@
     <integer name="config_flingToDeleteMinVelocity">-1500</integer>
 
 <!-- AllApps/Customize/AppsCustomize -->
+    <!-- Which default transition effect to use on the AppsCustomize -->
+    <string name="config_drawerDefaultTransitionEffect">Stack</string>
     <!-- The alpha of the AppsCustomize bg in spring loaded mode -->
     <integer name="config_appsCustomizeSpringLoadedBgAlpha">45</integer>
     <integer name="config_workspaceUnshrinkTime">300</integer>
@@ -42,6 +44,8 @@
     <string name="config_workspaceDefaultTransitionEffect">Tablet</string>
     <!-- Whether or not to fade the side pages -->
     <bool name="config_workspaceFadeAdjacentScreens">false</bool>
+    <!-- Whether to show outlines on the screens when scrolling -->
+    <bool name="config_workspaceDefaultShowOutlines">false</bool>
 
     <!-- The transition duration for the background of the drop targets -->
     <integer name="config_dropTargetBgTransitionDuration">0</integer>
@@ -86,4 +90,7 @@
     <integer name="hotseat_all_apps_index">2</integer>
     <!-- must be between 0 and 100 -->
     <integer name="hotseat_item_scale_percentage">100</integer>
+
+    <!-- must be between 0 and 100 -->
+    <integer name="app_icon_scale_percentage">100</integer>
 </resources>

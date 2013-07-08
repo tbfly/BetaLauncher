@@ -298,6 +298,9 @@ public class Workspace extends SmoothPagedView
             mLauncher.getModel().bindRemainingSynchronousPages();
         }
     };
+    // Preferences
+    private boolean mShowSearchBar;
+    private boolean mShowDockDivider;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -392,8 +395,10 @@ public class Workspace extends SmoothPagedView
         LauncherModel.updateWorkspaceLayoutCells(cellCountX, cellCountY);
         setHapticFeedbackEnabled(false);
 
+        mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mTransitionEffect = PreferencesProvider.Interface.Homescreen.Scrolling.getTransitionEffect(
                 res.getString(R.string.config_workspaceDefaultTransitionEffect));
+        mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider();
         initWorkspace();
 
         // Disable multitouch across the workspace/all apps/customize tray
@@ -471,6 +476,12 @@ public class Workspace extends SmoothPagedView
             mBackground = res.getDrawable(R.drawable.apps_customize_bg);
         } catch (Resources.NotFoundException e) {
             // In this case, we will skip drawing background protection
+        }
+
+        if (!mShowSearchBar) {
+            int paddingLeft = (int) res.getDimension(R.dimen.workspace_left_padding_qsb_hidden);
+            int paddingTop = (int) res.getDimension(R.dimen.workspace_top_padding_qsb_hidden);
+            setPadding(paddingLeft, paddingTop, getPaddingRight(), getPaddingBottom());
         }
 
         mWallpaperOffset = new WallpaperOffsetInterpolator();
@@ -1210,7 +1221,7 @@ public class Workspace extends SmoothPagedView
                 mBackgroundFadeOutAnimation = LauncherAnimUtils.ofFloat(startAlpha, finalAlpha);
                 mBackgroundFadeOutAnimation.addUpdateListener(new AnimatorUpdateListener() {
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        setBackgroundAlpha(((Float) animation.getAnimatedValue()).floatValue());
+                        setBackgroundAlpha((Float) animation.getAnimatedValue());
                     }
                 });
                 mBackgroundFadeOutAnimation.setInterpolator(new DecelerateInterpolator(1.5f));
@@ -3444,8 +3455,6 @@ public class Workspace extends SmoothPagedView
         if (mDragMode == DRAG_MODE_CREATE_FOLDER && !userFolderPending) {
             setDragMode(DRAG_MODE_NONE);
         }
-
-        return;
     }
 
     class FolderCreationAlarmListener implements OnAlarmListener {
@@ -3651,7 +3660,7 @@ public class Workspace extends SmoothPagedView
                     animationStyle, finalView, true);
         } else {
             // This is for other drag/drop cases, like dragging from All Apps
-            View view = null;
+            View view;
 
             switch (info.itemType) {
             case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
@@ -4200,10 +4209,10 @@ public class Workspace extends SmoothPagedView
                         if (tag instanceof ShortcutInfo) {
                             final ShortcutInfo info = (ShortcutInfo) tag;
                             final Intent intent = info.intent;
-                            final ComponentName name = intent.getComponent();
 
-                            if (name != null) {
-                                if (packageNames.contains(name.getPackageName())) {
+                            if (intent != null) {
+                                final ComponentName name = intent.getComponent();
+                                if (name != null && packageNames.contains(name.getPackageName())) {
                                     LauncherModel.deleteItemFromDatabase(mLauncher, info);
                                     childrenToRemove.add(view);
                                 }
@@ -4211,12 +4220,10 @@ public class Workspace extends SmoothPagedView
                         } else if (tag instanceof FolderInfo) {
                             final FolderInfo info = (FolderInfo) tag;
                             final ArrayList<ShortcutInfo> contents = info.contents;
-                            final int contentsCount = contents.size();
                             final ArrayList<ShortcutInfo> appsToRemoveFromFolder =
                                     new ArrayList<ShortcutInfo>();
 
-                            for (int k = 0; k < contentsCount; k++) {
-                                final ShortcutInfo appInfo = contents.get(k);
+                            for (final ShortcutInfo appInfo : contents) {
                                 final Intent intent = appInfo.intent;
                                 final ComponentName name = intent.getComponent();
 
@@ -4292,7 +4299,9 @@ public class Workspace extends SmoothPagedView
                                 for (ItemInfo info : shortcuts) {
                                     LauncherModel.deleteItemFromDatabase(context, info);
                                 }
-                            } catch (URISyntaxException e) {}
+                            } catch (URISyntaxException e) {
+                                // Ignore
+                            }
                         }
                     }
                 }
@@ -4316,9 +4325,7 @@ public class Workspace extends SmoothPagedView
                     final ComponentName name = intent.getComponent();
                     if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION &&
                             Intent.ACTION_MAIN.equals(intent.getAction()) && name != null) {
-                        final int appCount = apps.size();
-                        for (int k = 0; k < appCount; k++) {
-                            ApplicationInfo app = apps.get(k);
+                        for (ApplicationInfo app : apps) {
                             if (app.componentName.equals(name)) {
                                 BubbleTextView shortcut = (BubbleTextView) view;
                                 info.updateIcon(mIconCache);
@@ -4373,8 +4380,8 @@ public class Workspace extends SmoothPagedView
         final View scrollIndicator = getScrollingIndicator();
 
         cancelScrollingIndicatorAnimations();
-        if (qsbDivider != null) qsbDivider.setAlpha(reducedFade);
-        if (dockDivider != null) dockDivider.setAlpha(reducedFade);
+        if (qsbDivider != null && mShowSearchBar) qsbDivider.setAlpha(reducedFade);
+        if (dockDivider != null && mShowDockDivider) dockDivider.setAlpha(reducedFade);
         scrollIndicator.setAlpha(1 - fade);
     }
 }
