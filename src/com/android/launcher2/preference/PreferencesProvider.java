@@ -81,6 +81,9 @@ public final class PreferencesProvider {
         }
 
         public static class Drawer {
+            public static int getDrawerTransparency() {
+                return Integer.parseInt(getString("ui_drawer_transparency", "128"));
+            }
             public static String getHiddenApps() {
                 return getString("ui_drawer_hidden_apps", "");
             }

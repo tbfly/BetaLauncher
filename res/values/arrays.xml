@@ -69,4 +69,19 @@
         <item>@drawable/ic_folder_carousel</item>
     </array>
 
+    <string-array name="preferences_interface_drawer_transparency_names">
+        <item>Opaque</item>
+        <item>25%</item>
+        <item>50%</item>
+        <item>75%</item>
+        <item>Transparent</item>
+    </string-array>
+    <string-array name="preferences_interface_drawer_transparency_values" translatable="false">
+        <item>255</item>
+        <item>192</item>
+        <item>128</item>
+        <item>64</item>
+        <item>0</item>
+    </string-array>
+
 </resources>

@@ -37,5 +37,14 @@
             android:entryValues="@array/folder_icon_style_values"
             android:defaultValue="0" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preferences_interface_drawer_title">
+        <ListPreference
+            android:key="ui_drawer_transparency"
+            android:title="@string/preferences_interface_drawer_transparency_title"
+            android:summary="@string/preferences_interface_drawer_transparency_summary"
+            android:entries="@array/preferences_interface_drawer_transparency_names"
+            android:entryValues="@array/preferences_interface_drawer_transparency_values"
+            android:defaultValue="0" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

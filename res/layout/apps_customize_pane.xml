@@ -15,10 +15,10 @@
 -->
 <com.android.launcher2.AppsCustomizeTabHost
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-    android:background="#80000000">
+    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher">
     <LinearLayout
         android:id="@+id/apps_customize_content"
+        android:background="#ff000000"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -72,7 +72,6 @@
                 android:id="@+id/animation_buffer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#80000000"
                 android:visibility="gone" />
 
             <include

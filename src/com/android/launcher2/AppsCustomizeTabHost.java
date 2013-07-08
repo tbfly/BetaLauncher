@@ -22,6 +22,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,6 +35,7 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 import com.android.launcher.R;
+import com.android.launcher2.preference.PreferencesProvider;
 
 import java.util.ArrayList;
 
@@ -104,6 +106,10 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         mAppsCustomizePane = appsCustomizePane;
         mAnimationBuffer = (FrameLayout) findViewById(R.id.animation_buffer);
         mContent = (LinearLayout) findViewById(R.id.apps_customize_content);
+        Drawable background = mContent.getBackground();
+        int alpha = PreferencesProvider.Interface.Drawer.getDrawerTransparency();
+        background.setAlpha(alpha);
+
         if (tabs == null || mAppsCustomizePane == null) throw new Resources.NotFoundException();
 
         // Configure the tabs content factory to return the same paged view (that we change the

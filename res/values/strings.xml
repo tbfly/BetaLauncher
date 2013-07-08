@@ -254,12 +254,20 @@ s -->
     <string name="preferences_title">Preferences</string>
     <string name="icon_theme">Icon theme</string>
 
+    <!-- UI -->
+    <!-- Homescreen -->
+    <string name="preferences_interface_homescreen_title">Homescreen</string>
     <string name="preferences_interface_homescreen_scrolling_category">Scrolling</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_summary">Scrolling effect when scrolling homescreens</string>
     <string name="preferences_interface_homescreen_folder_style_category">Folder icon style</string>
     <string name="preferences_interface_homescreen_folder_style_title">Style</string>
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
+
+    <!-- Drawer -->
+    <string name="preferences_interface_drawer_title">Drawer</string>
+    <string name="preferences_interface_drawer_transparency_title">Transparency</string>
+    <string name="preferences_interface_drawer_transparency_summary">Set transparency of app drawer background</string>
 
     <!-- Folder sort types -->
     <string name="menu_folder_sort_none">None</string>
