@@ -653,7 +653,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 mWidgetCleanupState = WIDGET_INFLATED;
                 hostView.setVisibility(INVISIBLE);
                 int[] unScaledSize = mLauncher.getWorkspace().estimateItemSize(info.spanX,
-                        info.spanY, info, false);
+                        info.spanY, false);
 
                 // We want the first widget layout to be the correct size. This will be important
                 // for width size reporting to the AppWidgetManager.
@@ -751,7 +751,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             int spanX = createItemInfo.spanX;
             int spanY = createItemInfo.spanY;
             int[] size = mLauncher.getWorkspace().estimateItemSize(spanX, spanY,
-                    createWidgetInfo, true);
+                    true);
 
             FastBitmapDrawable previewDrawable = (FastBitmapDrawable) image.getDrawable();
             float minScale = 1.25f;
@@ -770,7 +770,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                             (float) previewDrawable.getIntrinsicHeight()),
                     Matrix.ScaleToFit.START);
             m.getValues(mv);
-            scale = (float) mv[0];
+            scale = mv[0];
         } else {
             PendingAddShortcutInfo createShortcutInfo = (PendingAddShortcutInfo) v.getTag();
             Drawable icon = mIconCache.getFullResIcon(createShortcutInfo.shortcutActivityInfo);

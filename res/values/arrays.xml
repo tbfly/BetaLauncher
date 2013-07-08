@@ -19,6 +19,39 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <string-array name="preferences_interface_homescreen_scrolling_transition_effect_entries">
+        <item>Standard</item>
+        <item>Tablet</item>
+        <item>Zoom In</item>
+        <item>Zoom Out</item>
+        <item>Rotate Up</item>
+        <item>Rotate Down</item>
+        <item>Cylinder In</item>
+        <item>Cylinder Out</item>
+        <item>Cube In</item>
+        <item>Cube Out</item>
+        <item>Spin</item>
+        <item>Flip</item>
+        <item>Stack</item>
+        <item>Accordion</item>
+    </string-array>
+    <string-array name="preferences_interface_homescreen_scrolling_transition_effect_values" translatable="false">
+        <item>Standard</item>
+        <item>Tablet</item>
+        <item>ZoomIn</item>
+        <item>ZoomOut</item>
+        <item>RotateUp</item>
+        <item>RotateDown</item>
+        <item>CylinderIn</item>
+        <item>CylinderOut</item>
+        <item>CubeIn</item>
+        <item>CubeOut</item>
+        <item>Spin</item>
+        <item>Flip</item>
+        <item>Stack</item>
+        <item>Accordion</item>
+    </string-array>
+
     <!-- Folder icon options -->
     <string-array name="folder_icon_style_names">
         <item>Stacked</item>

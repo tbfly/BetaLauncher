@@ -55,6 +55,24 @@ public final class PreferencesProvider {
 
     public static class Interface {
         public static class Homescreen {
+            public static class Scrolling {
+                public static Workspace.TransitionEffect getTransitionEffect(String def) {
+                    try {
+                        return Workspace.TransitionEffect.valueOf(
+                                getString("ui_homescreen_scrolling_transition_effect", def));
+                    } catch (IllegalArgumentException iae) {
+                        // Continue
+                    }
+
+                    try {
+                        return Workspace.TransitionEffect.valueOf(def);
+                    } catch (IllegalArgumentException iae) {
+                        // Continue
+                    }
+
+                    return Workspace.TransitionEffect.Standard;
+                }
+            }
             public static class FolderIconStyle {
                 public static int getFolderIconStyle(Context context) {
                     return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));

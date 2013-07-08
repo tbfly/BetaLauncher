@@ -2393,9 +2393,9 @@ public final class Launcher extends Activity
     /**
      * Helper method for the cameraZoomIn/cameraZoomOut animations
      * @param view The view being animated
-     * @param scaleFactor The scale factor used for the zoom
+     *
      */
-    private void setPivotsForZoom(View view, float scaleFactor) {
+    private void setPivotsForZoom(View view) {
         view.setPivotX(view.getWidth() / 2.0f);
         view.setPivotY(view.getHeight() / 2.0f);
     }
@@ -2501,7 +2501,7 @@ public final class Launcher extends Activity
         final int startDelay =
                 res.getInteger(R.integer.config_workspaceAppsCustomizeAnimationStagger);
 
-        setPivotsForZoom(toView, scale);
+        setPivotsForZoom(toView);
 
         // Shrink workspaces away if going to AppsCustomize from workspace
         Animator workspaceAnim =
@@ -2586,7 +2586,7 @@ public final class Launcher extends Activity
 
             // If any of the objects being animated haven't been measured/laid out
             // yet, delay the animation until we get a layout pass
-            if ((((LauncherTransitionable) toView).getContent().getMeasuredWidth() == 0) ||
+            if ((toView.getContent().getMeasuredWidth() == 0) ||
                     (mWorkspace.getMeasuredWidth() == 0) ||
                     (toView.getMeasuredWidth() == 0)) {
                 observer = mWorkspace.getViewTreeObserver();
@@ -2602,7 +2602,7 @@ public final class Launcher extends Activity
                     // we waited for a layout/draw pass
                     if (mStateAnimation != stateAnimation)
                         return;
-                    setPivotsForZoom(toView, scale);
+                    setPivotsForZoom(toView);
                     dispatchOnLauncherTransitionStart(fromView, animated, false);
                     dispatchOnLauncherTransitionStart(toView, animated, false);
                     toView.post(new Runnable() {
@@ -2670,7 +2670,7 @@ public final class Launcher extends Activity
      * @param animated If true, the transition will be animated.
      */
     private void hideAppsCustomizeHelper(State toState, final boolean animated,
-            final boolean springLoaded, final Runnable onCompleteRunnable) {
+            final Runnable onCompleteRunnable) {
 
         if (mStateAnimation != null) {
             mStateAnimation.cancel();
@@ -2696,7 +2696,7 @@ public final class Launcher extends Activity
                     Workspace.State.SPRING_LOADED, animated);
         }
 
-        setPivotsForZoom(fromView, scaleFactor);
+        setPivotsForZoom(fromView);
         updateWallpaperVisibility();
         showHotseat(animated);
         if (animated) {
@@ -2795,7 +2795,7 @@ public final class Launcher extends Activity
         if (mState != State.WORKSPACE) {
             boolean wasInSpringLoadedMode = (mState == State.APPS_CUSTOMIZE_SPRING_LOADED);
             mWorkspace.setVisibility(View.VISIBLE);
-            hideAppsCustomizeHelper(State.WORKSPACE, animated, false, onCompleteRunnable);
+            hideAppsCustomizeHelper(State.WORKSPACE, animated, onCompleteRunnable);
 
             // Show the search bar (only animate if we were showing the drop target bar in spring
             // loaded mode)
@@ -2847,7 +2847,7 @@ public final class Launcher extends Activity
 
     void enterSpringLoadedDragMode() {
         if (isAllAppsVisible()) {
-            hideAppsCustomizeHelper(State.APPS_CUSTOMIZE_SPRING_LOADED, true, true, null);
+            hideAppsCustomizeHelper(State.APPS_CUSTOMIZE_SPRING_LOADED, true, null);
             hideDockDivider();
             mState = State.APPS_CUSTOMIZE_SPRING_LOADED;
         }
@@ -3116,7 +3116,7 @@ public final class Launcher extends Activity
 
     private void updateGlobalSearchIcon(Drawable.ConstantState d) {
         final View searchButtonContainer = findViewById(R.id.search_button_container);
-        final View searchButton = (ImageView) findViewById(R.id.search_button);
+        final View searchButton = findViewById(R.id.search_button);
         updateButtonWithDrawable(R.id.search_button, d);
         invalidatePressedFocusedStates(searchButtonContainer, searchButton);
     }
@@ -3410,8 +3410,8 @@ public final class Launcher extends Activity
 
         // If we received the result of any pending adds while the loader was running (e.g. the
         // widget configuration forced an orientation change), process them now.
-        for (int i = 0; i < sPendingAddList.size(); i++) {
-            completeAdd(sPendingAddList.get(i));
+        for (PendingAddArguments pendingAdd : sPendingAddList) {
+            completeAdd(pendingAdd);
         }
         sPendingAddList.clear();
 
@@ -3606,7 +3606,7 @@ public final class Launcher extends Activity
         }
 
         // Notify the drag controller
-        mDragController.onAppsRemoved(packageNames, this);
+        mDragController.onAppsRemoved(packageNames);
     }
 
     /**
@@ -3711,8 +3711,8 @@ public final class Launcher extends Activity
         super.dump(prefix, fd, writer, args);
         writer.println(" ");
         writer.println("Debug logs: ");
-        for (int i = 0; i < sDumpLogs.size(); i++) {
-            writer.println("  " + sDumpLogs.get(i));
+        for (String dumpLog : sDumpLogs) {
+            writer.println("  " + dumpLog);
         }
     }
 
@@ -3720,8 +3720,8 @@ public final class Launcher extends Activity
         Log.d(TAG, "");
         Log.d(TAG, "*********************");
         Log.d(TAG, "Launcher debug logs: ");
-        for (int i = 0; i < sDumpLogs.size(); i++) {
-            Log.d(TAG, "  " + sDumpLogs.get(i));
+        for (String dumpLog : sDumpLogs) {
+            Log.d(TAG, "  " + dumpLog);
         }
         Log.d(TAG, "*********************");
         Log.d(TAG, "");

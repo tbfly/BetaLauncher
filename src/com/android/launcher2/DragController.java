@@ -326,7 +326,7 @@ public class DragController {
         }
         endDrag();
     }
-    public void onAppsRemoved(ArrayList<String> packageNames, Context context) {
+    public void onAppsRemoved(ArrayList<String> packageNames) {
         // Cancel the current drag if we are removing an app that we are dragging
         if (mDragObject != null) {
             Object rawDragInfo = mDragObject.dragInfo;
@@ -416,7 +416,7 @@ public class DragController {
         @SuppressWarnings("all") // suppress dead code warning
         final boolean debug = false;
         if (debug) {
-            Log.d(Launcher.TAG, "DragController.onInterceptTouchEvent " + ev + " mDragging="
+            Log.d(TAG, "onInterceptTouchEvent " + ev + " mDragging="
                     + mDragging);
         }
 
@@ -473,7 +473,8 @@ public class DragController {
         if (mScrollState == SCROLL_WAITING_IN_ZONE) {
             mScrollState = SCROLL_OUTSIDE_ZONE;
             mScrollRunnable.setDirection(SCROLL_RIGHT);
-            mDragScroller.onExitScrollArea();
+            if (mDragScroller != null)
+                mDragScroller.onExitScrollArea();
             mLauncher.getDragLayer().onExitScrollArea();
         }
     }
