@@ -188,10 +188,11 @@ public class IconCache {
             Drawable image = ThemeUtils.getDrawable(mContext,iconBackList.get(iconBackListIndex));
             Drawable icon = getFullResIcon(resources, iconId);
             android.util.Log.d("LX", packageName);
-            return createIconDrawable(image, icon);
-        } else {
-            return null;
+            if (image != null && icon != null) {
+                return createIconDrawable(image, icon);
+            }
         }
+        return null;
     }
 
     /*private Drawable createIconDrawable(Drawable background, Drawable icon) {
