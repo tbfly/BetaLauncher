@@ -390,7 +390,16 @@ public class DragLayer extends FrameLayout {
         }
     }
 
-    public void addResizeFrame(LauncherAppWidgetHostView widget, CellLayout cellLayout) {
+    public boolean hasResizeFrames() {
+        return mResizeFrames.size() > 0;
+    }
+
+    public boolean isWidgetBeingResized() {
+        return mCurrentResizeFrame != null;
+    }
+
+    public void addResizeFrame(ItemInfo itemInfo, LauncherAppWidgetHostView widget,
+            CellLayout cellLayout) {
         AppWidgetResizeFrame resizeFrame = new AppWidgetResizeFrame(getContext(),
                 widget, cellLayout, this);
 

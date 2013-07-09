@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.launcher.R;
+import com.android.launcher2.preference.PreferencesProvider;
 
 public class AppWidgetResizeFrame extends FrameLayout {
     private LauncherAppWidgetHostView mWidgetView;
@@ -76,14 +77,14 @@ public class AppWidgetResizeFrame extends FrameLayout {
         mLauncher = (Launcher) context;
         mCellLayout = cellLayout;
         mWidgetView = widgetView;
-        mResizeMode = AppWidgetProviderInfo.RESIZE_BOTH;
+        mResizeMode = widgetView.getAppWidgetInfo().resizeMode;
         mDragLayer = dragLayer;
         mWorkspace = (Workspace) dragLayer.findViewById(R.id.workspace);
 
         final AppWidgetProviderInfo info = widgetView.getAppWidgetInfo();
         int[] result = Launcher.getMinSpanForWidget(mLauncher, info);
-        mMinHSpan = 1;
-        mMinVSpan = 1;
+        mMinHSpan = result[0];
+        mMinVSpan = result[1];
 
         setBackgroundResource(R.drawable.widget_resize_frame_holo);
         setPadding(0, 0, 0, 0);
@@ -120,6 +121,21 @@ public class AppWidgetResizeFrame extends FrameLayout {
         mWidgetPaddingRight = p.right;
         mWidgetPaddingBottom = p.bottom;
 
+        // Resize any widget
+        if (PreferencesProvider.Interface.Homescreen.getResizeAnyWidget()) {
+            mResizeMode = AppWidgetProviderInfo.RESIZE_BOTH;
+            mMinHSpan = 1;
+            mMinVSpan = 1;
+        }
+
+        if (mResizeMode == AppWidgetProviderInfo.RESIZE_HORIZONTAL) {
+            mTopHandle.setVisibility(GONE);
+            mBottomHandle.setVisibility(GONE);
+        } else if (mResizeMode == AppWidgetProviderInfo.RESIZE_VERTICAL) {
+            mLeftHandle.setVisibility(GONE);
+            mRightHandle.setVisibility(GONE);
+        }
+
         final float density = mLauncher.getResources().getDisplayMetrics().density;
         mBackgroundPadding = (int) Math.ceil(density * BACKGROUND_PADDING);
         mTouchTargetWidth = 2 * mBackgroundPadding;
@@ -131,8 +147,8 @@ public class AppWidgetResizeFrame extends FrameLayout {
     }
 
     public boolean beginResizeIfPointInRegion(int x, int y) {
-        boolean horizontalActive = true;
-        boolean verticalActive = true;
+        boolean horizontalActive = (mResizeMode & AppWidgetProviderInfo.RESIZE_HORIZONTAL) != 0;
+        boolean verticalActive = (mResizeMode & AppWidgetProviderInfo.RESIZE_VERTICAL) != 0;
 
         mLeftBorderActive = (x < mTouchTargetWidth) && horizontalActive;
         mRightBorderActive = (x > getWidth() - mTouchTargetWidth) && horizontalActive;
@@ -445,7 +461,13 @@ public class AppWidgetResizeFrame extends FrameLayout {
                 }
             });
             AnimatorSet set = LauncherAnimUtils.createAnimatorSet();
-            set.playTogether(oa, leftOa, rightOa, topOa, bottomOa);
+            if (mResizeMode == AppWidgetProviderInfo.RESIZE_VERTICAL) {
+                set.playTogether(oa, topOa, bottomOa);
+            } else if (mResizeMode == AppWidgetProviderInfo.RESIZE_HORIZONTAL) {
+                set.playTogether(oa, leftOa, rightOa);
+            } else {
+                set.playTogether(oa, leftOa, rightOa, topOa, bottomOa);
+            }
 
             set.setDuration(SNAP_DURATION);
             set.start();

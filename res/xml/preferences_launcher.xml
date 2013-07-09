@@ -52,6 +52,10 @@
             launcher:min="80"
             launcher:max="120"
             launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
+        <CheckBoxPreference android:key="ui_homescreen_general_resize_any_widget"
+            android:title="@string/preferences_interface_homescreen_general_resize_any_widget_title"
+            android:summary="@string/preferences_interface_homescreen_general_resize_any_widget_summary"
+            android:defaultValue="true" />
         <ListPreference
             android:key="ui_homescreen_folder_style"
             android:title="@string/preferences_interface_homescreen_folder_style_title"

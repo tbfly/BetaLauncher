@@ -326,6 +326,7 @@ public class Workspace extends PagedView
     private boolean mStretchScreens;
     private boolean mShowSearchBar;
     private boolean mShowHotseat;
+    private boolean mResizeAnyWidget;
     private boolean mHideIconLabels;
     private boolean mScrollWallpaper;
     private int mWallpaperSize;
@@ -425,6 +426,7 @@ public class Workspace extends PagedView
 
         mStretchScreens = PreferencesProvider.Interface.Homescreen.getStretchScreens();
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
+        mResizeAnyWidget = PreferencesProvider.Interface.Homescreen.getResizeAnyWidget();
         mShowHotseat = PreferencesProvider.Interface.Dock.getShowDock();
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
         mTransitionEffect = PreferencesProvider.Interface.Homescreen.Scrolling.getTransitionEffect(
@@ -3025,13 +3027,16 @@ public class Workspace extends PagedView
                         // in its final location
 
                         final LauncherAppWidgetHostView hostView = (LauncherAppWidgetHostView) cell;
-                        final Runnable addResizeFrame = new Runnable() {
+                        AppWidgetProviderInfo pinfo = hostView.getAppWidgetInfo();
+                        if (pinfo != null &&
+                                pinfo.resizeMode != AppWidgetProviderInfo.RESIZE_NONE || mResizeAnyWidget) {
+                            final Runnable addResizeFrame = new Runnable() {
                                 public void run() {
                                     DragLayer dragLayer = mLauncher.getDragLayer();
-                                    dragLayer.addResizeFrame(hostView, cellLayout);
+                                    dragLayer.addResizeFrame(info, hostView, cellLayout);
                                 }
-                        };
-                        resizeRunnable = new Runnable() {
+                            };
+                            resizeRunnable = (new Runnable() {
                                 public void run() {
                                     if (!isPageMoving()) {
                                         addResizeFrame.run();
@@ -3039,7 +3044,8 @@ public class Workspace extends PagedView
                                         mDelayedResizeRunnable = addResizeFrame;
                                     }
                                 }
-                        };
+                            });
+                        }
                     }
 
                     LauncherModel.moveItemInDatabase(mLauncher, info, container, screen, lp.cellX,
