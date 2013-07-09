@@ -142,7 +142,8 @@ public final class Launcher extends Activity
     private static final int MENU_GROUP_WALLPAPER = 1;
     private static final int MENU_GROUP_APPDRAWER = 2;
     private static final int MENU_WALLPAPER_SETTINGS = Menu.FIRST + 1;
-    private static final int MENU_PLAY_STORE = MENU_WALLPAPER_SETTINGS + 1;
+    private static final int MENU_LOCK_WORKSPACE = MENU_WALLPAPER_SETTINGS + 1;
+    private static final int MENU_PLAY_STORE = MENU_LOCK_WORKSPACE + 1;
     private static final int MENU_MANAGE_APPS = MENU_PLAY_STORE + 1;
     private static final int MENU_PREVIEWS = MENU_MANAGE_APPS + 1;
     private static final int MENU_PREFERENCES = MENU_PREVIEWS + 1;
@@ -323,6 +324,7 @@ public final class Launcher extends Activity
     private boolean mShowDockDivider;
     private boolean mHideIconLabels;
     private boolean mAutoRotate;
+    private boolean mLockWorkspace;
     private boolean mFullscreenMode;
 
     private boolean mWallpaperVisible;
@@ -402,6 +404,7 @@ public final class Launcher extends Activity
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider() && mShowHotseat;
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
         mAutoRotate = PreferencesProvider.Interface.General.getAutoRotate(getResources().getBoolean(R.bool.allow_rotation));
+        mLockWorkspace = PreferencesProvider.Interface.General.getLockWorkspace(getResources().getBoolean(R.bool.lock_workspace));
         mFullscreenMode = PreferencesProvider.Interface.General.getFullscreenMode();
 
         if (PROFILE_STARTUP) {
@@ -1563,6 +1566,10 @@ public final class Launcher extends Activity
 
             Runnable processIntent = new Runnable() {
                 public void run() {
+                    if (mWorkspace == null) {
+                        // Can be cases where mWorkspace is null, this prevents a NPE
+                        return;
+                    }
                     Folder openFolder = mWorkspace.getOpenFolder();
                     // In all these cases, only animate if we're already on home
                     mWorkspace.exitWidgetResizeMode();
@@ -1578,6 +1585,7 @@ public final class Launcher extends Activity
                                 showPreviewLayout(true);
                             else
                                 mWorkspace.moveToDefaultScreen(true);
+                                mHotseat.moveToDefaultScreen(true);
                         } else
                             showWorkspace(true);
                     } else {
@@ -1618,6 +1626,43 @@ public final class Launcher extends Activity
                 case AllApps:
                     showAllApps(true);
                     break;
+                case RecentApps:
+                    toggleRecentApps();
+                    break;
+                case Search:
+                    onSearchRequested();
+                    break;
+                case VoiceSearch:
+                    launchVoiceSearch();
+                    break;
+                case ExpandNotifications:
+                    mWorkspace.expandStatusBar();
+                    break;
+                case ToggleFullscreen:
+                    toggleFullscreenMode();
+                    break;
+                case DefaultScreen:
+                    mWorkspace.moveToDefaultScreen(true);
+                    break;
+                case ShowPreview:
+                    showPreviewLayout(true);
+                    break;
+                case LockUnlock:
+                    toggleLockWorkspace();
+                    break;
+                case ToggleDock:
+                    toggleHotseat();
+                    mWorkspace.setupHotseatPadding();
+                    break;
+                case QuickSettings:
+                    break;
+                case LauncherSettings:
+                    Intent preferences = new Intent().setClass(this, Preferences.class);
+                    preferences.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    startActivity(preferences);
+                    break;
+                default:
             }
         }
     }
@@ -1853,6 +1898,8 @@ public final class Launcher extends Activity
             .setIcon(R.drawable.ic_launcher_market_holo)
             .setIntent(playStore)
             .setAlphabeticShortcut('M');
+        menu.add(0, MENU_LOCK_WORKSPACE, 0, !mLockWorkspace ? R.string.menu_lock_workspace : R.string.menu_unlock_workspace)
+            .setAlphabeticShortcut('L');
         menu.add(0, MENU_MANAGE_APPS, 0, R.string.menu_manage_apps)
             .setIcon(android.R.drawable.ic_menu_manage)
             .setIntent(manageApps)
@@ -1891,6 +1938,8 @@ public final class Launcher extends Activity
         menu.setGroupVisible(MENU_GROUP_WALLPAPER, !allAppsVisible);
         menu.setGroupVisible(MENU_GROUP_APPDRAWER, allAppsVisible);
 
+        menu.findItem(MENU_LOCK_WORKSPACE).setTitle(!mLockWorkspace ? R.string.menu_lock_workspace : R.string.menu_unlock_workspace);
+
 		// only show the previews option if on the workspace
 		boolean previewsVisible =  mState == State.WORKSPACE;
 		menu.findItem(MENU_PREVIEWS).setVisible(previewsVisible);
@@ -1906,7 +1955,12 @@ public final class Launcher extends Activity
         case MENU_PREVIEWS:
             showPreviewLayout(true);
             return true;
+        case MENU_LOCK_WORKSPACE:
+            mLockWorkspace = !mLockWorkspace;
+            PreferencesProvider.Interface.General.setLockWorkspace(this, mLockWorkspace);
+            return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -2225,6 +2279,7 @@ public final class Launcher extends Activity
                     showPreviewLayout(true);
                     break;
                 case LockUnlock:
+                    toggleLockWorkspace();
                     break;
                 case ToggleDock:
                     toggleHotseat();
@@ -2690,7 +2745,11 @@ public final class Launcher extends Activity
                 showAddDialog(longClickCellInfo);
             } else {
                 if (!(itemUnderLongClick instanceof Folder)) {
-                    // User long pressed on an item
+                    // User long pressed on an item (only if workspace is not locked)
+                    if (mLockWorkspace) {
+                        Toast.makeText(this, getString(R.string.workspace_locked), Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
                     mWorkspace.startDrag(longClickCellInfo);
                 }
             }
@@ -2707,6 +2766,15 @@ public final class Launcher extends Activity
     }
     SearchDropTargetBar getSearchBar() {
         return mSearchDropTargetBar;
+    }
+
+    boolean getLockWorkspace() {
+        return mLockWorkspace;
+    }
+
+    void toggleLockWorkspace() {
+        mLockWorkspace = !mLockWorkspace;
+        PreferencesProvider.Interface.General.setLockWorkspace(this, mLockWorkspace);
     }
 
     /**
@@ -3405,7 +3473,7 @@ public final class Launcher extends Activity
                 if (mHotseat.getAlpha() != 0f) {
                     int duration = 0;
                     if (mSearchDropTargetBar != null) {
-                        duration = mSearchDropTargetBar.getTransitionInDuration();
+                        duration = mSearchDropTargetBar.getTransitionOutDuration();
                     }
                     mHotseat.animate().alpha(0f).setDuration(duration);
                 }

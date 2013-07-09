@@ -254,6 +254,10 @@
     <CheckBoxPreference android:key="ui_general_fullscreen"
         android:title="@string/preferences_interface_general_fullscreen_title"
         android:summary="@string/preferences_interface_general_fullscreen_summary" />
+    <CheckBoxPreference android:key="ui_general_lock_workspace"
+        android:title="@string/preferences_interface_general_lock_workspace_title"
+        android:summary="@string/preferences_interface_general_lock_workspace_summary"
+        android:defaultValue="false" />
         <PreferenceScreen android:title="@string/preferences_interface_homescreen_gestures_title"
                 android:summary="@string/preferences_interface_homescreen_gestures_summary" >
             <ListPreference android:key="ui_homescreen_up_gesture"

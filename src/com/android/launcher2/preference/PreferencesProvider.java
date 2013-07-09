@@ -48,6 +48,14 @@ public final class PreferencesProvider {
                 (Boolean) sKeyValues.get(key) : def;
     }
 
+    private static void setBoolean(Context ctx, String key, boolean value) {
+        SharedPreferences preferences = ctx.getSharedPreferences(PREFERENCES_KEY, 0);
+        Editor editor = preferences.edit();
+        editor.putBoolean(key, value);
+        editor.apply(); // For better performance
+        sKeyValues.put(key, Boolean.valueOf(value));
+    }
+
     private static String getString(String key, String def) {
         return sKeyValues.containsKey(key) && sKeyValues.get(key) instanceof String ?
                 (String) sKeyValues.get(key) : def;
@@ -264,11 +272,8 @@ public final class PreferencesProvider {
             public static boolean getShowDock() {
                 return getBoolean("ui_dock_enabled", true);
             }
-            public static void setShowDock(Context context, boolean value) {
-                final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
-                Editor editor = preferences.edit();
-                editor.putBoolean("ui_dock_enabled", value);
-                editor.commit();
+            public static void setShowDock(Context ctx, boolean value) {
+                setBoolean(ctx, "ui_dock_enabled", value);
             }
             public static int getNumberPages() {
                 return getInt("ui_dock_pages", 1);
@@ -294,14 +299,17 @@ public final class PreferencesProvider {
             public static boolean getAutoRotate(boolean def) {
                 return getBoolean("ui_general_orientation", def);
             }
+            public static boolean getLockWorkspace(boolean def) {
+                return getBoolean("ui_general_lock_workspace", def);
+            }
+            public static void setLockWorkspace(Context ctx, boolean value) {
+                setBoolean(ctx, "ui_general_lock_workspace", value);
+            }
             public static boolean getFullscreenMode() {
                 return getBoolean("ui_general_fullscreen", false);
             }
-            public static void setFullscreenMode(Context context, boolean value) {
-                final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
-                Editor editor = preferences.edit();
-                editor.putBoolean("ui_general_fullscreen", value);
-                editor.commit();
+            public static void setFullscreenMode(Context ctx, boolean value) {
+                setBoolean(ctx, "ui_general_fullscreen", value);
             }
         }
     }

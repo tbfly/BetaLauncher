@@ -4790,7 +4790,7 @@ public class Workspace extends PagedView
             disableScrollingIndicator();
             mLauncher.showPreviewLayout(true);
         } else if (gestureAction.equals("lock_unlock")) {
-            // Not done
+            mLauncher.toggleLockWorkspace();
         } else if (gestureAction.equals("toggle_dock")) {
             mLauncher.toggleHotseat();
             setupHotseatPadding();
