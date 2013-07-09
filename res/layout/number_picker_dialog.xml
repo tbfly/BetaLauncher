@@ -13,8 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.launcher2.Hotseat
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-    launcher:cellCount="@integer/hotseat_cell_count"
-    android:background="@drawable/hotseat_background_landscape" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <NumberPicker
+        android:id="@+id/number_picker"
+        android:layout_centerInParent="true"
+        android:layout_width="100dip"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

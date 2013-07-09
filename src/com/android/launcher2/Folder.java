@@ -121,8 +121,6 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
     private float mIconScale = 1.0f;
 
-    private Context mContext;
-
     /**
      * Used to inflate the Workspace from XML.
      *
@@ -131,7 +129,6 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
      */
     public Folder(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
         setAlwaysDrawnWithCacheEnabled(false);
         mInflater = LayoutInflater.from(context);
         mIconCache = ((LauncherApplication)context.getApplicationContext()).getIconCache();
@@ -191,6 +188,10 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mFolderName.setInputType(mFolderName.getInputType() |
                 InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 
+        if (PreferencesProvider.Interface.Homescreen.getHideIconLabels()){
+            mFolderName.setVisibility(View.GONE);
+        }
+
         View iv = findViewById(R.id.btn_sort);
         iv.setOnClickListener(new OnClickListener() {
             @Override
@@ -201,7 +202,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     }
 
     private void showPopup(View v) {
-        PopupMenu popup = new PopupMenu(mContext, v);
+        PopupMenu popup = new PopupMenu(getContext(), v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.folder_sorting, popup.getMenu());
         popup.setOnMenuItemClickListener(mMenuItemClickListener);
@@ -316,7 +317,9 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         // Convert to a string here to ensure that no other state associated with the text field
         // gets saved.
         String newTitle = mFolderName.getText().toString();
-        mInfo.setTitle(newTitle);
+        if (!PreferencesProvider.Interface.Homescreen.getHideIconLabels()) {
+            mInfo.setTitle(newTitle);
+        }
         LauncherModel.updateItemInDatabase(mLauncher, mInfo);
 
         if (commit) {

@@ -73,6 +73,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
             };
 
         // Preferences
+        mJoinWidgetsApps = PreferencesProvider.Interface.Drawer.getJoinWidgetsApps();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
     }
 
@@ -94,6 +95,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
     }
     void selectWidgetsTab() {
         setContentTypeImmediate(AppsCustomizePagedView.ContentType.Widgets);
+        mAppsCustomizePane.setCurrentPageToWidgets();
     }
 
     /**
@@ -134,6 +136,14 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         tabView = (TextView) mLayoutInflater.inflate(R.layout.tab_widget_indicator, tabs, false);
         tabView.setText(label);
         tabView.setContentDescription(label);
+        if (getContext() instanceof Launcher) {
+            tabView.setOnLongClickListener(new View.OnLongClickListener() {
+                    public boolean onLongClick(View v) {
+                        ((Launcher) getContext()).onLongClickAppsTab(v);
+                        return true;
+                    }
+            });
+        }
         addTab(newTabSpec(APPS_TAB_TAG).setIndicator(tabView).setContent(contentFactory));
         label = getContext().getString(R.string.widgets_tab_label);
         tabView = (TextView) mLayoutInflater.inflate(R.layout.tab_widget_indicator, tabs, false);
@@ -214,17 +224,19 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
     public void onTabChanged(String tabId) {
         final AppsCustomizePagedView.ContentType type = getContentTypeForTabTag(tabId);
 
-        // Animate the changing of the tab content by fading pages in and out
-        final Resources res = getResources();
-        final int duration = res.getInteger(R.integer.config_tabTransitionDuration);
+        if (!mAppsCustomizePane.isContentType(type) || mJoinWidgetsApps) {
 
-        // We post a runnable here because there is a delay while the first page is loading and
-        // the feedback from having changed the tab almost feels better than having it stick
-        post(new Runnable() {
-            @Override
-            public void run() {
+            // Animate the changing of the tab content by fading pages in and out
+            final Resources res = getResources();
+            final int duration = res.getInteger(R.integer.config_tabTransitionDuration);
+
+            // We post a runnable here because there is a delay while the first page is loading and
+            // the feedback from having changed the tab almost feels better than having it stick
+            post(new Runnable() {
+                @Override
+                public void run() {
                 if (mAppsCustomizePane.getMeasuredWidth() <= 0 ||
-                        mAppsCustomizePane.getMeasuredHeight() <= 0) {
+                    mAppsCustomizePane.getMeasuredHeight() <= 0) {
                     reloadCurrentPage();
                     return;
                 }
@@ -265,7 +277,6 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
                             child.getMeasuredHeight());
                     p.setMargins(child.getLeft(), child.getTop(), 0, 0);
                     mAnimationBuffer.addView(child, p);
-                }
 
                 // Toggle the new content
                 onTabChangedStart();
@@ -292,17 +303,13 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
                         reloadCurrentPage();
                     }
                 });
-
-                final AnimatorSet animSet = LauncherAnimUtils.createAnimatorSet();
+                AnimatorSet animSet = LauncherAnimUtils.createAnimatorSet();
                 animSet.playTogether(outAnim, inAnim);
                 animSet.setDuration(duration);
-                post(new Runnable() {
-                    public void run() {
-                        animSet.start();
-                    }
-                });
-            }
+                animSet.start();
+            }}
         });
+	}
     }
 
     public void setCurrentTabFromContent(AppsCustomizePagedView.ContentType type) {
@@ -428,6 +435,9 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         }
 
         if (!toWorkspace) {
+            // Going from Workspace -> All Apps
+            setVisibilityOfSiblingsWithLowerZOrder(INVISIBLE);
+
             // Make sure adjacent pages are loaded (we wait until after the transition to
             // prevent slowing down the animation)
             mAppsCustomizePane.loadAssociatedPages(mAppsCustomizePane.getCurrentPage());
@@ -435,11 +445,6 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
             if (!LauncherApplication.isScreenLarge() && mFadeScrollingIndicator) {
                 mAppsCustomizePane.hideScrollingIndicator(false);
             }
-
-            // Going from Workspace -> All Apps
-            // NOTE: We should do this at the end since we check visibility state in some of the
-            // initialization/dismiss code above.
-            setVisibilityOfSiblingsWithLowerZOrder(INVISIBLE);
         }
     }
 

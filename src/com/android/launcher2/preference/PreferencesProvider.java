@@ -124,6 +124,9 @@ public final class PreferencesProvider {
                 public static boolean getWallpaperHack(boolean def) {
                     return getBoolean("ui_homescreen_scrolling_wallpaper_hack", def);
                 }
+                public static int getWallpaperSize() {
+                    return getInt("ui_homescreen_scrolling_wallpaper_size", 2);
+                }
                 public static boolean getFadeInAdjacentScreens(boolean def) {
                     return getBoolean("ui_homescreen_scrolling_fade_adjacent_screens", def);
                 }
@@ -208,6 +211,12 @@ public final class PreferencesProvider {
             public static int getDrawerTransparency() {
                 return Integer.parseInt(getString("ui_drawer_transparency", "50"));
             }
+            public static boolean getVertical() {
+                return getString("ui_drawer_orientation", "horizontal").equals("vertical");
+            }
+            public static boolean getJoinWidgetsApps() {
+                return getBoolean("ui_drawer_widgets_join_apps", true);
+            }
             public static String getHiddenApps() {
                 return getString("ui_drawer_hidden_apps", "");
             }
@@ -249,6 +258,12 @@ public final class PreferencesProvider {
         }
 
         public static class Dock {
+            public static int getNumberPages() {
+                return getInt("ui_dock_pages", 1);
+            }
+            public static int getDefaultPage(int def) {
+                return getInt("ui_dock_default_page", def + 1) - 1;
+            }
             public static int getNumberIcons(int def) {
                 return getInt("ui_dock_icons", def);
             }

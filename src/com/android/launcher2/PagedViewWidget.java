@@ -135,7 +135,7 @@ public class PagedViewWidget extends LinearLayout {
         return maxSize;
     }
 
-    void applyPreview(FastBitmapDrawable preview, int index) {
+    void applyPreview(FastBitmapDrawable preview) {
         final PagedViewWidgetImageView image =
             (PagedViewWidgetImageView) findViewById(R.id.widget_preview);
         if (preview != null) {

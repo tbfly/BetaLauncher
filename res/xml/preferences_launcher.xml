@@ -65,6 +65,12 @@
             android:title="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_summary"
             android:defaultValue="true" />
+        <com.android.launcher2.preference.NumberPickerPreference android:key="ui_homescreen_scrolling_wallpaper_size"
+            android:title="@string/preferences_interface_homescreen_scrolling_wallpaper_size_title"
+            android:summary="@string/preferences_interface_homescreen_scrolling_wallpaper_size_summary"
+            android:defaultValue="2"
+            launcher:max="5"
+            launcher:min="2" />
         <CheckBoxPreference android:key="ui_homescreen_scrolling_wallpaper_hack"
             android:title="@string/preferences_interface_homescreen_scrolling_wallpaper_hack_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_wallpaper_hack_summary"
@@ -144,6 +150,10 @@
             launcher:min="0"
             launcher:max="100"
             android:defaultValue="50" />
+        <CheckBoxPreference android:key="ui_drawer_widgets_join_apps"
+            android:title="@string/preferences_interface_drawer_widgets_join_apps_title"
+            android:summary="@string/preferences_interface_drawer_widgets_join_apps_summary"
+            android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_drawer_scrolling_category">
         <ListPreference android:key="ui_drawer_scrolling_transition_effect"
@@ -152,6 +162,12 @@
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
+        <ListPreference android:key="ui_drawer_orientation"
+            android:title="@string/preferences_interface_drawer_orientation_title"
+            android:summary="@string/preferences_interface_drawer_orientation_summary"
+            android:entries="@array/preferences_interface_drawer_orientation_entries"
+            android:entryValues="@array/preferences_interface_drawer_orientation_values"
+            android:defaultValue="horizontal" />
         <CheckBoxPreference android:key="ui_drawer_scrolling_fade_adjacent_screens"
             android:title="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_title"
             android:summary="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_summary" />
@@ -178,6 +194,20 @@
 
     <PreferenceScreen android:title="@string/preferences_interface_dock_title"
         android:summary="@string/preferences_interface_dock_summary" >
+    <com.android.launcher2.preference.NumberPickerPreference android:key="ui_dock_pages"
+        android:title="@string/preferences_interface_dock_pages_title"
+        android:summary="@string/preferences_interface_dock_pages_summary"
+        android:defaultValue="1"
+        launcher:max="5"
+        launcher:min="1" />
+        <!-- android:dependency="ui_dock_enabled" /-->
+    <com.android.launcher2.preference.NumberPickerPreference android:key="ui_dock_default_page"
+        android:title="@string/preferences_interface_dock_default_page_title"
+        android:summary="@string/preferences_interface_dock_default_page_summary"
+        android:defaultValue="1"
+        launcher:maxExternal="ui_dock_pages"
+        launcher:max="5"
+        launcher:min="1" />
     <PreferenceCategory android:title="@string/preferences_interface_dock_category_title">
         <CheckBoxPreference android:key="ui_dock_background"
             android:title="@string/preferences_interface_dock_background_title"

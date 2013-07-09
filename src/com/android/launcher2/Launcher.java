@@ -236,7 +236,6 @@ public final class Launcher extends Activity
     private FolderInfo mFolderInfo;
 
     private Hotseat mHotseat;
-    private View mAllAppsButton;
 
     private SearchDropTargetBar mSearchDropTargetBar;
     private AppsCustomizeTabHost mAppsCustomizeTabHost;
@@ -260,8 +259,6 @@ public final class Launcher extends Activity
 
     // Keep track of whether the user has left launcher
     private static boolean sPausedFromUserAction = false;
-
-    private Bundle mSavedInstanceState;
 
     private LauncherModel mModel;
     private IconCache mIconCache;
@@ -929,9 +926,6 @@ public final class Launcher extends Activity
 
         // Setup the hotseat
         mHotseat = (Hotseat) findViewById(R.id.hotseat);
-        if (mHotseat != null) {
-            mHotseat.setup(this);
-        }
 
         // Setup the workspace
         mWorkspace.setHapticFeedbackEnabled(false);
@@ -1051,7 +1045,7 @@ public final class Launcher extends Activity
             info.setActivity(data.getComponent(), Intent.FLAG_ACTIVITY_NEW_TASK |
                     Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             info.container = ItemInfo.NO_ID;
-            mWorkspace.addApplicationShortcut(info, layout, container, screen, cellXY[0], cellXY[1],
+            mWorkspace.addApplicationShortcut(info, layout, container, screen,
                     isWorkspaceLocked(), cellX, cellY);
         } else {
             Log.e(TAG, "Couldn't find ActivityInfo for selected application: " + data);
@@ -1172,7 +1166,7 @@ public final class Launcher extends Activity
             }
             DragObject dragObject = new DragObject();
             dragObject.dragInfo = info;
-            if (mWorkspace.addToExistingFolderIfNecessary(view, layout, cellXY, 0, dragObject,
+            if (mWorkspace.addToExistingFolderIfNecessary(layout, cellXY, 0, dragObject,
                     true)) {
                 return;
             }
@@ -2057,43 +2051,46 @@ public final class Launcher extends Activity
 
         Object tag = v.getTag();
         if (tag instanceof ShortcutInfo) {
-            // Open shortcut
-            final Intent intent = ((ShortcutInfo) tag).intent;
-            int[] pos = new int[2];
-            v.getLocationOnScreen(pos);
-            intent.setSourceBounds(new Rect(pos[0], pos[1],
-                    pos[0] + v.getWidth(), pos[1] + v.getHeight()));
+            if (((ShortcutInfo) tag).itemType == LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS) {
+                showAllApps(true);
+            } else {
+                // Open shortcut
+                final Intent intent = ((ShortcutInfo) tag).intent;
+                int[] pos = new int[2];
+                v.getLocationOnScreen(pos);
+                intent.setSourceBounds(new Rect(pos[0], pos[1],
+                        pos[0] + v.getWidth(), pos[1] + v.getHeight()));
 
-            boolean success = startActivitySafely(v, intent, tag);
+                boolean success = startActivitySafely(v, intent, tag);
 
-	        if (success) {
-    	        ((ItemInfo)tag).launchCount++;
-        	    LauncherModel.updateItemInDatabase(this, (ItemInfo)tag);
-            }
+	            if (success) {
+    	            ((ItemInfo)tag).launchCount++;
+        	        LauncherModel.updateItemInDatabase(this, (ItemInfo)tag);
+            	}
 
-            if (success && v instanceof BubbleTextView) {
-                mWaitingForResume = (BubbleTextView) v;
-                mWaitingForResume.setStayPressed(true);
+                if (success && v instanceof BubbleTextView) {
+                    mWaitingForResume = (BubbleTextView) v;
+                    mWaitingForResume.setStayPressed(true);
+                }
             }
         } else if (tag instanceof FolderInfo) {
             if (v instanceof FolderIcon) {
                 FolderIcon fi = (FolderIcon) v;
                 handleFolderClick(fi);
             }
-        } else if (v == mAllAppsButton) {
-            if (isAllAppsVisible()) {
-                showWorkspace(true);
-            } else {
-                onClickAllAppsButton(v);
-            }
         }
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        // this is an intercepted event being forwarded from mWorkspace;
-        // clicking anywhere on the workspace causes the customization drawer to slide down
-        showWorkspace(true);
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            Object tag = v.getTag();
+            if (tag instanceof ShortcutInfo &&
+                    ((ShortcutInfo)tag).itemType == LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS) {
+               v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+            }
+        }
         return false;
     }
 
@@ -2133,19 +2130,40 @@ public final class Launcher extends Activity
         }
     }
 
-    /**
-     * Event handler for the "grid" button that appears on the home screen, which
-     * enters all apps mode.
-     *
-     * @param v The view that was clicked.
-     */
-    public void onClickAllAppsButton(View v) {
-        showAllApps(true);
-    }
-
-    public void onTouchDownAllAppsButton(View v) {
-        // Provide the same haptic feedback that the system offers for virtual keys.
-        v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    public void onLongClickAppsTab(View v) {
+        final PopupMenu popupMenu = new PopupMenu(this, v);
+        final Menu menu = popupMenu.getMenu();
+        popupMenu.inflate(R.menu.apps_tab);
+        AppsCustomizePagedView.SortMode sortMode = mAppsCustomizeContent.getSortMode();
+        if (sortMode == AppsCustomizePagedView.SortMode.Title) {
+            menu.findItem(R.id.apps_sort_title).setChecked(true);
+        } else if (sortMode == AppsCustomizePagedView.SortMode.InstallDate) {
+            menu.findItem(R.id.apps_sort_install_date).setChecked(true);
+        }
+        boolean showSystemApps = mAppsCustomizeContent.getShowSystemApps();
+        boolean showDownloadedApps = mAppsCustomizeContent.getShowDownloadedApps();
+        menu.findItem(R.id.apps_filter_system).setChecked(showSystemApps).setEnabled(showDownloadedApps);
+        menu.findItem(R.id.apps_filter_downloaded).setChecked(showDownloadedApps).setEnabled(showSystemApps);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.apps_sort_title:
+                            mAppsCustomizeContent.setSortMode(AppsCustomizePagedView.SortMode.Title);
+                            break;
+                        case R.id.apps_sort_install_date:
+                            mAppsCustomizeContent.setSortMode(AppsCustomizePagedView.SortMode.InstallDate);
+                            break;
+                        case R.id.apps_filter_system:
+                            mAppsCustomizeContent.setShowSystemApps(!item.isChecked());
+                            break;
+                        case R.id.apps_filter_downloaded:
+                            mAppsCustomizeContent.setShowDownloadedApps(!item.isChecked());
+                            break;
+                    }
+                    return true;
+                }
+        });
+        popupMenu.show();
     }
 
     public void onClickOverflowMenuButton(View v) {
@@ -2486,7 +2504,7 @@ public final class Launcher extends Activity
 
     boolean isHotseatLayout(View layout) {
         return mHotseat != null && layout != null &&
-                (layout instanceof CellLayout) && (layout == mHotseat.getLayout());
+                (layout instanceof CellLayout) && mHotseat.hasPage(layout);
     }
     Hotseat getHotseat() {
         return mHotseat;
@@ -2501,7 +2519,7 @@ public final class Launcher extends Activity
     CellLayout getCellLayout(long container, int screen) {
         if (container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
             if (mHotseat != null) {
-                return mHotseat.getLayout();
+                return (CellLayout) mHotseat.getPageAt(screen);
             } else {
                 return null;
             }
@@ -2517,11 +2535,6 @@ public final class Launcher extends Activity
     // Now a part of LauncherModel.Callbacks. Used to reorder loading steps.
     public boolean isAllAppsVisible() {
         return (mState == State.APPS_CUSTOMIZE) || (mOnResumeState == State.APPS_CUSTOMIZE);
-    }
-
-    @Override
-    public boolean isAllAppsButtonRank(int rank) {
-        return mHotseat.isAllAppsButtonRank(rank);
     }
 
     // Now a part of LauncherModel.Callbacks. Used to reorder loading steps.
@@ -3133,16 +3146,6 @@ public final class Launcher extends Activity
         }
     }
 
-    /**
-     * Add an item from all apps or customize onto the given workspace screen.
-     * If layout is null, add to the current screen.
-     */
-    void addExternalItemToScreen(ItemInfo itemInfo, final CellLayout layout) {
-        if (!mWorkspace.addExternalItemToScreen(itemInfo, layout)) {
-            showOutOfSpaceMessage(isHotseatLayout(layout));
-        }
-    }
-
     public int getCurrentOrientation() {
         return getResources().getConfiguration().orientation;
     }
@@ -3482,7 +3485,7 @@ public final class Launcher extends Activity
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                 case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
                     ShortcutInfo info = (ShortcutInfo) item;
-                    String uri = info.intent.toUri(0).toString();
+                    String uri = info.intent != null ? info.intent.toUri(0) : null;
                     View shortcut = createShortcut(info);
                     workspace.addInScreen(shortcut, item.container, item.screen, item.cellX,
                             item.cellY, 1, 1, false);
@@ -3664,7 +3667,7 @@ public final class Launcher extends Activity
                         PropertyValuesHolder.ofFloat("scaleY", 1f));
                 bounceAnim.setDuration(InstallShortcutReceiver.NEW_SHORTCUT_BOUNCE_DURATION);
                 bounceAnim.setStartDelay(i * InstallShortcutReceiver.NEW_SHORTCUT_STAGGER_DELAY);
-                bounceAnim.setInterpolator(new SmoothPagedView.OvershootInterpolator());
+                bounceAnim.setInterpolator(new PagedView.OvershootInterpolator());
                 bounceAnims.add(bounceAnim);
             }
             anim.playTogether(bounceAnims);

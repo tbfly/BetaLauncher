@@ -16,40 +16,30 @@
 
 package com.android.launcher2;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 
+import com.android.launcher.R;
 import com.android.launcher2.preference.PreferencesProvider;
 import com.lennox.utils.ThemeUtils;
 
-import com.android.launcher.R;
+import java.util.Arrays;
 
-public class Hotseat extends FrameLayout {
+public class Hotseat extends PagedView {
     private int mCellCount;
-    @SuppressWarnings("unused")
-    private static final String TAG = "Hotseat";
-
-    private Launcher mLauncher;
-    private CellLayout mContent;
-
-    private int mAllAppsButtonRank;
 
     private boolean mTransposeLayoutWithOrientation;
     private boolean mIsLandscape;
+
+    private float[] mTempCellLayoutCenterCoordinates = new float[2];
+    private Matrix mTempInverseMatrix = new Matrix();
 
     private static final int DEFAULT_CELL_COUNT = 5;
 
@@ -64,12 +54,19 @@ public class Hotseat extends FrameLayout {
     public Hotseat(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
+        mFadeInAdjacentScreens = false;
+        mHandleScrollIndicator = true;
+
+        int hotseatPages = PreferencesProvider.Interface.Dock.getNumberPages();
+        int defaultPage = PreferencesProvider.Interface.Dock.getDefaultPage(hotseatPages / 2);
+
+
+        mCurrentPage = defaultPage;
+
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Hotseat, defStyle, 0);
-        Resources r = context.getResources();
-        mAllAppsButtonRank = r.getInteger(R.integer.hotseat_all_apps_index);
-        mTransposeLayoutWithOrientation = 
-                r.getBoolean(R.bool.hotseat_transpose_layout_with_orientation);
+        mTransposeLayoutWithOrientation =
+                context.getResources().getBoolean(R.bool.hotseat_transpose_layout_with_orientation);
         mIsLandscape = context.getResources().getConfiguration().orientation ==
             Configuration.ORIENTATION_LANDSCAPE;
         mCellCount = a.getInt(R.styleable.Hotseat_cellCount, DEFAULT_CELL_COUNT);
@@ -80,67 +77,125 @@ public class Hotseat extends FrameLayout {
             background.setAlpha(0);
         }
 
-    }
+        LauncherModel.updateHotseatLayoutCells(mCellCount);
 
-    public void setup(Launcher launcher) {
-        mLauncher = launcher;
+        mVertical = hasVerticalHotseat();
+
+
+        float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(
+                getResources().getInteger(R.integer.hotseat_item_scale_percentage)) / 100f;
+
+        LayoutInflater inflater =
+                (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < hotseatPages; i++) {
+            CellLayout cl = (CellLayout) inflater.inflate(R.layout.hotseat_page, null);
+            cl.setChildrenScale(childrenScale);
+            cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1));
+            addView(cl);
+        }
+
+        // No data needed
+        setDataIsReady();
+
         setOnKeyListener(new HotseatIconKeyEventListener());
     }
 
-    CellLayout getLayout() {
-        return mContent;
+    public boolean hasPage(View view) {
+        for (int i = 0; i < getChildCount(); i++) {
+            if (view == getChildAt(i)) {
+                return true;
+            }
+        }
+        return false;
     }
-  
+
     private boolean hasVerticalHotseat() {
         return (mIsLandscape && mTransposeLayoutWithOrientation);
     }
 
     /* Get the orientation invariant order of the item in the hotseat for persistence. */
     int getOrderInHotseat(int x, int y) {
-        return hasVerticalHotseat() ? (mContent.getCountY() - y - 1) : x;
+        return hasVerticalHotseat() ? (mCellCount - y - 1) : x;
     }
     /* Get the orientation specific coordinates given an invariant order in the hotseat. */
     int getCellXFromOrder(int rank) {
         return hasVerticalHotseat() ? 0 : rank;
     }
     int getCellYFromOrder(int rank) {
-        return hasVerticalHotseat() ? (mContent.getCountY() - (rank + 1)) : 0;
+        return hasVerticalHotseat() ? (mCellCount - rank - 1) : 0;
     }
-    public boolean isAllAppsButtonRank(int rank) {
-        return rank == mAllAppsButtonRank;
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mContent = (CellLayout) findViewById(R.id.layout);
-        mContent.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1));
-        mContent.setIsHotseat(true);
-
-        float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(
-                getResources().getInteger(R.integer.hotseat_item_scale_percentage)) / 100f;
-        mContent.setChildrenScale(childrenScale);
-
-        resetLayout();
+    int getScreenFromOrder(int screen) {
+        return hasVerticalHotseat() ? (getChildCount() - screen - 1) : screen;
     }
 
-    void resetLayout() {
-        mContent.removeAllViewsInLayout();
+    /*
+     *
+     * Convert the 2D coordinate xy from the parent View's coordinate space to this CellLayout's
+     * coordinate space. The argument xy is modified with the return result.
+     *
+     * if cachedInverseMatrix is not null, this method will just use that matrix instead of
+     * computing it itself; we use this to avoid redundant matrix inversions in
+     * findMatchingPageForDragOver
+     *
+     */
+    void mapPointFromSelfToChild(View v, float[] xy, Matrix cachedInverseMatrix) {
+        if (cachedInverseMatrix == null) {
+            v.getMatrix().invert(mTempInverseMatrix);
+            cachedInverseMatrix = mTempInverseMatrix;
+        }
+        int scrollX = getScrollX();
+        if (mNextPage != INVALID_PAGE) {
+            scrollX = mScroller.getFinalX();
+        }
+        xy[0] = xy[0] + scrollX - v.getLeft();
+        xy[1] = xy[1] + getScrollY() - v.getTop();
+        cachedInverseMatrix.mapPoints(xy);
+    }
 
-        // Add the Apps button
-        Context context = getContext();
-        LayoutInflater inflater = LayoutInflater.from(context);
-        BubbleTextView allAppsButton = (BubbleTextView)
-                inflater.inflate(R.layout.application, mContent, false);
+    /**
+     * Convert the 2D coordinate xy from this CellLayout's coordinate space to
+     * the parent View's coordinate space. The argument xy is modified with the return result.
+     */
+    void mapPointFromChildToSelf(View v, float[] xy) {
+        v.getMatrix().mapPoints(xy);
+        int scrollX = getScrollX();
+        if (mNextPage != INVALID_PAGE) {
+            scrollX = mScroller.getFinalX();
+        }
+        xy[0] -= (scrollX - v.getLeft());
+        xy[1] -= (getScrollY() - v.getTop());
+    }
 
-        /*ImageView allAppsButton = new ImageView(context);
+    /**
+     * This method returns the CellLayout that is currently being dragged to. In order to drag
+     * to a CellLayout, either the touch point must be directly over the CellLayout, or as a second
+     * strategy, we see if the dragView is overlapping any CellLayout and choose the closest one
+     *
+     * Return null if no CellLayout is currently being dragged over
+     */
+    CellLayout findMatchingPageForDragOver(float originX, float originY, boolean exact) {
+        // We loop through all the screens (ie CellLayouts) and see which ones overlap
+        // with the item being dragged and then choose the one that's closest to the touch point
+        final int screenCount = getChildCount();
+        CellLayout bestMatchingScreen = null;
+        float smallestDistSoFar = Float.MAX_VALUE;
 
-        ActivityManager activityManager =
-                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        int mIconDpi = activityManager.getLauncherLargeIconDensity();*/
+        for (int i = 0; i < screenCount; i++) {
+            CellLayout cl = (CellLayout) getChildAt(i);
 
-        Drawable appDrawerIcon = null;
-        //String[] possibleNames = { "all_apps_button_icon", "ic_allapps", "allapp" };
+            final float[] touchXy = {originX, originY};
+            // Transform the touch coordinates to the CellLayout's local coordinates
+            // If the touch point is within the bounds of the cell layout, we can return immediately
+            cl.getMatrix().invert(mTempInverseMatrix);
+            mapPointFromSelfToChild(cl, touchXy, mTempInverseMatrix);
+
+            if (touchXy[0] >= 0 && touchXy[0] <= cl.getWidth() &&
+                    touchXy[1] >= 0 && touchXy[1] <= cl.getHeight()) {
+                return cl;
+            }
+
+        /*Drawable appDrawerIcon = null;
+        String[] possibleNames = { "all_apps_button_icon", "ic_allapps", "allapp" };
         String[] possibleNames = { "all_apps_button_icon", "ic_allapps" };
         for ( String s : possibleNames ) {
              appDrawerIcon = ThemeUtils.getDrawable(context, s);
@@ -151,15 +206,15 @@ public class Hotseat extends FrameLayout {
         if ( appDrawerIcon == null ) {
             appDrawerIcon  = context.getResources().getDrawable(R.drawable.all_apps_button_icon);
         }
+        
+        Bitmap bitmap = ((BitmapDrawable)appDrawerIcon).getBitmap();
+        int width=96;
+        int height=96;
+        Bitmap resizedbitmap=Bitmap.createScaledBitmap(bitmap, width, height, true);
 
-        //Bitmap bitmap = ((BitmapDrawable)appDrawerIcon).getBitmap();
-        //int width=96;
-        //int height=96;
-        //Bitmap resizedbitmap=Bitmap.createScaledBitmap(bitmap, width, height, true);
+        allAppsButton.setImageDrawable(appDrawerIcon);
 
-        //allAppsButton.setImageDrawable(appDrawerIcon);
-
-        //allAppsButton.setLayoutParams(new ViewGroup.LayoutParams(64,64));*/
+        allAppsButton.setLayoutParams(new ViewGroup.LayoutParams(64,64));
 
         allAppsButton.setCompoundDrawablesWithIntrinsicBounds(null,appDrawerIcon, null, null);
         allAppsButton.setContentDescription(context.getString(R.string.all_apps_button_label));
@@ -172,23 +227,63 @@ public class Hotseat extends FrameLayout {
                 }
                 return false;
             }
-        });
+        });*/
 
-        allAppsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(android.view.View v) {
-                if (mLauncher != null) {
-                    mLauncher.onClickAllAppsButton(v);
+            if (!exact) {
+                // Get the center of the cell layout in screen coordinates
+                final float[] cellLayoutCenter = mTempCellLayoutCenterCoordinates;
+                cellLayoutCenter[0] = cl.getWidth()/2;
+                cellLayoutCenter[1] = cl.getHeight()/2;
+                mapPointFromChildToSelf(cl, cellLayoutCenter);
+
+                touchXy[0] = originX;
+                touchXy[1] = originY;
+
+                // Calculate the distance between the center of the CellLayout
+                // and the touch point
+                float dist = Workspace.squaredDistance(touchXy, cellLayoutCenter);
+
+                if (dist < smallestDistSoFar) {
+                    smallestDistSoFar = dist;
+                    bestMatchingScreen = cl;
                 }
             }
-        });
+        }
+        return bestMatchingScreen;
+    }
 
-        // Note: We do this to ensure that the hotseat is always laid out in the orientation of
-        // the hotseat in order regardless of which orientation they were added
-        int x = getCellXFromOrder(mAllAppsButtonRank);
-        int y = getCellYFromOrder(mAllAppsButtonRank);
-        CellLayout.LayoutParams lp = new CellLayout.LayoutParams(x,y,1,1);
-        lp.canReorder = false;
-        mContent.addViewToCellLayout(allAppsButton, -1, 0, lp, true);
+    public void setChildrenOutlineAlpha(float alpha) {
+        for (int i = 0; i < getChildCount(); i++) {
+            CellLayout cl = (CellLayout) getChildAt(i);
+            cl.setBackgroundAlpha(alpha);
+        }
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        resetLayout();
+    }
+
+    void resetLayout() {
+        for (int i = 0; i < getChildCount(); i++) {
+            CellLayout cl = (CellLayout) getPageAt(i);
+            cl.removeAllViewsInLayout();
+        }
+    }
+
+    @Override
+    public void syncPages() {
+    }
+
+    @Override
+    public void syncPageItems(int page, boolean immediate) {
+    }
+
+    @Override
+    protected void loadAssociatedPages(int page) {
+    }
+    @Override
+    protected void loadAssociatedPages(int page, boolean immediateAndOnly) {
     }
 }

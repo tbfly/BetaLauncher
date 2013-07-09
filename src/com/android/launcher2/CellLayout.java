@@ -22,6 +22,7 @@ import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -53,8 +54,6 @@ import com.android.launcher2.FolderIcon.FolderRingAnimator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -141,8 +140,6 @@ public class CellLayout extends ViewGroup {
     private TimeInterpolator mEaseOutInterpolator;
     private ShortcutAndWidgetContainer mShortcutsAndWidgets;
 
-    private boolean mIsHotseat = false;
-    private float mHotseatScale = 1f;
     private float mChildrenScale = 1f;
 
     public static final int MODE_DRAG_OVER = 0;
@@ -207,9 +204,6 @@ public class CellLayout extends ViewGroup {
         setDrawingCacheEnabled(true);
 
         final Resources res = getResources();
-        mHotseatScale = (res.getInteger(R.integer.hotseat_item_scale_percentage) / 100f);
-        mChildrenScale =  mIsHotseat ? mHotseatScale : 1.0f;
-
         mNormalBackground = res.getDrawable(R.drawable.homescreen_blue_normal_holo);
         mActiveGlowBackground = res.getDrawable(R.drawable.homescreen_blue_strong_holo);
 
@@ -619,25 +613,15 @@ public class CellLayout extends ViewGroup {
         return mCountY;
     }
 
-    public void setIsHotseat(boolean isHotseat) {
-        mIsHotseat = isHotseat;
-    }
-
     public boolean addViewToCellLayout(View child, int index, int childId, LayoutParams params,
             boolean markCells) {
         final LayoutParams lp = params;
 
-        // Hotseat icons - remove text
         if (child instanceof BubbleTextView) {
             BubbleTextView bubbleChild = (BubbleTextView) child;
 
             Resources res = getResources();
-            if (mIsHotseat) {
-                bubbleChild.setTextColor(res.getColor(android.R.color.transparent));
-            } else {
-                bubbleChild.setTextColor(res.getColor(R.color.workspace_icon_text_color));
-            }
-            bubbleChild.setIconScale(getChildrenScale());
+            bubbleChild.setTextColor(res.getColor(R.color.workspace_icon_text_color));
         }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells

@@ -28,16 +28,16 @@ import android.view.ViewGroup;
 
 import com.android.launcher.R;
 
-public class InfoDropTarget extends ButtonDropTarget {
+public class EditDropTarget extends ButtonDropTarget {
 
     private ColorStateList mOriginalTextColor;
     private TransitionDrawable mDrawable;
 
-    public InfoDropTarget(Context context, AttributeSet attrs) {
+    public EditDropTarget(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public InfoDropTarget(Context context, AttributeSet attrs, int defStyle) {
+    public EditDropTarget(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
@@ -49,7 +49,7 @@ public class InfoDropTarget extends ButtonDropTarget {
 
         // Get the hover color
         Resources r = getResources();
-        mHoverColor = r.getColor(R.color.info_target_hover_tint);
+        mHoverColor = r.getColor(R.color.edit_target_hover_tint);
         mDrawable = (TransitionDrawable) getCurrentDrawable();
         mDrawable.setCrossFadeEnabled(true);
 
@@ -63,8 +63,11 @@ public class InfoDropTarget extends ButtonDropTarget {
         }
     }
 
-    private boolean isFromAllApps(DragSource source) {
-        return (source instanceof AppsCustomizePagedView);
+    private boolean isDragSourceWorkspaceOrFolder(DragSource source) {
+        return (source instanceof Workspace) || (source instanceof Folder);
+    }
+    private boolean isWorkspaceOrFolderApplication(DragSource source, Object info) {
+        return isDragSourceWorkspaceOrFolder(source) && (info instanceof ShortcutInfo);
     }
 
     @Override
@@ -72,16 +75,10 @@ public class InfoDropTarget extends ButtonDropTarget {
         // acceptDrop is called just before onDrop. We do the work here, rather than
         // in onDrop, because it allows us to reject the drop (by returning false)
         // so that the object being dragged isn't removed from the drag source.
-        ComponentName componentName = null;
-        if (d.dragInfo instanceof ApplicationInfo) {
-            componentName = ((ApplicationInfo) d.dragInfo).componentName;
-        } else if (d.dragInfo instanceof ShortcutInfo) {
-            componentName = ((ShortcutInfo) d.dragInfo).intent.getComponent();
-        } else if (d.dragInfo instanceof PendingAddItemInfo) {
-            componentName = ((PendingAddItemInfo) d.dragInfo).componentName;
-        }
-        if (componentName != null) {
-            mLauncher.startApplicationDetailsActivity(componentName);
+        if (d.dragInfo instanceof ShortcutInfo) {
+            mLauncher.updateShortcut((ShortcutInfo) d.dragInfo);
+        } else if (d.dragInfo instanceof Folder) {
+            //
         }
 
         // There is no post-drop animation, so clean up the DragView now
@@ -94,7 +91,7 @@ public class InfoDropTarget extends ButtonDropTarget {
         boolean isVisible = true;
 
         // Hide this button unless we are dragging something from AllApps
-        if (!isFromAllApps(source)) {
+        if (!isWorkspaceOrFolderApplication(source, info)) {
             isVisible = false;
         }
 

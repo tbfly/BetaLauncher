@@ -84,16 +84,6 @@ class AsyncTaskPageData {
         LoadWidgetPreviewData
     }
 
-    AsyncTaskPageData(int p, ArrayList<Object> l, ArrayList<Bitmap> si, AsyncTaskCallback bgR,
-            AsyncTaskCallback postR) {
-        page = p;
-        items = l;
-        sourceImages = si;
-        generatedImages = new ArrayList<Bitmap>();
-        maxImageWidth = maxImageHeight = -1;
-        doInBackgroundCallback = bgR;
-        postExecuteCallback = postR;
-    }
     AsyncTaskPageData(int p, ArrayList<Object> l, int cw, int ch, AsyncTaskCallback bgR,
             AsyncTaskCallback postR) {
         page = p;
@@ -137,8 +127,9 @@ class AsyncTaskPageData {
  * A generic template for an async task used in AppsCustomize.
  */
 class AppsCustomizeAsyncTask extends AsyncTask<AsyncTaskPageData, Void, AsyncTaskPageData> {
-    AppsCustomizeAsyncTask(int p, AsyncTaskPageData.Type ty) {
+    AppsCustomizeAsyncTask(int p, AppsCustomizePagedView.ContentType t, AsyncTaskPageData.Type ty) {
         page = p;
+        pageContentType = t;
         threadPriority = Process.THREAD_PRIORITY_DEFAULT;
         dataType = ty;
     }
@@ -165,6 +156,7 @@ class AppsCustomizeAsyncTask extends AsyncTask<AsyncTaskPageData, Void, AsyncTas
     // The page that this async task is associated with
     AsyncTaskPageData.Type dataType;
     int page;
+    AppsCustomizePagedView.ContentType pageContentType;
     int threadPriority;
 }
 
@@ -243,6 +235,19 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         Widgets
     }
 
+    /**
+     * The sorting mode of the apps.
+     */
+    public enum SortMode {
+        Title,
+        InstallDate
+    }
+
+    private int mFilterApps = FILTER_APPS_SYSTEM_FLAG | FILTER_APPS_DOWNLOADED_FLAG;
+
+    private static final int FILTER_APPS_SYSTEM_FLAG = 1;
+    private static final int FILTER_APPS_DOWNLOADED_FLAG = 2;
+
     // Refs
     private Launcher mLauncher;
     private DragController mDragController;
@@ -255,7 +260,10 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     // Content
     private ContentType mContentType;
+    private SortMode mSortMode = SortMode.Title;
     private ArrayList<ApplicationInfo> mApps;
+    private ArrayList<ApplicationInfo> mFilteredApps;
+    private ArrayList<ComponentName> mHiddenApps;
     private ArrayList<Object> mWidgets;
 
     // Caching
@@ -272,8 +280,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     private final int mWidgetPreviewIconPaddedDimension;
     private static final float WIDGET_PREVIEW_ICON_PADDING_PERCENTAGE = 0.25f;
     private PagedViewCellLayout mWidgetSpacingLayout;
-    private int mNumAppsPages;
-    private int mNumWidgetPages;
+    private int mNumAppsPages = 0;
+    private int mNumWidgetPages = 0;
 
     // Relating to the scroll and overscroll effects
     Workspace.ZInterpolator mZInterpolator = new Workspace.ZInterpolator(0.5f);
@@ -341,6 +349,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     PaintCache mCachedAppWidgetPreviewPaint = new PaintCache();
 
     // Preferences
+    private boolean mJoinWidgetsApps;
     private boolean mFadeScrollingIndicator;
     private boolean mWidgetIconStyle;
     private int mScrollingIndicatorPosition;
@@ -354,6 +363,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mPackageManager = context.getPackageManager();
         mContentType = ContentType.Applications;
         mApps = new ArrayList<ApplicationInfo>();
+        mFilteredApps = new ArrayList<ApplicationInfo>();
+        mHiddenApps = new ArrayList<ComponentName>();
         mWidgets = new ArrayList<Object>();
         mIconCache = ((LauncherApplication) context.getApplicationContext()).getIconCache();
         mCanvas = new Canvas();
@@ -366,6 +377,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mCameraDistance = resources.getInteger(R.integer.config_cameraDistance);
 
         // Preferences
+        mJoinWidgetsApps = PreferencesProvider.Interface.Drawer.getJoinWidgetsApps();
+        mVertical = PreferencesProvider.Interface.Drawer.getVertical();
         mTransitionEffect = PreferencesProvider.Interface.Drawer.Scrolling.getTransitionEffect(
                 resources.getString(R.string.config_drawerDefaultTransitionEffect));
         mFadeInAdjacentScreens = PreferencesProvider.Interface.Drawer.Scrolling.getFadeInAdjacentScreens();
@@ -373,6 +386,11 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         boolean showScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getShowScrollingIndicator();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Drawer.Indicator.getScrollingIndicatorPosition();
+
+        String[] flattened = PreferencesProvider.Interface.Drawer.getHiddenApps().split("\\|");
+        for (String flat : flattened) {
+            mHiddenApps.add(ComponentName.unflattenFromString(flat));
+        }
 
 
         if (!showScrollingIndicator) {
@@ -412,7 +430,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     @Override
     protected void init() {
         super.init();
-        mCenterPagesVertically = false;
+        mCenterPages = false;
 
         Context context = getContext();
         Resources r = context.getResources();
@@ -425,22 +443,44 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         int i = -1;
         if (getPageCount() > 0) {
             int currentPage = getCurrentPage();
-            if (currentPage < mNumAppsPages) {
-                PagedViewCellLayout layout = (PagedViewCellLayout) getPageAt(currentPage);
-                PagedViewCellLayoutChildren childrenLayout = layout.getChildrenLayout();
-                int numItemsPerPage = mCellCountX * mCellCountY;
-                int childCount = childrenLayout.getChildCount();
-                if (childCount > 0) {
-                    i = (currentPage * numItemsPerPage) + (childCount / 2);
+            if (mJoinWidgetsApps) {
+                if (currentPage < mNumAppsPages) {
+                    PagedViewCellLayout layout = (PagedViewCellLayout) getPageAt(currentPage);
+                    PagedViewCellLayoutChildren childrenLayout = layout.getChildrenLayout();
+                    int numItemsPerPage = mCellCountX * mCellCountY;
+                    int childCount = childrenLayout.getChildCount();
+                    if (childCount > 0) {
+                        i = (currentPage * numItemsPerPage) + (childCount / 2);
+                    }
+                } else {
+                    int numApps = mFilteredApps.size();
+                    PagedViewGridLayout layout = (PagedViewGridLayout) getPageAt(currentPage);
+                    int numItemsPerPage = mWidgetCountX * mWidgetCountY;
+                    int childCount = layout.getChildCount();
+                    if (childCount > 0) {
+                        i = numApps +
+                            ((currentPage - mNumAppsPages) * numItemsPerPage) + (childCount / 2);
+                    }
                 }
             } else {
-                int numApps = mApps.size();
-                PagedViewGridLayout layout = (PagedViewGridLayout) getPageAt(currentPage);
-                int numItemsPerPage = mWidgetCountX * mWidgetCountY;
-                int childCount = layout.getChildCount();
-                if (childCount > 0) {
-                    i = numApps +
-                        ((currentPage - mNumAppsPages) * numItemsPerPage) + (childCount / 2);
+                switch (mContentType) {
+                case Applications: {
+                     PagedViewCellLayout layout = (PagedViewCellLayout) getPageAt(currentPage);
+                     PagedViewCellLayoutChildren childrenLayout = layout.getChildrenLayout();
+                    int numItemsPerPage = mCellCountX * mCellCountY;
+                    int childCount = childrenLayout.getChildCount();
+                    if (childCount > 0) {
+                        i = (currentPage * numItemsPerPage) + (childCount / 2);
+                    }}
+                    break;
+                case Widgets: {
+                    PagedViewGridLayout layout = (PagedViewGridLayout) getPageAt(currentPage);
+                    int numItemsPerPage = mWidgetCountX * mWidgetCountY;
+                    int childCount = layout.getChildCount();
+                    if (childCount > 0) {
+                        i = (currentPage * numItemsPerPage) + (childCount / 2);
+                    }}
+                    break;
                 }
             }
         }
@@ -458,14 +498,27 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     /** Returns the page in the current orientation which is expected to contain the specified
      *  item index. */
     int getPageForComponent(int index) {
-        if (index < 0) return 0;
+        if (mJoinWidgetsApps) {
+            if (index < 0) return 0;
 
-        if (index < mApps.size()) {
-            int numItemsPerPage = mCellCountX * mCellCountY;
-            return (index / numItemsPerPage);
+            if (index < mFilteredApps.size()) {
+                int numItemsPerPage = mCellCountX * mCellCountY;
+                return (index / numItemsPerPage);
+            } else {
+                int numItemsPerPage = mWidgetCountX * mWidgetCountY;
+                return mNumAppsPages + ((index - mFilteredApps.size()) / numItemsPerPage);
+            }
         } else {
-            int numItemsPerPage = mWidgetCountX * mWidgetCountY;
-            return mNumAppsPages + ((index - mApps.size()) / numItemsPerPage);
+            switch (mContentType) {
+            case Applications: {
+                int numItemsPerPage = mCellCountX * mCellCountY;
+                return (index / numItemsPerPage);
+            }
+            case Widgets: {
+                int numItemsPerPage = mWidgetCountX * mWidgetCountY;
+                return (index / numItemsPerPage);
+            }}
+            return -1;
         }
     }
 
@@ -476,9 +529,11 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     }
 
     private void updatePageCounts() {
-        mNumWidgetPages = (int) Math.ceil(mWidgets.size() /
-                (float) (mWidgetCountX * mWidgetCountY));
-        mNumAppsPages = (int) Math.ceil((float) mApps.size() / (mCellCountX * mCellCountY));
+        if (mJoinWidgetsApps) {
+            mNumWidgetPages = (int) Math.ceil(mWidgets.size() /
+                    (float) (mWidgetCountX * mWidgetCountY));
+            mNumAppsPages = (int) Math.ceil((float) mFilteredApps.size() / (mCellCountX * mCellCountY));
+        }
     }
 
     protected void onDataReady(int width, int height) {
@@ -534,7 +589,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         if (!isDataReady()) {
-            if (!mApps.isEmpty() && !mWidgets.isEmpty()) {
+            boolean isReady;
+            if (mContentType == AppsCustomizePagedView.ContentType.Widgets || mJoinWidgetsApps) {
+                isReady = (!mApps.isEmpty() && !mWidgets.isEmpty());
+            } else {
+                isReady = !mApps.isEmpty();
+            }
+
+            if (isReady) {
                 setDataIsReady();
                 setMeasuredDimension(width, height);
                 onDataReady(width, height);
@@ -634,7 +696,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mLauncher.getWorkspace().beginDragShared(v, this);
     }
 
-    Bundle getDefaultOptionsForWidget(Launcher launcher, PendingAddWidgetInfo info) {
+    Bundle getDefaultOptionsForWidget(PendingAddWidgetInfo info) {
         Bundle options = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             AppWidgetResizeFrame.getWidgetSizeRanges(mLauncher, info.spanX, info.spanY, mTmpRect);
@@ -662,7 +724,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     private void preloadWidget(final PendingAddWidgetInfo info) {
         final AppWidgetProviderInfo pInfo = info.info;
-        final Bundle options = getDefaultOptionsForWidget(mLauncher, info);
+        final Bundle options = getDefaultOptionsForWidget(info);
 
         if (pInfo.configure != null) {
             info.bindOptions = options;
@@ -1032,25 +1094,32 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     }
 
     public void setContentType(ContentType type) {
-        if (type == ContentType.Widgets) {
-            invalidatePageData(mNumAppsPages, true);
-        } else if (type == ContentType.Applications) {
-            invalidatePageData(0, true);
+        if (mJoinWidgetsApps) {
+            if (type == ContentType.Widgets) {
+                invalidatePageData(mNumAppsPages, true);
+            } else if (type == ContentType.Applications) {
+                invalidatePageData(0, true);
+            }
+        } else {
+            mContentType = type;
+            invalidatePageData(0, (type != ContentType.Applications));
         }
     }
 
     protected void snapToPage(int whichPage, int delta, int duration) {
         super.snapToPage(whichPage, delta, duration);
-        updateCurrentTab(whichPage);
+        if (mJoinWidgetsApps) {
+            updateCurrentTab(whichPage);
 
-        // Update the thread priorities given the direction lookahead
-        for (AppsCustomizeAsyncTask task : mRunningTasks) {
-            int pageIndex = task.page;
-            if ((mNextPage > mCurrentPage && pageIndex >= mCurrentPage) ||
-                (mNextPage < mCurrentPage && pageIndex <= mCurrentPage)) {
-                task.setThreadPriority(getThreadPriorityForPage(pageIndex));
-            } else {
-                task.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
+            // Update the thread priorities given the direction lookahead
+            for (AppsCustomizeAsyncTask task : mRunningTasks) {
+                int pageIndex = task.page;
+                if ((mNextPage > mCurrentPage && pageIndex >= mCurrentPage) ||
+                        (mNextPage < mCurrentPage && pageIndex <= mCurrentPage)) {
+                    task.setThreadPriority(getThreadPriorityForPage(pageIndex));
+                } else {
+                    task.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
+                }
             }
         }
     }
@@ -1105,17 +1174,27 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         layout.measure(widthSpec, heightSpec);
         setVisibilityOnChildren(layout, View.VISIBLE);
     }
+    public void syncAppsPages() {
+        // Ensure that we have the right number of pages
+        Context context = getContext();
+        int numPages = (int) Math.ceil((float) mFilteredApps.size() / (mCellCountX * mCellCountY));
 
+        for (int i = 0; i < numPages; ++i) {
+            PagedViewCellLayout layout = new PagedViewCellLayout(context);
+            setupPage(layout);
+            addView(layout);
+        }
+    }
     public void syncAppsPageItems(int page) {
         // ensure that we have the right number of items on the pages
         int numCells = mCellCountX * mCellCountY;
         int startIndex = page * numCells;
-        int endIndex = Math.min(startIndex + numCells, mApps.size());
+        int endIndex = Math.min(startIndex + numCells, mFilteredApps.size());
         PagedViewCellLayout layout = (PagedViewCellLayout) getPageAt(page);
 
         layout.removeAllViewsOnPage();
         for (int i = startIndex; i < endIndex; ++i) {
-            ApplicationInfo info = mApps.get(i);
+            ApplicationInfo info = mFilteredApps.get(i);
             PagedViewIcon icon = (PagedViewIcon) mLayoutInflater.inflate(
                     R.layout.apps_customize_application, layout, false);
             icon.applyFromApplicationInfo(info, mIconScale, true, this);
@@ -1179,7 +1258,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
      * Creates and executes a new AsyncTask to load a page of widget previews.
      */
     private void prepareLoadWidgetPreviewsTask(int page, ArrayList<Object> widgets,
-            int cellWidth, int cellHeight, int cellCountX) {
+            int cellWidth, int cellHeight) {
 
         // Prune all tasks that are no longer needed
         Iterator<AppsCustomizeAsyncTask> iter = mRunningTasks.iterator();
@@ -1220,13 +1299,17 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 public void run(AppsCustomizeAsyncTask task, AsyncTaskPageData data) {
                     mRunningTasks.remove(task);
                     if (task.isCancelled()) return;
+                    if (!mJoinWidgetsApps) {
+                        if (task.page > getPageCount()) return;
+                        if (task.pageContentType != mContentType) return;
+                    }
                     // do cleanup inside onSyncWidgetPageItems
                     onSyncWidgetPageItems(data);
                 }
             });
 
         // Ensure that the task is appropriately prioritized and runs in parallel
-        AppsCustomizeAsyncTask t = new AppsCustomizeAsyncTask(page,
+        AppsCustomizeAsyncTask t = new AppsCustomizeAsyncTask(page, mContentType,
                 AsyncTaskPageData.Type.LoadWidgetPreviewData);
         t.setThreadPriority(getThreadPriorityForPage(page));
         t.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pageData);
@@ -1470,6 +1553,19 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
         return preview;
     }
+    public void syncWidgetPages() {
+        // Ensure that we have the right number of pages
+        Context context = getContext();
+        int numPages = (int) Math.ceil(mWidgets.size() /
+                (float) (mWidgetCountX * mWidgetCountY));
+        for (int j = 0; j < numPages; ++j) {
+            PagedViewGridLayout layout = new PagedViewGridLayout(context, mWidgetCountX,
+                    mWidgetCountY);
+            setupPage(layout);
+            addView(layout, new PagedViewGridLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT));
+        }
+    }
 
     public void syncWidgetPageItems(final int page, final boolean immediate) {
         int numItemsPerPage = mWidgetCountX * mWidgetCountY;
@@ -1572,7 +1668,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         mDeferredPrepareLoadWidgetPreviewsTasks.add(this);
                     } else {
                         prepareLoadWidgetPreviewsTask(page, items,
-                                maxPreviewWidth, maxPreviewHeight, mWidgetCountX);
+                                maxPreviewWidth, maxPreviewHeight);
                     }
                 }
             }
@@ -1638,7 +1734,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 PagedViewWidget widget = (PagedViewWidget) layout.getChildAt(i);
                 if (widget != null) {
                     Bitmap preview = data.generatedImages.get(i);
-                    widget.applyPreview(new FastBitmapDrawable(preview), i);
+                    widget.applyPreview(new FastBitmapDrawable(preview));
                 }
             }
 
@@ -1660,28 +1756,50 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         removeAllViews();
         cancelAllTasks();
 
-        Context context = getContext();
-        for (int j = 0; j < mNumWidgetPages; ++j) {
-            PagedViewGridLayout layout = new PagedViewGridLayout(context, mWidgetCountX,
-                    mWidgetCountY);
-            setupPage(layout);
-            addView(layout, new PagedView.LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT));
-        }
+        if (mJoinWidgetsApps) {
+            Context context = getContext();
+            for (int j = 0; j < mNumWidgetPages; ++j) {
+                PagedViewGridLayout layout = new PagedViewGridLayout(context, mWidgetCountX,
+                        mWidgetCountY);
+                setupPage(layout);
+                addView(layout, new PagedView.LayoutParams(LayoutParams.MATCH_PARENT,
+                            LayoutParams.MATCH_PARENT));
+            }
 
-        for (int i = 0; i < mNumAppsPages; ++i) {
-            PagedViewCellLayout layout = new PagedViewCellLayout(context);
-            setupPage(layout);
-            addView(layout);
+            for (int i = 0; i < mNumAppsPages; ++i) {
+                PagedViewCellLayout layout = new PagedViewCellLayout(context);
+                setupPage(layout);
+                addView(layout);
+            }
+        } else {
+            switch (mContentType) {
+            case Applications:
+                syncAppsPages();
+                break;
+            case Widgets:
+                syncWidgetPages();
+                break;
+            }
         }
     }
 
     @Override
     public void syncPageItems(int page, boolean immediate) {
-        if (page < mNumAppsPages) {
-            syncAppsPageItems(page);
+        if (mJoinWidgetsApps) {
+            if (page < mNumAppsPages) {
+                syncAppsPageItems(page);
+            } else {
+                syncWidgetPageItems(page, immediate);
+            }
         } else {
-            syncWidgetPageItems(page, immediate);
+            switch (mContentType) {
+            case Applications:
+                syncAppsPageItems(page);
+                break;
+            case Widgets:
+                syncWidgetPageItems(page, immediate);
+                break;
+            }
         }
     }
 
@@ -1718,8 +1836,13 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation = TRANSITION_SCREEN_ROTATION * scrollProgress;
                 float translation = mLauncher.getWorkspace().getOffsetXForRotation(rotation, v.getWidth(), v.getHeight());
 
-                v.setTranslationX(translation);
-                v.setRotationY(rotation);
+                if (!mVertical) {
+                    v.setTranslationX(translation);
+                    v.setRotationY(rotation);
+                } else {
+                    v.setTranslationY(translation);
+                    v.setRotationX(-rotation);
+                }
                 if (mFadeInAdjacentScreens) {
                     float alpha = 1 - Math.abs(scrollProgress);
                     v.setAlpha(alpha);
@@ -1737,8 +1860,13 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
                 // Extra translation to account for the increase in size
                 if (!in) {
-                    float translationX = v.getMeasuredWidth() * 0.1f * -scrollProgress;
-                    v.setTranslationX(translationX);
+                    if (!mVertical) {
+                        float translationX = v.getMeasuredWidth() * 0.1f * -scrollProgress;
+                        v.setTranslationX(translationX);
+                    } else {
+                        float translationY = v.getMeasuredHeight() * 0.1f * -scrollProgress;
+                        v.setTranslationY(translationY);
+                    }
                 }
 
                 v.setScaleX(scale);
@@ -1759,20 +1887,37 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation =
                         (up ? TRANSITION_SCREEN_ROTATION : -TRANSITION_SCREEN_ROTATION) * scrollProgress;
 
-                float translationX = v.getMeasuredWidth() * scrollProgress;
+                if (!mVertical) {
+                    float translationX = v.getMeasuredWidth() * scrollProgress;
 
-                float rotatePoint =
-                        (v.getMeasuredWidth() * 0.5f) /
-                        (float) Math.tan(Math.toRadians((double) (TRANSITION_SCREEN_ROTATION * 0.5f)));
+                    float rotatePoint =
+                            (v.getMeasuredWidth() * 0.5f) /
+                            (float) Math.tan(Math.toRadians((double) (TRANSITION_SCREEN_ROTATION * 0.5f)));
 
-                v.setPivotX(v.getMeasuredWidth() * 0.5f);
-                if (up) {
-                    v.setPivotY(-rotatePoint);
+                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                    if (up) {
+                        v.setPivotY(-rotatePoint);
+                    } else {
+                        v.setPivotY(v.getMeasuredHeight() + rotatePoint);
+                    }
+                    v.setRotation(rotation);
+                    v.setTranslationX(translationX);
                 } else {
-                    v.setPivotY(v.getMeasuredHeight() + rotatePoint);
+                    float translationY = v.getMeasuredHeight() * scrollProgress;
+
+                    float rotatePoint =
+                            (v.getMeasuredHeight() * 0.5f) /
+                            (float) Math.tan(Math.toRadians((double) (TRANSITION_SCREEN_ROTATION * 0.5f)));
+
+                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                    if (up) {
+                        v.setPivotX(-rotatePoint);
+                    } else {
+                        v.setPivotX(v.getMeasuredWidth() + rotatePoint);
+                    }
+                    v.setRotation(-rotation);
+                    v.setTranslationY(translationY);
                 }
-                v.setRotation(rotation);
-                v.setTranslationX(translationX);
                 if (mFadeInAdjacentScreens) {
                     float alpha = 1 - Math.abs(scrollProgress);
                     v.setAlpha(alpha);
@@ -1792,9 +1937,15 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     v.setCameraDistance(mDensity * mCameraDistance);
                 }
 
-                v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
-                v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                v.setRotationY(rotation);
+                if (!mVertical) {
+                    v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                    v.setRotationY(rotation);
+                } else {
+                    v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                    v.setRotationX(-rotation);
+                }
                 if (mFadeInAdjacentScreens) {
                     float alpha = 1 - Math.abs(scrollProgress);
                     v.setAlpha(alpha);
@@ -1811,7 +1962,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float interpolatedProgress =
                         mZInterpolator.getInterpolation(Math.abs(Math.min(scrollProgress, 0)));
                 float scale = (1 - interpolatedProgress) + interpolatedProgress * 0.76f;
-                float translation = Math.min(0, scrollProgress) * v.getMeasuredWidth();
+                float translation = Math.min(0, scrollProgress) *
+                        (!mVertical ? v.getMeasuredWidth() : v.getMeasuredHeight());
                 float alpha;
 
                 if (!LauncherApplication.isScreenLarge() || scrollProgress < 0) {
@@ -1822,7 +1974,11 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
                 }
 
-                v.setTranslationX(translation);
+                if (!mVertical) {
+                    v.setTranslationX(translation);
+                } else {
+                    v.setTranslationY(translation);
+                }
                 v.setScaleX(scale);
                 v.setScaleY(scale);
                 v.setAlpha(alpha);
@@ -1846,8 +2002,13 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f - Math.abs(scrollProgress);
 
-                v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
-                v.setScaleX(scale);
+                if (!mVertical) {
+                    v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                    v.setScaleX(scale);
+                } else {
+                    v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                    v.setScaleY(scale);
+                }
 
                 if (mFadeInAdjacentScreens) {
                     float alpha = 1 - Math.abs(scrollProgress);
@@ -1890,9 +2051,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
                     v.setPivotX(v.getMeasuredWidth() * 0.5f);
                     v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    v.setCameraDistance(mDensity * mCameraDistance);
-                    v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
-                    v.setRotationY(rotation);
+                    if (!mVertical) {
+                        v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
+                        v.setRotationY(rotation);
+                    } else {
+                        v.setTranslationY(v.getMeasuredHeight() * scrollProgress);
+                        v.setRotationX(-rotation);
+                        v.setCameraDistance(mDensity * mCameraDistance);
+                    }
                     if (v.getVisibility() != VISIBLE) {
                         v.setVisibility(VISIBLE);
                     }
@@ -1905,7 +2071,6 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 }
             }
         }
-        invalidate();
     }
 
     private void screenScrolledCylinder(int screenScroll, boolean in) {
@@ -1915,9 +2080,15 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? TRANSITION_SCREEN_ROTATION : -TRANSITION_SCREEN_ROTATION) * scrollProgress;
 
-                v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
-                v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                v.setRotationY(rotation);
+                if (!mVertical) {
+                    v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
+                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                    v.setRotationY(rotation);
+                } else {
+                    v.setPivotY((scrollProgress + 1) * v.getMeasuredHeight() * 0.5f);
+                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                    v.setRotationX(-rotation);
+                }
 
                 if (mFadeInAdjacentScreens) {
                     float alpha = 1 - Math.abs(scrollProgress);
@@ -1932,23 +2103,31 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     protected void screenScrolled(int screenScroll) {
         super.screenScrolled(screenScroll);
 
-        boolean isInOverscroll = (mOverScrollX < 0 || mOverScrollX > mMaxScrollX);
+        boolean isInOverscroll = !mVertical ? (mOverScrollX < 0 || mOverScrollX > mMaxScrollX) :
+                (mOverScrollY < 0 || mOverScrollY > mMaxScrollY);
         if (isInOverscroll && !mOverscrollTransformsDirty) {
             mScrollTransformsDirty = true;
         }
         if (!isInOverscroll || mScrollTransformsDirty) {
             // Limit the "normal" effects to mScrollX/Y
-            int scroll = getScrollX();
+            int scroll = !mVertical ? getScrollX() : getScrollY();
 
             // Reset transforms when we aren't in overscroll
             if (mOverscrollTransformsDirty) {
                 mOverscrollTransformsDirty = false;
                 View v0 = getPageAt(0);
                 View v1 = getPageAt(getChildCount() - 1);
-                v0.setTranslationX(0);
-                v1.setTranslationX(0);
-                v0.setRotationY(0);
-                v1.setRotationY(0);
+                if (!mVertical) {
+                    v0.setTranslationX(0);
+                    v1.setTranslationX(0);
+                    v0.setRotationY(0);
+                    v1.setRotationY(0);
+                } else {
+                    v0.setTranslationY(0);
+                    v1.setTranslationY(0);
+                    v0.setRotationX(0);
+                    v1.setRotationX(0);
+                }
                 v0.setCameraDistance(mDensity * 1280);
                 v1.setCameraDistance(mDensity * 1280);
                 v0.setPivotX(v0.getMeasuredWidth() / 2);
@@ -2004,7 +2183,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
 
         if (isInOverscroll) {
-            int index = mOverScrollX < 0 ? 0 : getChildCount() - 1;
+            int index = (!mVertical ? mOverScrollX : mOverScrollY) < 0 ? 0 : getChildCount() - 1;
             View v = getPageAt(index);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenScroll, v, index);
@@ -2012,11 +2191,21 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 if (!mOverscrollTransformsDirty) {
                     mOverscrollTransformsDirty = true;
                     v.setCameraDistance(mDensity * mCameraDistance);
-                    v.setPivotX(v.getMeasuredWidth() * (index == 0 ? TRANSITION_PIVOT : 1 - TRANSITION_PIVOT));
-                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    v.setTranslationX(0);
+                    if (!mVertical) {
+                        v.setPivotX(v.getMeasuredWidth() * (index == 0 ? TRANSITION_PIVOT : 1 - TRANSITION_PIVOT));
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setTranslationX(0);
+                    } else {
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * (index == 0 ? TRANSITION_PIVOT : 1 - TRANSITION_PIVOT));
+                        v.setTranslationY(0);
+                    }
                 }
-                v.setRotationY(rotation);
+                if (!mVertical) {
+                    v.setRotationY(rotation);
+                } else {
+                    v.setRotationX(-rotation);
+                }
             }
         }
     }
@@ -2047,10 +2236,18 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     @Override
     protected int getScrollingIndicatorId() {
-        if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_BOTTOM) {
-            return R.id.paged_view_indicator_bottom;
-        } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_TOP) {
-            return R.id.paged_view_indicator_top;
+        if (!mVertical) {
+            if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_BOTTOM) {
+                return R.id.paged_view_indicator_bottom;
+            } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_TOP) {
+                return R.id.paged_view_indicator_top;
+            }
+        } else {
+            if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_BOTTOM) {
+                return R.id.paged_view_indicator_right;
+            } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_TOP) {
+                return R.id.paged_view_indicator_left;
+            }
         }
         return -1;
     }
@@ -2089,9 +2286,49 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
+    public SortMode getSortMode() {
+        return mSortMode;
+    }
+
+    public void setSortMode(SortMode sortMode) {
+        if (mSortMode == sortMode) {
+            return;
+        }
+
+        mSortMode = sortMode;
+
+        filterApps();
+    }
+
+    public void setShowSystemApps(boolean show) {
+        if (show) {
+            mFilterApps |= FILTER_APPS_SYSTEM_FLAG;
+        } else {
+            mFilterApps &= ~FILTER_APPS_SYSTEM_FLAG;
+        }
+        filterApps();
+    }
+
+    public void setShowDownloadedApps(boolean show) {
+        if (show) {
+            mFilterApps |= FILTER_APPS_DOWNLOADED_FLAG;
+        } else {
+            mFilterApps &= ~FILTER_APPS_DOWNLOADED_FLAG;
+        }
+        filterApps();
+    }
+
+    public boolean getShowSystemApps() {
+        return (mFilterApps & FILTER_APPS_SYSTEM_FLAG) != 0;
+    }
+
+    public boolean getShowDownloadedApps() {
+        return (mFilterApps & FILTER_APPS_DOWNLOADED_FLAG) != 0;
+    }
+
     public void setApps(ArrayList<ApplicationInfo> list) {
         mApps = list;
-        Collections.sort(mApps, LauncherModel.getAppNameComparator());
+        filterAppsWithoutInvalidate();
         updatePageCounts();
         invalidateOnDataChange();
     }
@@ -2106,6 +2343,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     }
     public void addApps(ArrayList<ApplicationInfo> list) {
         addAppsWithoutInvalidate(list);
+        filterAppsWithoutInvalidate();
         updatePageCounts();
         invalidateOnDataChange();
     }
@@ -2151,6 +2389,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     }
     public void removeApps(ArrayList<String> packageNames) {
         removeAppsWithPackageNameWithoutInvalidate(packageNames);
+        filterAppsWithoutInvalidate();
         updatePageCounts();
         invalidateOnDataChange();
     }
@@ -2160,6 +2399,30 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // place in the list.
         removeAppsWithoutInvalidate(list);
         addAppsWithoutInvalidate(list);
+        filterAppsWithoutInvalidate();
+        updatePageCounts();
+        invalidateOnDataChange();
+    }
+    public void filterAppsWithoutInvalidate() {
+        mFilteredApps = new ArrayList<ApplicationInfo>(mApps);
+        Iterator<ApplicationInfo> iterator = mFilteredApps.iterator();
+        while (iterator.hasNext()) {
+            ApplicationInfo appInfo = iterator.next();
+            boolean system = (appInfo.flags & ApplicationInfo.DOWNLOADED_FLAG) == 0;
+            if (mHiddenApps.contains(appInfo.componentName) || 
+                (system && !getShowSystemApps()) ||
+                (!system && !getShowDownloadedApps())) {
+                iterator.remove();
+            }
+        }
+        if (mSortMode == SortMode.Title) {
+            Collections.sort(mFilteredApps, LauncherModel.getAppNameComparator());
+        } else if (mSortMode == SortMode.InstallDate) {
+            Collections.sort(mFilteredApps, LauncherModel.APP_INSTALL_TIME_COMPARATOR);
+        }
+    }
+    public void filterApps() {
+        filterAppsWithoutInvalidate();
         updatePageCounts();
         invalidateOnDataChange();
     }
@@ -2168,11 +2431,21 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // If we have reset, then we should not continue to restore the previous state
         mSaveInstanceStateItemIndex = -1;
 
-        AppsCustomizeTabHost tabHost = getTabHost();
-        String tag = tabHost.getCurrentTabTag();
-        if (tag != null) {
-            if (!tag.equals(tabHost.getTabTagForContentType(ContentType.Applications))) {
-                tabHost.setCurrentTabFromContent(ContentType.Applications);
+        if (mJoinWidgetsApps) {
+            AppsCustomizeTabHost tabHost = getTabHost();
+            String tag = tabHost.getCurrentTabTag();
+            if (tag != null) {
+                if (!tag.equals(tabHost.getTabTagForContentType(ContentType.Applications))) {
+                    tabHost.setCurrentTabFromContent(ContentType.Applications);
+                }
+            }
+        } else {
+            if (mContentType != ContentType.Applications) {
+                // Reset to the first page of the Apps pane
+                AppsCustomizeTabHost tabs = (AppsCustomizeTabHost)
+                    mLauncher.findViewById(R.id.apps_customize_pane);
+                tabs.selectAppsTab();
+                return;
             }
         }
 
@@ -2256,17 +2529,30 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     protected String getCurrentPageDescription() {
         int page = (mNextPage != INVALID_PAGE) ? mNextPage : mCurrentPage;
         int stringId = R.string.default_scroll_format;
-        int count = 0;
-        
-        if (page < mNumAppsPages) {
-            stringId = R.string.apps_customize_apps_scroll_format;
-            count = mNumAppsPages;
-        } else {
-            page -= mNumAppsPages;
-            stringId = R.string.apps_customize_widgets_scroll_format;
-            count = mNumWidgetPages;
-        }
 
-        return String.format(getContext().getString(stringId), page + 1, count);
+        if (mJoinWidgetsApps) {
+            int count;
+
+            if (page < mNumAppsPages) {
+                stringId = R.string.apps_customize_apps_scroll_format;
+                count = mNumAppsPages;
+            } else {
+                page -= mNumAppsPages;
+                stringId = R.string.apps_customize_widgets_scroll_format;
+                count = mNumWidgetPages;
+            }
+
+            return String.format(getContext().getString(stringId), page + 1, count);
+        } else {
+            switch (mContentType) {
+            case Applications:
+                stringId = R.string.apps_customize_apps_scroll_format;
+                break;
+            case Widgets:
+                stringId = R.string.apps_customize_widgets_scroll_format;
+                break;
+            }
+            return String.format(getContext().getString(stringId), page + 1, getChildCount());
+        }
     }
 }
