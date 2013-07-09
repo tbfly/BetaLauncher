@@ -22,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.launcher.R;
 
 /* Class that does most of the work of enabling dragging items out of a PagedView by performing a
  * vertical drag. Used by both CustomizePagedView and AllAppsPagedView.

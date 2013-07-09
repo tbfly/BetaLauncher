@@ -31,11 +31,12 @@ public final class PreferencesProvider {
 
     public static final String PREFERENCES_CHANGED = "preferences_changed";
 
-    private static Map<String, ?> sKeyValues;
+    private static Map<String, Object> sKeyValues;
 
+    @SuppressWarnings("unchecked")
     public static void load(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
-        sKeyValues = preferences.getAll();
+        sKeyValues = (Map<String, Object>)preferences.getAll();
     }
 
     private static int getInt(String key, int def) {
@@ -299,8 +300,8 @@ public final class PreferencesProvider {
             public static boolean getAutoRotate(boolean def) {
                 return getBoolean("ui_general_orientation", def);
             }
-            public static boolean getLockWorkspace(boolean def) {
-                return getBoolean("ui_general_lock_workspace", def);
+            public static boolean getLockWorkspace() {
+                return getBoolean("ui_general_lock_workspace", false);
             }
             public static void setLockWorkspace(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_general_lock_workspace", value);

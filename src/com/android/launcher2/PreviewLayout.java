@@ -133,7 +133,9 @@ public class PreviewLayout extends FrameLayout
         ((ImageView)layout.findViewById(R.id.home_button)).setVisibility(View.GONE);
         ImageView image = (ImageView)layout.findViewById(R.id.preview_screen);
         image.setScaleType(ImageView.ScaleType.CENTER);
-        image.setOnClickListener(this);
+        if (!mLauncher.getLockWorkspace()) {
+            image.setOnClickListener(this);
+        }
         image.setImageResource(R.drawable.preview_new_screen);
         mContent.addViewToCellLayout(layout, -1, 0, params, true);
     }
@@ -167,16 +169,23 @@ public class PreviewLayout extends FrameLayout
             image.setClickable(false);
             if (bitmap != null)
                 image.setImageBitmap(bitmap);
-            image.setOnClickListener(this);
-            image.setOnLongClickListener(this);
+
+            if (!mLauncher.getLockWorkspace()) {
+                image.setOnClickListener(this);
+                image.setOnLongClickListener(this);
+            }
 
             image = (ImageView)layout.findViewById(R.id.home_button);
-            image.setOnClickListener(this);
+
+            if (!mLauncher.getLockWorkspace()) {
+                image.setOnClickListener(this);
+            }
+
             if (isDefault)
                 image.setSelected(true);
             else
                 image.setSelected(false);
-        } else {
+        } else if (!mLauncher.getLockWorkspace()) {
             image.setOnClickListener(this);
             image = (ImageView)layout.findViewById(R.id.preview_screen);
             image.setOnClickListener(this);
@@ -194,8 +203,11 @@ public class PreviewLayout extends FrameLayout
         info.cellY = cellY;
         info.id = cellX + cellY * 3;
         layout.setTag(info);
-        layout.setOnClickListener(this);
-        layout.setOnLongClickListener(this);
+
+        if (!mLauncher.getLockWorkspace()) {
+            layout.setOnClickListener(this);
+            layout.setOnLongClickListener(this);
+        }
 
         this.mContent.addViewToCellLayout(layout, -1, 0, params, true);
     }
