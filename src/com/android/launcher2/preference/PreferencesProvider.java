@@ -202,6 +202,9 @@ public final class PreferencesProvider {
                     return def;
                 }
             }
+            public static boolean getWidgetIcons() {
+                return getBoolean("ui_drawer_widget_icon_style", false);
+            }
             public static int getDrawerTransparency() {
                 return Integer.parseInt(getString("ui_drawer_transparency", "50"));
             }

@@ -342,6 +342,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     // Preferences
     private boolean mFadeScrollingIndicator;
+    private boolean mWidgetIconStyle;
     private int mScrollingIndicatorPosition;
 
     private static final int SCROLLING_INDICATOR_TOP = 1;
@@ -368,6 +369,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mTransitionEffect = PreferencesProvider.Interface.Drawer.Scrolling.getTransitionEffect(
                 resources.getString(R.string.config_drawerDefaultTransitionEffect));
         mFadeInAdjacentScreens = PreferencesProvider.Interface.Drawer.Scrolling.getFadeInAdjacentScreens();
+        mWidgetIconStyle = PreferencesProvider.Interface.Drawer.getWidgetIcons();
         boolean showScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getShowScrollingIndicator();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Drawer.Indicator.getScrollingIndicatorPosition();
@@ -483,9 +485,22 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // Note that we transpose the counts in portrait so that we get a similar layout
         boolean isLandscape = getResources().getConfiguration().orientation ==
             Configuration.ORIENTATION_LANDSCAPE;
-        int maxCellCountX = mMaxAppCellCountX;
-        int maxCellCountY = mMaxAppCellCountY;
+        int maxCellCountX = Integer.MAX_VALUE;
+        int maxCellCountY = Integer.MAX_VALUE;
+        if (LauncherApplication.isScreenLarge()) {
+            maxCellCountX = (isLandscape ? LauncherModel.getWorkspaceCellCountX() :
+                LauncherModel.getWorkspaceCellCountY());
+            maxCellCountY = (isLandscape ? LauncherModel.getWorkspaceCellCountY() :
+                LauncherModel.getWorkspaceCellCountX());
+        }
+        if (mMaxAppCellCountX > -1) {
+            maxCellCountX = Math.min(maxCellCountX, mMaxAppCellCountX);
+        }
+        // Temp hack for now: only use the max cell count Y for widget layout
         int maxWidgetCellCountY = maxCellCountY;
+        if (mMaxAppCellCountY > -1) {
+            maxWidgetCellCountY = Math.min(maxWidgetCellCountY, mMaxAppCellCountY);
+        }
 
         // Now that the data is ready, we can calculate the content width, the number of cells to
         // use for each page
@@ -493,6 +508,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mWidgetSpacingLayout.setPadding(mPageLayoutPaddingLeft, mPageLayoutPaddingTop,
                 mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
         mWidgetSpacingLayout.calculateCellCount(width, height, maxCellCountX, maxCellCountY);
+        //mCellCountX = mWidgetSpacingLayout.getCellCountX();
+        //mCellCountY = mWidgetSpacingLayout.getCellCountY();
         mCellCountX = mMaxAppCellCountX;
         mCellCountY = mMaxAppCellCountY;
         updatePageCounts();
@@ -1297,6 +1314,54 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         return preview;
     }
 
+    private Bitmap getWidgetIcon(ComponentName provider, int iconId, int maxWidth, int maxHeight) {
+        final Canvas c = mCachedShortcutPreviewCanvas.get();
+        Bitmap tempBitmap = Bitmap.createBitmap(maxWidth, maxHeight, Config.ARGB_8888);
+        mCachedShortcutPreviewBitmap.set(tempBitmap);
+
+        String packageName = provider.getPackageName();
+        Drawable icon = null;
+        if (iconId > 0) {
+            icon = mIconCache.getFullResIcon(packageName, iconId);
+            if (icon == null) {
+                Log.w(TAG, "Can't load widget icon 0x" +
+                    Integer.toHexString(iconId) + " for provider: " + provider);
+            }
+        }
+
+        int paddingTop =
+                getResources().getDimensionPixelOffset(R.dimen.shortcut_preview_padding_top);
+        int paddingLeft =
+                getResources().getDimensionPixelOffset(R.dimen.shortcut_preview_padding_left);
+        int paddingRight =
+                getResources().getDimensionPixelOffset(R.dimen.shortcut_preview_padding_right);
+
+        int scaledIconWidth = (maxWidth - paddingLeft - paddingRight);
+
+        renderDrawableToBitmap(
+                icon, tempBitmap, paddingLeft, paddingTop, scaledIconWidth, scaledIconWidth);
+
+        Bitmap preview = Bitmap.createBitmap(maxWidth, maxHeight, Config.ARGB_8888);
+        c.setBitmap(preview);
+        Paint p = mCachedShortcutPreviewPaint.get();
+        if (p == null) {
+            p = new Paint();
+            ColorMatrix colorMatrix = new ColorMatrix();
+            colorMatrix.setSaturation(0);
+            p.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+            p.setAlpha((int) (255 * 0.06f));
+            //float density = 1f;
+            //p.setMaskFilter(new BlurMaskFilter(15*density, BlurMaskFilter.Blur.NORMAL));
+            mCachedShortcutPreviewPaint.set(p);
+        }
+        c.drawBitmap(tempBitmap, 0, 0, p);
+        c.setBitmap(null);
+
+        renderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
+
+        return preview;
+    }
+
     private Bitmap getWidgetPreview(ComponentName provider, int previewImage, int iconId,
             int cellHSpan, int cellVSpan, int maxWidth, int maxHeight) {
         // Load the preview image if possible
@@ -1430,8 +1495,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         for (int i = 0; i < items.size(); ++i) {
             Object rawInfo = items.get(i);
             PendingAddItemInfo createItemInfo;
-            PagedViewWidget widget = (PagedViewWidget) mLayoutInflater.inflate(
-                    R.layout.apps_customize_widget, layout, false);
+            PagedViewWidget widget;
+            if (mWidgetIconStyle) {
+                widget = (PagedViewWidget) mLayoutInflater.inflate(
+                        R.layout.apps_customize_widget_icon, layout, false);
+            } else {
+                widget = (PagedViewWidget) mLayoutInflater.inflate(
+                         R.layout.apps_customize_widget, layout, false);
+            }
             if (rawInfo instanceof AppWidgetProviderInfo) {
                 // Fill in the widget information
                 AppWidgetProviderInfo info = (AppWidgetProviderInfo) rawInfo;
@@ -1536,8 +1607,13 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         mWidgetSpacingLayout.estimateCellWidth(cellSpans[0]));
                 int maxHeight = Math.min(data.maxImageHeight,
                         mWidgetSpacingLayout.estimateCellHeight(cellSpans[1]));
-                Bitmap b = getWidgetPreview(info.provider, info.previewImage, info.icon,
+                Bitmap b;
+                if (mWidgetIconStyle) {
+                    b = getWidgetIcon(info.provider, info.icon, maxWidth, maxHeight);
+                } else {
+                    b = getWidgetPreview(info.provider, info.previewImage, info.icon,
                         cellSpans[0], cellSpans[1], maxWidth, maxHeight);
+                }
                 images.add(b);
             } else if (item instanceof ResolveInfo) {
                 // Fill in the shortcuts information

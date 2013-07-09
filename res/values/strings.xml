@@ -310,6 +310,8 @@ s -->
     <string name="preferences_interface_drawer_app_grid_summary">Choose the number of rows/columns in the app drawer</string>
     <string name="preferences_interface_drawer_widget_grid_title">Widget grid size</string>
     <string name="preferences_interface_drawer_widget_grid_summary">Choose the number of rows/columns for widgets in drawer</string>
+    <string name="preferences_interface_drawer_widget_icon_style_title">Icon style widgets</string>
+    <string name="preferences_interface_drawer_widget_icon_style_summary">Make widgets use icon style in drawer rather than preview</string>
     <string name="preferences_interface_drawer_scrolling_category">Scrolling</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>

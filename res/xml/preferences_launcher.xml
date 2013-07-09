@@ -129,6 +129,9 @@
             launcher:min1="1"
             launcher:max2="7"
             launcher:min2="1" />
+        <CheckBoxPreference android:key="ui_drawer_widget_icon_style"
+            android:title="@string/preferences_interface_drawer_widget_icon_style_title"
+            android:summary="@string/preferences_interface_drawer_widget_icon_style_summary" />
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_icon_scale"
             android:title="@string/preferences_interface_general_icon_scale_title"
             android:summary="@string/preferences_interface_general_icon_scale_summary"
