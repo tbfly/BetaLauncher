@@ -307,7 +307,9 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         Stack,
         Accordion,
         CylinderIn,
-        CylinderOut
+        CylinderOut,
+        CarouselLeft,
+        CarouselRight
     }
     private TransitionEffect mTransitionEffect = TransitionEffect.Standard;
 
@@ -1243,11 +1245,11 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // TODO-APPS_CUSTOMIZE: detect number of cores and set thread priorities accordingly below
         int pageDiff = getWidgetPageLoadPriority(page);
         if (pageDiff <= 0) {
-            return Process.THREAD_PRIORITY_LESS_FAVORABLE;
+            return Process.THREAD_PRIORITY_FOREGROUND;
         } else if (pageDiff <= 1) {
-            return Process.THREAD_PRIORITY_LOWEST;
+            return Process.THREAD_PRIORITY_MORE_FAVORABLE;
         } else {
-            return Process.THREAD_PRIORITY_LOWEST;
+            return Process.THREAD_PRIORITY_DEFAULT;
         }
     }
     private int getSleepForPage(int page) {
@@ -2098,6 +2100,27 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
+    private void screenScrolledCarousel(int screenScroll, boolean left) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getPageAt(i);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, i);
+                float rotation = 90.0f * -scrollProgress;
+
+                v.setCameraDistance(mDensity * mCameraDistance);
+                v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
+                v.setPivotX(left ? 0f : v.getMeasuredWidth());
+                v.setPivotY(0f);
+                v.setRotationY(rotation);
+
+                if (mFadeInAdjacentScreens) {
+                    float alpha = 1 - Math.abs(scrollProgress);
+                    v.setAlpha(alpha);
+                }
+            }
+        }
+    }
+
     // Transition effects
     @Override
     protected void screenScrolled(int screenScroll) {
@@ -2178,6 +2201,13 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     break;
                 case CylinderOut:
                     screenScrolledCylinder(scroll, false);
+                    break;
+                case CarouselLeft:
+                    screenScrolledCarousel(scroll, true);
+                    break;
+                case CarouselRight:
+                    screenScrolledCarousel(scroll, false);
+                    break;
             }
             mScrollTransformsDirty = false;
         }

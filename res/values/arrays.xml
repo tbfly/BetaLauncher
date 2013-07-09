@@ -43,6 +43,8 @@
         <item>Flip</item>
         <item>Stack</item>
         <item>Accordion</item>
+        <item>Carousel Left</item>
+        <item>Carousel Right</item>
     </string-array>
     <string-array name="preferences_interface_homescreen_scrolling_transition_effect_values" translatable="false">
         <item>Standard</item>
@@ -59,6 +61,8 @@
         <item>Flip</item>
         <item>Stack</item>
         <item>Accordion</item>
+        <item>CarouselLeft</item>
+        <item>CarouselRight</item>
     </string-array>
     <string-array name="preferences_interface_drawer_indicator_position_entries">
         <item>Top/Left</item>
@@ -111,6 +115,7 @@
 
     <string-array name="gesture_target_names">
         <item>Nothing</item>
+        <item>Toggle status bar</item>
         <item>Expand status bar</item>
         <item>Go to default homescreen</item>
         <item>Open app drawer</item>
@@ -119,6 +124,7 @@
     </string-array>
     <string-array name="gesture_target_values" translatable="false" >
         <item>nothing</item>
+        <item>toggle_status_bar</item>
         <item>expand_status_bar</item>
         <item>default_homescreen</item>
         <item>open_app_drawer</item>

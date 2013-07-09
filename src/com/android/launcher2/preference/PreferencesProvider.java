@@ -170,7 +170,7 @@ public final class PreferencesProvider {
 
         public static class Drawer {
             public static int getCellCountX() {
-                int def = 5;
+                int def = 4;
                 String[] values = getString("ui_drawer_grid", "0|" + def).split("\\|");
                 try {
                     return Integer.parseInt(values[1]);
@@ -179,7 +179,7 @@ public final class PreferencesProvider {
                 }
             }
             public static int getCellCountY() {
-                int def = 4;
+                int def = 5;
                 String[] values = getString("ui_drawer_grid", def + "|0").split("\\|");
                 try {
                     return Integer.parseInt(values[0]);
@@ -188,7 +188,7 @@ public final class PreferencesProvider {
                 }
             }
             public static int getWidgetCountX() {
-                int def = 3;
+                int def = 2;
                 String[] values = getString("ui_drawer_widget_grid", "0|" + def).split("\\|");
                 try {
                     return Integer.parseInt(values[1]);
@@ -197,7 +197,7 @@ public final class PreferencesProvider {
                 }
             }
             public static int getWidgetCountY() {
-                int def = 2;
+                int def = 3;
                 String[] values = getString("ui_drawer_widget_grid", def + "|0").split("\\|");
                 try {
                     return Integer.parseInt(values[0]);
@@ -284,6 +284,12 @@ public final class PreferencesProvider {
             }
             public static boolean getFullscreenMode() {
                 return getBoolean("ui_general_fullscreen", false);
+            }
+            public static void setFullscreenMode(Context context, boolean value) {
+                final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
+                Editor editor = preferences.edit();
+                editor.putBoolean("ui_general_fullscreen", value);
+                editor.commit();
             }
         }
     }
