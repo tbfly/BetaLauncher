@@ -63,7 +63,7 @@ public class LauncherProvider extends ContentProvider {
 
     private static final String DATABASE_NAME = "launcher.db";
 
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     static final String AUTHORITY = "com.android.launcher2.settings";
 
@@ -232,7 +232,7 @@ public class LauncherProvider extends ContentProvider {
         private static final String TAG_SEARCH = "search";
         private static final String TAG_APPWIDGET = "appwidget";
         private static final String TAG_SHORTCUT = "shortcut";
-        private static final String TAG_ALLAPPS = "allapps";
+        private static final String TAG_ACTION = "action";
         private static final String TAG_FOLDER = "folder";
         private static final String TAG_EXTRA = "extra";
 
@@ -287,7 +287,8 @@ public class LauncherProvider extends ContentProvider {
                     "iconResource TEXT," +
                     "icon BLOB," +
                     "launchCount INTEGER," +
-                    "sortType INTEGER" +
+                    "sortType INTEGER," +
+                    "action TEXT" +
                     ");");
 
             // Database was just created, so wipe any previous widgets
@@ -356,6 +357,7 @@ public class LauncherProvider extends ContentProvider {
             final int cellYIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.CELLY);
             final int launchCountIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.LAUNCH_COUNT);
             final int sortTypeIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.SORT_TYPE);
+            final int actionIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.LAUNCHER_ACTION);
 
             ContentValues[] rows = new ContentValues[c.getCount()];
             int i = 0;
@@ -376,6 +378,7 @@ public class LauncherProvider extends ContentProvider {
                 values.put(LauncherSettings.Favorites.CELLY, c.getInt(cellYIndex));
                 values.put(LauncherSettings.Favorites.LAUNCH_COUNT, c.getInt(launchCountIndex));
                 values.put(LauncherSettings.Favorites.SORT_TYPE, c.getInt(sortTypeIndex));
+                values.put(LauncherSettings.Favorites.LAUNCHER_ACTION, c.getString(actionIndex));
                 rows[i++] = values;
             }
 
@@ -439,8 +442,25 @@ public class LauncherProvider extends ContentProvider {
                             "ADD COLUMN launchCount INTEGER NOT NULL DEFAULT 0;");
                     db.execSQL("ALTER TABLE favorites " +
                             "ADD COLUMN sortType INTEGER NOT NULL DEFAULT 0;");
+                    db.execSQL("ALTER TABLE favorites ADD COLUMN action TEXT;");
                     db.setTransactionSuccessful();
                     version = 15;
+                } catch (SQLException ex) {
+                    // Old version remains, which means we wipe old data
+                    Log.e(TAG, ex.getMessage(), ex);
+                } finally {
+                    db.endTransaction();
+                }
+            }
+
+            if (version < 16) {
+                // upgrade 14 -> 15 added launchCount and sortType columns
+                db.beginTransaction();
+                try {
+                    // Insert new column for holding launchCount
+                    db.execSQL("ALTER TABLE favorites ADD COLUMN action TEXT;");
+                    db.setTransactionSuccessful();
+                    version = 16;
                 } catch (SQLException ex) {
                     // Old version remains, which means we wipe old data
                     Log.e(TAG, ex.getMessage(), ex);
@@ -653,8 +673,8 @@ public class LauncherProvider extends ContentProvider {
                         added = addClockWidget(db, values);
                     } else if (TAG_APPWIDGET.equals(name)) {
                         added = addAppWidget(parser, attrs, db, values, a, packageManager);
-                    } else if (TAG_ALLAPPS.equals(name)) {
-                        long id = addAllAppsButton(db, values);
+                    } else if (TAG_ACTION.equals(name)) {
+                        long id = addLauncherAction(db, values, a);
                         added = id >= 0;
                     } else if (TAG_SHORTCUT.equals(name)) {
                         long id = addUriShortcut(db, values, a);
@@ -909,17 +929,22 @@ public class LauncherProvider extends ContentProvider {
             return allocatedAppWidgets;
         }
 
-        private long addAllAppsButton(SQLiteDatabase db, ContentValues values) {
+        private long addLauncherAction(SQLiteDatabase db, ContentValues values,
+                TypedArray a) {
             Resources r = mContext.getResources();
 
+            String actionText = a.getString(R.styleable.Favorite_action);
+            LauncherAction.Action action = LauncherAction.Action.valueOf(actionText);
+
             long id = generateNewId();
-            values.put(Favorites.TITLE, r.getString(R.string.all_apps_button_label));
-            values.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_ALLAPPS);
+            values.put(Favorites.TITLE, r.getString(action.getString()));
+            values.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_LAUNCHER_ACTION);
             values.put(Favorites.SPANX, 1);
             values.put(Favorites.SPANY, 1);
             values.put(Favorites.ICON_TYPE, Favorites.ICON_TYPE_RESOURCE);
             values.put(Favorites.ICON_PACKAGE, mContext.getPackageName());
-            values.put(Favorites.ICON_RESOURCE, r.getResourceName(R.drawable.all_apps_button_icon));
+            values.put(Favorites.ICON_RESOURCE, r.getResourceName(action.getDrawable()));
+            values.put(Favorites.LAUNCHER_ACTION, actionText);
             values.put(Favorites._ID, id);
 
             if (dbInsertAndCheck(db, TABLE_FAVORITES, null, values) < 0) {

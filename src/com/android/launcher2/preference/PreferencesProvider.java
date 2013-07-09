@@ -258,6 +258,15 @@ public final class PreferencesProvider {
         }
 
         public static class Dock {
+            public static boolean getShowDock() {
+                return getBoolean("ui_dock_enabled", true);
+            }
+            public static void setShowDock(Context context, boolean value) {
+                final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
+                Editor editor = preferences.edit();
+                editor.putBoolean("ui_dock_enabled", value);
+                editor.commit();
+            }
             public static int getNumberPages() {
                 return getInt("ui_dock_pages", 1);
             }

@@ -114,7 +114,7 @@ public class DeleteDropTarget extends ButtonDropTarget {
                 switch (addInfo.itemType) {
                     case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                     case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
-                    case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
+                    case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
                         return true;
                 }
             }
@@ -143,11 +143,6 @@ public class DeleteDropTarget extends ButtonDropTarget {
 
     @Override
     public boolean acceptDrop(DragObject d) {
-        if (d.dragInfo instanceof ShortcutInfo) {
-            if (((ShortcutInfo) d.dragInfo).itemType == LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS) {
-                return false;
-            }
-        }
         return true;
     }
 
@@ -166,14 +161,14 @@ public class DeleteDropTarget extends ButtonDropTarget {
         } else if (isWorkspaceOrFolderApplication(source, info)) {
             ShortcutInfo shortcutInfo = (ShortcutInfo) info;
             PackageManager pm = getContext().getPackageManager();
-            if (shortcutInfo.itemType != LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS) {
+            if (shortcutInfo.itemType != LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION) {
                 ResolveInfo resolveInfo = pm.resolveActivity(shortcutInfo.intent, 0);
                 if (resolveInfo != null && (resolveInfo.activityInfo.applicationInfo.flags &
                         android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0) {
                     isUninstall = true;
                 }
             } else {
-                isVisible = false;
+                isVisible = true;
             }
         }
 

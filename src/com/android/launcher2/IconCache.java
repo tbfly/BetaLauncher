@@ -187,7 +187,6 @@ public class IconCache {
             int iconBackListIndex = r.nextInt(iconBackList.size());
             Drawable image = ThemeUtils.getDrawable(mContext,iconBackList.get(iconBackListIndex));
             Drawable icon = getFullResIcon(resources, iconId);
-            android.util.Log.d("LX", packageName);
             if (image != null && icon != null) {
                 return createIconDrawable(image, icon);
             }
@@ -205,8 +204,6 @@ public class IconCache {
         float iconScale = 1.0f - ((float) backgroundHeight / (float) iconHeight);
 
         ScaleDrawable scaledIcon = new ScaleDrawable(icon, Gravity.CENTER, iconScale, iconScale);
-
-        android.util.Log.d("LX", "iconscale " + iconScale + " scale " + scaleFactor);
 
         if ( iconFrontList != null && iconFrontList.size() > 0) {
             ScaleDrawable sd = new ScaleDrawable(scaledIcon, Gravity.CENTER, scaleFactor, scaleFactor);

@@ -348,7 +348,7 @@ public class LauncherModel extends BroadcastReceiver {
                             case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                             case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                             case LauncherSettings.Favorites.ITEM_TYPE_FOLDER:
-                            case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
+                            case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
                                 if (!sBgWorkspaceItems.contains(modelItem)) {
                                     sBgWorkspaceItems.add(modelItem);
                                 }
@@ -437,13 +437,13 @@ public class LauncherModel extends BroadcastReceiver {
 
     /**
      * Returns true if the shortcuts already exists in the database.
-     * we identify a shortcut by its intent.
+     * we identify a shortcut by its title and intent.
      */
-    static boolean shortcutExists(Context context, Intent intent) {
+    static boolean shortcutExists(Context context, String title, Intent intent) {
         final ContentResolver cr = context.getContentResolver();
         Cursor c = cr.query(LauncherSettings.Favorites.CONTENT_URI,
-            new String[] { "intent" }, "intent=?",
-            new String[] { intent.toUri(0) }, null);
+            new String[] { "title", "intent" }, "title=? and intent=?",
+            new String[] { title, intent.toUri(0) }, null);
         boolean result = false;
         try {
             result = c.moveToFirst();
@@ -581,7 +581,7 @@ public class LauncherModel extends BroadcastReceiver {
                             // Fall through
                         case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                         case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
-                        case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
+                        case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
                             if (item.container == LauncherSettings.Favorites.CONTAINER_DESKTOP ||
                                     item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
                                 sBgWorkspaceItems.add(item);
@@ -680,7 +680,7 @@ public class LauncherModel extends BroadcastReceiver {
                             break;
                         case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                         case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
-                        case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
+                        case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
                             sBgWorkspaceItems.remove(item);
                             break;
                         case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
@@ -1279,6 +1279,8 @@ public class LauncherModel extends BroadcastReceiver {
                             LauncherSettings.Favorites.LAUNCH_COUNT);
                     final int sortTypeIndex = c.getColumnIndexOrThrow(
                             LauncherSettings.Favorites.SORT_TYPE);
+                    final int actionIndex = c.getColumnIndexOrThrow(
+                            LauncherSettings.Favorites.LAUNCHER_ACTION);
 
                     ShortcutInfo info;
                     String intentDescription;
@@ -1301,7 +1303,7 @@ public class LauncherModel extends BroadcastReceiver {
                                     continue;
                                 }
 
-                            case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
+                            case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
 
                                 if (itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
                                     info = getShortcutInfo(manager, intent, context, c, iconIndex,
@@ -1323,10 +1325,9 @@ public class LauncherModel extends BroadcastReceiver {
                                             Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                                     }
                                 } else {
-                                    info = getShortcutInfo(c, context, iconTypeIndex,
+                                    info = getLauncherActionInfo(c, context, iconTypeIndex,
                                             iconPackageIndex, iconResourceIndex, iconIndex,
-                                            titleIndex);
-                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS;
+                                            titleIndex, actionIndex);
                                 }
 
                                 if (info != null) {
@@ -2228,6 +2229,67 @@ public class LauncherModel extends BroadcastReceiver {
         return info;
     }
 
+    /**
+     * Make an ShortcutInfo object for a shortcut that isn't an application.
+     */
+    private LauncherActionInfo getLauncherActionInfo(Cursor c, Context context,
+            int iconTypeIndex, int iconPackageIndex, int iconResourceIndex, int iconIndex,
+            int titleIndex, int actionIndex) {
+
+        Bitmap icon = null;
+        final LauncherActionInfo info = new LauncherActionInfo();
+
+        info.title = c.getString(titleIndex);
+        info.action = LauncherAction.Action.valueOf(c.getString(actionIndex));
+
+        int iconType = c.getInt(iconTypeIndex);
+        switch (iconType) {
+            case LauncherSettings.Favorites.ICON_TYPE_RESOURCE:
+                String packageName = c.getString(iconPackageIndex);
+                String resourceName = c.getString(iconResourceIndex);
+                PackageManager packageManager = context.getPackageManager();
+                info.customIcon = false;
+                // the resource
+                try {
+                    Resources resources = packageManager.getResourcesForApplication(packageName);
+                    if (resources != null) {
+                        final int id = resources.getIdentifier(resourceName, null, null);
+                        icon = Utilities.createIconBitmap(
+                                mIconCache.getFullResIcon(packageName, id), context);
+                    }
+                } catch (Exception e) {
+                    // drop this.  we have other places to look for icons
+                }
+                // the db
+                if (icon == null) {
+                    icon = getIconFromCursor(c, iconIndex, context);
+                }
+                // the fallback icon
+                if (icon == null) {
+                    icon = getFallbackIcon();
+                    info.usingFallbackIcon = true;
+                }
+                break;
+            case LauncherSettings.Favorites.ICON_TYPE_BITMAP:
+                icon = getIconFromCursor(c, iconIndex, context);
+                if (icon == null) {
+                    icon = getFallbackIcon();
+                    info.customIcon = false;
+                    info.usingFallbackIcon = true;
+                } else {
+                    info.customIcon = true;
+                }
+                break;
+            default:
+                icon = getFallbackIcon();
+                info.usingFallbackIcon = true;
+                info.customIcon = false;
+                break;
+        }
+        info.setIcon(icon);
+        return info;
+    }
+
     Bitmap getIconFromCursor(Cursor c, int iconIndex, Context context) {
         @SuppressWarnings("all") // suppress dead code warning
         final boolean debug = false;
@@ -2441,9 +2503,11 @@ public class LauncherModel extends BroadcastReceiver {
     }
     public static class WidgetAndShortcutNameComparator implements Comparator<Object> {
         private Collator mCollator;
+        private Context mContext;
         private PackageManager mPackageManager;
         private HashMap<Object, String> mLabelCache;
-        WidgetAndShortcutNameComparator(PackageManager pm) {
+        WidgetAndShortcutNameComparator(Context context, PackageManager pm) {
+            mContext = context;
             mPackageManager = pm;
             mLabelCache = new HashMap<Object, String>();
             mCollator = Collator.getInstance();
@@ -2457,6 +2521,8 @@ public class LauncherModel extends BroadcastReceiver {
                     labelA = ((AppWidgetProviderInfo) a).label;
                 } else if (a instanceof ResolveInfo) {
                     labelA = ((ResolveInfo) a).loadLabel(mPackageManager).toString();
+                } else if (a instanceof LauncherAction.Action) {
+                    labelA = mContext.getResources().getString(((LauncherAction.Action) a).getString());
                 }
                 mLabelCache.put(a, labelA);
             }
@@ -2467,6 +2533,8 @@ public class LauncherModel extends BroadcastReceiver {
                     labelB = ((AppWidgetProviderInfo) b).label;
                 } else if (b instanceof ResolveInfo) {
                     labelB = ((ResolveInfo) b).loadLabel(mPackageManager).toString();
+                } else if (b instanceof LauncherAction.Action) {
+                    labelB = mContext.getResources().getString(((LauncherAction.Action) b).getString());
                 }
                 mLabelCache.put(b, labelB);
             }

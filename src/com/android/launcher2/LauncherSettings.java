@@ -58,7 +58,7 @@ class LauncherSettings {
         /**
          * The gesture is a launcher action
          */
-        static final int ITEM_TYPE_ALLAPPS = 3;
+        static final int ITEM_TYPE_LAUNCHER_ACTION = 3;
 
         /**
          * The icon type.
@@ -143,6 +143,11 @@ class LauncherSettings {
         static final String LAUNCH_COUNT = "launchCount";
 
         static final String SORT_TYPE = "sortType";
+
+        /**
+         * The LauncherAction of a launcher action shortcut
+         */
+        static final String LAUNCHER_ACTION = "action";
 
         /**
          * The screen holding the favorite (if container is CONTAINER_DESKTOP)

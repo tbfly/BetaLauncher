@@ -45,6 +45,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -66,6 +67,8 @@ import com.android.launcher2.LauncherSettings.Favorites;
 import com.android.launcher2.preference.PreferencesProvider;
 import com.android.launcher2.preference.Preferences;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -322,6 +325,7 @@ public class Workspace extends PagedView
     private int mDefaultHomescreen;
     private boolean mStretchScreens;
     private boolean mShowSearchBar;
+    private boolean mShowHotseat;
     private boolean mHideIconLabels;
     private boolean mScrollWallpaper;
     private int mWallpaperSize;
@@ -342,6 +346,11 @@ public class Workspace extends PagedView
     private String mDownGestureAction;
     private String mPinchGestureAction;
     private String mSpreadGestureAction;
+
+    private int mOriginalPaddingTop;
+    private int mOriginalPaddingBottom;
+    private int mOriginalPaddingLeft;
+    private int mOriginalPaddingRight;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -416,6 +425,7 @@ public class Workspace extends PagedView
 
         mStretchScreens = PreferencesProvider.Interface.Homescreen.getStretchScreens();
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
+        mShowHotseat = PreferencesProvider.Interface.Dock.getShowDock();
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
         mTransitionEffect = PreferencesProvider.Interface.Homescreen.Scrolling.getTransitionEffect(
                 res.getString(R.string.config_workspaceDefaultTransitionEffect));
@@ -430,7 +440,7 @@ public class Workspace extends PagedView
         mShowScrollingIndicator = PreferencesProvider.Interface.Homescreen.Indicator.getShowScrollingIndicator();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Homescreen.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Homescreen.Indicator.getScrollingIndicatorPosition();
-        mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider();
+        mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider() && mShowHotseat;
 
         mUpGestureAction = PreferencesProvider.Interface.Homescreen.Gestures.getUpGestureAction();
         mDownGestureAction = PreferencesProvider.Interface.Homescreen.Gestures.getDownGestureAction();
@@ -540,22 +550,14 @@ public class Workspace extends PagedView
         setChildrenDrawnWithCacheEnabled(true);
         mMultiTouchController = new MultiTouchController(this, false);
 
+        mOriginalPaddingTop = getPaddingTop();
+        mOriginalPaddingBottom = getPaddingBottom();
+        mOriginalPaddingLeft = getPaddingLeft();
+        mOriginalPaddingRight = getPaddingRight();
+
+        inflateLayouts();
+
         final Resources res = getResources();
-        final float iconScale = (float)PreferencesProvider.Interface.Homescreen.getIconScale(
-                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
-
-        LayoutInflater inflater =
-                (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        for (int i = 0; i < mNumberHomescreens; i++) {
-            CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
-            screen.setChildrenScale(iconScale);
-            if (mStretchScreens) {
-                screen.setCellGaps(-1, -1);
-                screen.setPadding(0, 0, 0, 0);
-            }
-            addView(screen);
-        }
-
         try {
             mBackground = res.getDrawable(R.drawable.apps_customize_bg);
         } catch (Resources.NotFoundException e) {
@@ -567,6 +569,8 @@ public class Workspace extends PagedView
             int paddingTop = (int) res.getDimension(R.dimen.workspace_top_padding_qsb_hidden);
             setPadding(paddingLeft, paddingTop, getPaddingRight(), getPaddingBottom());
         }
+
+        setupHotseatPadding();
 
         if (!mShowScrollingIndicator) {
             disableScrollingIndicator();
@@ -582,6 +586,35 @@ public class Workspace extends PagedView
 
         mMaxDistanceForFolderCreation = (0.55f * res.getDimensionPixelSize(R.dimen.app_icon_size));
         mFlingThresholdVelocity = (int) (FLING_THRESHOLD_VELOCITY * mDensity);
+    }
+
+    public void setupHotseatPadding() {
+        final Resources res = getResources();
+        if (!mShowHotseat) {
+            int paddingRight = (int) res.getDimension(R.dimen.workspace_right_padding_hotseat_hidden);
+            int paddingBottom = (int) res.getDimension(R.dimen.workspace_bottom_padding_hotseat_hidden);
+            setPadding(getPaddingLeft(), getPaddingTop(), paddingRight, paddingBottom);
+        } else {
+            setPadding(mOriginalPaddingLeft, mOriginalPaddingTop, mOriginalPaddingRight, mOriginalPaddingBottom);
+        }
+        invalidate();
+    }
+
+    private void inflateLayouts() {
+        final Resources res = getResources();
+        final float iconScale = (float)PreferencesProvider.Interface.Homescreen.getIconScale(
+                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
+        LayoutInflater inflater =
+                (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < mNumberHomescreens; i++) {
+            CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
+            screen.setChildrenScale(iconScale);
+            if (mStretchScreens) {
+                screen.setCellGaps(-1, -1);
+                screen.setPadding(0, 0, 0, 0);
+            }
+            addView(screen);
+        }
     }
 
     protected void checkWallpaper() {
@@ -2308,7 +2341,7 @@ public class Workspace extends PagedView
                     }
                 }
             }
- 
+
             if (stateIsSmall || stateIsSpringLoaded) {
                 cl.setCameraDistance(1280 * mDensity);
                 cl.setPivotX(cl.getMeasuredWidth() * 0.5f);
@@ -3711,8 +3744,7 @@ public class Workspace extends PagedView
             final PendingAddItemInfo pendingInfo = (PendingAddItemInfo) dragInfo;
 
             boolean findNearestVacantCell = true;
-            if (pendingInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
-                    pendingInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS) {
+            if (pendingInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT) {
                 mTargetCell = findNearestArea(touchXY[0], touchXY[1], spanX, spanY,
                         cellLayout, mTargetCell);
                 float distance = cellLayout.getDistanceFromCell(mDragViewVisualCenter[0],
@@ -3759,8 +3791,14 @@ public class Workspace extends PagedView
                                 container, screen, mTargetCell, span, null);
                         break;
                     case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
-                        mLauncher.processShortcutFromDrop(pendingInfo.componentName,
-                                container, screen, mTargetCell, null);
+                        case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
+                        if (pendingInfo instanceof PendingAddActionInfo) {
+                            mLauncher.processActionFromDrop(((PendingAddActionInfo)pendingInfo).action,
+                                    container, screen, mTargetCell, null);
+                        } else {
+                            mLauncher.processShortcutFromDrop(pendingInfo.componentName,
+                                    container, screen, mTargetCell, null);
+                        }
                         break;
                     default:
                         throw new IllegalStateException("Unknown item type: " +
@@ -3791,7 +3829,7 @@ public class Workspace extends PagedView
             switch (info.itemType) {
             case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
             case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
-            case LauncherSettings.Favorites.ITEM_TYPE_ALLAPPS:
+            case LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION:
                 if (info.container == NO_ID && info instanceof ApplicationInfo) {
                     // Came from all apps -- make a copy
                     info = new ShortcutInfo((ApplicationInfo) info);
@@ -3922,7 +3960,7 @@ public class Workspace extends PagedView
 
         int[] finalPos = new int[2];
         float scaleXY[] = new float[2];
-        boolean scalePreview = !(info instanceof PendingAddShortcutInfo);
+        boolean scalePreview = !(info instanceof PendingAddShortcutInfo || info instanceof PendingAddActionInfo);
         getFinalPositionForDropAnimation(finalPos, scaleXY, dragView, cellLayout, info, mTargetCell,
                 scalePreview);
 
@@ -4696,25 +4734,63 @@ public class Workspace extends PagedView
         setCurrentPage(index);
     }
 
-    private void expandeStatusBar() {
-        //StatusBarManager sbm = (StatusBarManager)mLauncher.getSystemService(Context.STATUS_BAR_SERVICE);
-        //sbm.expandNotificationsPanel();
+    public void expandStatusBar() {
+       String methodName = "expandNotificationsPanel";
+       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            methodName = "expand";
+       }
+       try {
+            Object sbservice = mLauncher.getSystemService("statusbar");
+            Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
+            Method showsb = statusbarManager.getMethod("expand");
+            showsb.invoke(sbservice);
+        } catch (ClassNotFoundException e) {
+            // Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void performGestureAction(String gestureAction) {
-        if (gestureAction.equals("expand_status_bar")) {
-            expandeStatusBar();
+        if (gestureAction.equals("open_app_drawer")) {
+            mLauncher.showAllApps(true);
+        } else if (gestureAction.equals("recent_apps")) {
+            mLauncher.toggleRecentApps();
+        } else if (gestureAction.equals("search")) {
+            mLauncher.onSearchRequested();
+        } else if (gestureAction.equals("voice_search")) {
+            mLauncher.launchVoiceSearch();
+        } else if (gestureAction.equals("expand_status_bar")) {
+            expandStatusBar();
         } else if (gestureAction.equals("toggle_status_bar")) {
             mLauncher.toggleFullscreenMode();
         } else if (gestureAction.equals("default_homescreen")) {
             moveToDefaultScreen(true);
-        } else if (gestureAction.equals("open_app_drawer")) {
-            mLauncher.showAllApps(true);
         } else if (gestureAction.equals("show_previews")) {
             disableScrollingIndicator();
             mLauncher.showPreviewLayout(true);
-        }
-        else if (gestureAction.equals("show_settings")) {
+        } else if (gestureAction.equals("lock_unlock")) {
+            // Not done
+        } else if (gestureAction.equals("toggle_dock")) {
+            mLauncher.toggleHotseat();
+            setupHotseatPadding();
+        } else if (gestureAction.equals("quick_settings")) {
+            // Not done
+        } else if (gestureAction.equals("show_settings")) {
             Intent preferences = new Intent().setClass(mLauncher, Preferences.class);
             preferences.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);

@@ -271,6 +271,22 @@ s -->
     <string name="hidden_apps_title">Hidden Apps</string>
 
     <skip />
+
+    <!--             -->
+    <!-- Actions     -->
+    <!--             -->
+    <string name="action_recent_apps">Recent Apps</string>
+    <string name="action_search">Search</string>
+    <string name="action_voice_search">Voice Search</string>
+    <string name="action_expand_notifications">Notifications</string>
+    <string name="action_toggle_fullscreen">Toggle Fullscreen</string>
+    <string name="action_default_screen">Default Screen</string>
+    <string name="action_show_preview">Preview</string>
+    <string name="action_lock_unlock">Lock/Unlock</string>
+    <string name="action_toggle_dock">Toggle Dock</string>
+    <string name="action_quick_settings">Quick Settings</string>
+    <string name="action_launcher_settings">Launcher Settings</string>
+
     <!--             -->
     <!-- Preferences -->
     <!--             -->
