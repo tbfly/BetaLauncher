@@ -73,7 +73,7 @@
     <application
         android:name="com.android.launcher2.LauncherApplication"
         android:label="@string/application_name"
-        android:icon="@mipmap/ic_launcher_home"
+        android:icon="@drawable/ic_launcher_home"
         android:hardwareAccelerated="true"
         android:largeHeap="@bool/config_largeHeap"
         android:supportsRtl="true">
@@ -109,6 +109,9 @@
                 <category android:name="com.lennox.category.LAUNCHER_PREFERENCES" />
             </intent-filter>
         </activity>
+
+        <activity android:name="com.android.launcher2.preference.HiddenAppsActivity"
+            android:label="@string/hidden_apps_title" />
 
         <!-- Intent received used to install shortcuts from other applications -->
         <receiver

@@ -53,10 +53,9 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -84,6 +83,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -92,8 +92,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Advanceable;
 import android.widget.EditText;
@@ -110,6 +108,7 @@ import com.android.launcher2.preference.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -129,7 +128,6 @@ public final class Launcher extends Activity
         implements View.OnClickListener, OnLongClickListener, LauncherModel.Callbacks,
                    View.OnTouchListener {
     static final String TAG = "Launcher";
-    static final boolean LOGD = false;
 
     static final boolean PROFILE_STARTUP = false;
     static final boolean DEBUG_WIDGETS = false;
@@ -312,6 +310,8 @@ public final class Launcher extends Activity
     private boolean mShowSearchBar;
     private boolean mShowDockDivider;
     private boolean mHideIconLabels;
+    private boolean mAutoRotate;
+    private boolean mFullscreenMode;
 
     private boolean mWallpaperVisible;
 
@@ -330,8 +330,6 @@ public final class Launcher extends Activity
 
     private static ArrayList<PendingAddArguments> sPendingAddList
             = new ArrayList<PendingAddArguments>();
-
-    private static boolean sForceEnableRotation = isPropertyEnabled(FORCE_ENABLE_ROTATION_PROPERTY);
 
     private static class PendingAddArguments {
         int requestCode;
@@ -390,6 +388,8 @@ public final class Launcher extends Activity
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider();
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
+        mAutoRotate = PreferencesProvider.Interface.General.getAutoRotate(getResources().getBoolean(R.bool.allow_rotation));
+        mFullscreenMode = PreferencesProvider.Interface.General.getFullscreenMode();
 
         if (PROFILE_STARTUP) {
             android.os.Debug.startMethodTracing(
@@ -2556,6 +2556,15 @@ public final class Launcher extends Activity
         mWallpaperVisible = visible;
     }
 
+    private void updateFullscreenMode(boolean enable) {
+        int fsflags = enable ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0;
+        int curflags = getWindow().getAttributes().flags
+                & WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        if (fsflags != curflags) {
+            getWindow().setFlags(fsflags, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+     }
+
     private void dispatchOnLauncherTransitionPrepare(View v, boolean animated, boolean toWorkspace) {
         if (v instanceof LauncherTransitionable) {
             ((LauncherTransitionable) v).onLauncherTransitionPrepare(this, animated, toWorkspace);
@@ -2951,6 +2960,9 @@ public final class Launcher extends Activity
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        if (hasFocus && mFullscreenMode) {
+            updateFullscreenMode(true);
+        }
     }
 
     void showPreviewLayout(boolean animated) {
@@ -3827,19 +3839,14 @@ public final class Launcher extends Activity
         return oriMap[(d.getRotation() + indexOffset) % 4];
     }
 
-    public boolean isRotationEnabled() {
-        boolean enableRotation = sForceEnableRotation ||
-                getResources().getBoolean(R.bool.allow_rotation);
-        return enableRotation;
-    }
     public void lockScreenOrientation() {
-        if (isRotationEnabled()) {
+        if (mAutoRotate) {
             setRequestedOrientation(mapConfigurationOriActivityInfoOri(getResources()
                     .getConfiguration().orientation));
         }
     }
     public void unlockScreenOrientation(boolean immediate) {
-        if (isRotationEnabled()) {
+        if (mAutoRotate) {
             if (immediate) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             } else {
@@ -3849,6 +3856,8 @@ public final class Launcher extends Activity
                     }
                 }, RESTORE_SCREEN_ORIENTATION_DELAY);
             }
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         }
     }
 

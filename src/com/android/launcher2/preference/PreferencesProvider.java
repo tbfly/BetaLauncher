@@ -278,6 +278,14 @@ public final class PreferencesProvider {
             }
         }
 
+        public static class General {
+            public static boolean getAutoRotate(boolean def) {
+                return getBoolean("ui_general_orientation", def);
+            }
+            public static boolean getFullscreenMode() {
+                return getBoolean("ui_general_fullscreen", false);
+            }
+        }
     }
 
     public static class Application {

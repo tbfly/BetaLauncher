@@ -294,6 +294,8 @@ s -->
     <string name="preferences_interface_homescreen_general_stretch_screens_summary">Expand homescreens to fill the size of display</string>
     <string name="preferences_interface_homescreen_general_hide_icon_labels_title">Hide icon labels</string>
     <string name="preferences_interface_homescreen_general_hide_icon_labels_summary">Hide homescreen icon labels</string>
+    <string name="preferences_interface_general_icon_scale_title">Icon scale</string>
+    <string name="preferences_interface_general_icon_scale_summary">Scale of icons in homescreens and app drawer</string>
     <string name="preferences_interface_homescreen_scrolling_category">Scrolling</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_summary">Scrolling effect when scrolling homescreens</string>
@@ -328,6 +330,8 @@ s -->
     <string name="preferences_interface_drawer_summary">Apps and widgets drawer</string>
     <string name="preferences_interface_drawer_orientation_title">Orientation</string>
     <string name="preferences_interface_drawer_orientation_summary">Choose which way the drawer scrolls</string>
+    <string name="preferences_interface_drawer_hidden_apps_title">Hidden apps</string>
+    <string name="preferences_interface_drawer_hidden_apps_summary">Hide apps from the drawer</string>
     <string name="preferences_interface_drawer_category_title">General</string>
     <string name="preferences_interface_drawer_app_grid_title">App grid size</string>
     <string name="preferences_interface_drawer_app_grid_summary">Choose the number of rows/columns in the app drawer</string>
@@ -373,8 +377,10 @@ s -->
 
     <!-- General -->
     <string name="preferences_interface_general_title">General</string>
-    <string name="preferences_interface_general_icon_scale_title">Icon scale</string>
-    <string name="preferences_interface_general_icon_scale_summary">Scale of icons in homescreens and app drawer</string>
+    <string name="preferences_interface_general_summary">Gestures and overall behaviour</string>
+    <string name="preferences_interface_general_orientation_title">Auto-rotate screen</string>
+    <string name="preferences_interface_general_fullscreen_title">Fullscreen mode</string>
+    <string name="preferences_interface_general_fullscreen_summary">Hide the status bar to extend the homescreen</string>
 
     <!-- Folder sort types -->
     <string name="menu_folder_sort_none">None</string>

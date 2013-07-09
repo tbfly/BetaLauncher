@@ -113,6 +113,13 @@
     <PreferenceScreen android:title="@string/preferences_interface_drawer_title"
         android:summary="@string/preferences_interface_drawer_summary" >
     <PreferenceCategory android:title="@string/preferences_interface_drawer_category_title">
+        <Preference android:key="ui_drawer_hidden_apps"
+            android:title="@string/preferences_interface_drawer_hidden_apps_title"
+            android:summary="@string/preferences_interface_drawer_hidden_apps_summary">
+            <intent
+                android:targetPackage="com.android.launcher"
+                android:targetClass="com.android.launcher2.preference.HiddenAppsActivity"/>
+        </Preference>
         <com.android.launcher2.preference.DoubleNumberPickerPreference android:key="ui_drawer_grid"
             android:title="@string/preferences_interface_drawer_app_grid_title"
             android:summary="@string/preferences_interface_drawer_app_grid_summary"
@@ -226,7 +233,13 @@
     </PreferenceCategory>
     </PreferenceScreen>
 
-
+    <PreferenceScreen android:title="@string/preferences_interface_general_title"
+        android:summary="@string/preferences_interface_general_summary" >
+    <CheckBoxPreference android:key="ui_general_orientation"
+        android:title="@string/preferences_interface_general_orientation_title" />
+    <CheckBoxPreference android:key="ui_general_fullscreen"
+        android:title="@string/preferences_interface_general_fullscreen_title"
+        android:summary="@string/preferences_interface_general_fullscreen_summary" />
         <PreferenceScreen android:title="@string/preferences_interface_homescreen_gestures_title"
                 android:summary="@string/preferences_interface_homescreen_gestures_summary" >
             <ListPreference android:key="ui_homescreen_up_gesture"
@@ -254,5 +267,7 @@
                 android:entryValues="@array/gesture_target_values"
                 android:defaultValue="nothing" />
         </PreferenceScreen>
+    </PreferenceScreen>
+
 
 </PreferenceScreen>
