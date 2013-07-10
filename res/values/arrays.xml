@@ -39,6 +39,8 @@
         <item>Cylinder Out</item>
         <item>Cube In</item>
         <item>Cube Out</item>
+        <item>Bouncy Cube In</item>
+        <item>Bouncy Cube Out</item>
         <item>Spin</item>
         <item>Flip</item>
         <item>Stack</item>
@@ -57,6 +59,8 @@
         <item>CylinderOut</item>
         <item>CubeIn</item>
         <item>CubeOut</item>
+        <item>CubeBouncyIn</item>
+        <item>CubeBouncyOut</item>
         <item>Spin</item>
         <item>Flip</item>
         <item>Stack</item>

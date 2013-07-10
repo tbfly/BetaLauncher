@@ -304,6 +304,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         Flip,
         CubeIn,
         CubeOut,
+        CubeBouncyIn,
+        CubeBouncyOut,
         Stack,
         Accordion,
         CylinderIn,
@@ -1958,8 +1960,41 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
+                float rotationAmount = (in ? 90.0f : 110.0f);
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
-                float rotation = (in ? 90.0f : -90.0f) * scrollProgress;
+                float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
+                float scale = 1.0f - Math.abs(scrollProgress) * 0.2f;
+
+                if (in) {
+                    v.setCameraDistance(mDensity * mCameraDistance);
+                }
+                v.setScaleX(scale);
+                v.setScaleY(scale);
+                if (!mVertical) {
+                    if (in) v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                    v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
+                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                    v.setRotationY(rotation);
+                } else {
+                    if (in) v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                    v.setPivotY((scrollProgress + 1) * v.getMeasuredHeight() * 0.5f);
+                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                    v.setRotationX(-rotation);
+                }
+                if (mFadeInAdjacentScreens) {
+                    float alpha = 1 - Math.abs(scrollProgress);
+                    v.setAlpha(alpha);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledCubeBouncy(int screenScroll, boolean in) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getPageAt(i);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, i);
+                float rotation = (in ? 110.0f : -110.0f) * scrollProgress;
 
                 if (in) {
                     v.setCameraDistance(mDensity * mCameraDistance);
@@ -2215,6 +2250,12 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     break;
                 case CubeOut:
                     screenScrolledCube(scroll, false);
+                    break;
+                case CubeBouncyIn:
+                    screenScrolledCubeBouncy(scroll, true);
+                    break;
+                case CubeBouncyOut:
+                    screenScrolledCubeBouncy(scroll, false);
                     break;
                 case Stack:
                     screenScrolledStack(scroll);

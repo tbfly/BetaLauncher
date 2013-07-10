@@ -305,6 +305,8 @@ public class Workspace extends PagedView
         Flip,
         CubeIn,
         CubeOut,
+        CubeBouncyIn,
+        CubeBouncyOut,
         Stack,
         Accordion,
         CylinderIn,
@@ -1571,9 +1573,10 @@ public class Workspace extends PagedView
         for (int i = 0; i < getChildCount(); i++) {
             CellLayout cl = (CellLayout) getPageAt(i);
             if (cl != null) {
+                float rotationAmount = (in ? 90.0f : 110.0f);
                 float scrollProgress = getScrollProgress(screenScroll, cl, i);
-                float rotation = (in ? 90.0f : -90.0f) * scrollProgress;
-                float scale = 1.0f - Math.abs(scrollProgress) * 0.2f;
+                float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
+                float scale = 1.0f - Math.abs(scrollProgress) * 0.1f;
 
                 if (in) {
                     cl.setCameraDistance(mDensity * mCameraDistance);
@@ -1583,6 +1586,26 @@ public class Workspace extends PagedView
                     cl.setScaleY(scale);
                     cl.setPivotX((scrollProgress + 1) * cl.getMeasuredWidth() * 0.5f);
                 }
+                cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
+                cl.setRotationY(rotation);
+                if (mFadeInAdjacentScreens && !isSmall()) {
+                    setCellLayoutFadeAdjacent(cl, scrollProgress);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledCubeBouncy(int screenScroll, boolean in) {
+        for (int i = 0; i < getChildCount(); i++) {
+            CellLayout cl = (CellLayout) getPageAt(i);
+            if (cl != null) {
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (in ? 110.0f : -110.0f) * scrollProgress;
+
+                if (in) {
+                    cl.setCameraDistance(mDensity * mCameraDistance);
+                }
+                cl.setPivotX(scrollProgress < 0 ? 0 : cl.getMeasuredWidth());
                 cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
                 cl.setRotationY(rotation);
                 if (mFadeInAdjacentScreens && !isSmall()) {
@@ -1799,6 +1822,12 @@ public class Workspace extends PagedView
                         break;
                     case CubeOut:
                         screenScrolledCube(scroll, false);
+                        break;
+                    case CubeBouncyIn:
+                        screenScrolledCubeBouncy(scroll, true);
+                        break;
+                    case CubeBouncyOut:
+                        screenScrolledCubeBouncy(scroll, false);
                         break;
                     case Stack:
                         screenScrolledStack(scroll);
@@ -2307,9 +2336,18 @@ public class Workspace extends PagedView
             // Cube Effects
             if ((mTransitionEffect == TransitionEffect.CubeIn || mTransitionEffect == TransitionEffect.CubeOut) && stateIsNormal) {
                 if (i < mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? -90.0f : 90.0f;
+                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? -110.0f : 90.0f;
                 } else if (i > mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? 90.0f : -90.0f;
+                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? 110.0f : -90.0f;
+                }
+            }
+
+            // Cube Bouncy Effects
+            if ((mTransitionEffect == TransitionEffect.CubeBouncyIn || mTransitionEffect == TransitionEffect.CubeBouncyOut) && stateIsNormal) {
+                if (i < mCurrentPage) {
+                    rotationY = mTransitionEffect == TransitionEffect.CubeBouncyOut ? -110.0f : 90.0f;
+                } else if (i > mCurrentPage) {
+                    rotationY = mTransitionEffect == TransitionEffect.CubeBouncyOut ? 110.0f : -90.0f;
                 }
             }
 
