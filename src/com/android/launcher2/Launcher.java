@@ -1636,7 +1636,7 @@ public final class Launcher extends Activity
                     launchVoiceSearch();
                     break;
                 case ExpandNotifications:
-                    mWorkspace.expandStatusBar();
+                    mWorkspace.expandStatusBar(false);
                     break;
                 case ToggleFullscreen:
                     toggleFullscreenMode();
@@ -1655,6 +1655,7 @@ public final class Launcher extends Activity
                     mWorkspace.setupHotseatPadding();
                     break;
                 case QuickSettings:
+                    mWorkspace.expandStatusBar(true);
                     break;
                 case LauncherSettings:
                     Intent preferences = new Intent().setClass(this, Preferences.class);
@@ -2267,7 +2268,7 @@ public final class Launcher extends Activity
                     launchVoiceSearch();
                     break;
                 case ExpandNotifications:
-                    mWorkspace.expandStatusBar();
+                    mWorkspace.expandStatusBar(false);
                     break;
                 case ToggleFullscreen:
                     toggleFullscreenMode();
@@ -2286,6 +2287,7 @@ public final class Launcher extends Activity
                     mWorkspace.setupHotseatPadding();
                     break;
                 case QuickSettings:
+                    mWorkspace.expandStatusBar(true);
                     break;
                 case LauncherSettings:
                     Intent preferences = new Intent().setClass(this, Preferences.class);
