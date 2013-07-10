@@ -66,16 +66,6 @@
         <attr name="maxGap" format="dimension" />
     </declare-styleable>
 
-    <!-- StrokedTextView specific attributes. -->
-    <declare-styleable name="StrokedTextView">
-        <!-- The color of the stroke outline -->
-        <attr name="strokeColor" format="color" />
-        <!-- The color of the text -->
-        <attr name="strokeTextColor" format="color" />
-        <!-- The width of the stroke -->
-        <attr name="strokeWidth" format="float" />
-    </declare-styleable>
-
     <!-- HolographicLinearLayout specific attributes. -->
     <declare-styleable name="HolographicLinearLayout">
         <!-- The source view to generate and apply the drawable states to/from -->

@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -66,6 +67,14 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private static final int STYLE_STACKED = 0;
     private static final int STYLE_GRID = 1;
     private static final int STYLE_CAROUSEL = 2;
+    private static final int STYLE_FAN = 3;
+    private static final int STYLE_IOS = 4;
+
+    private static final int BACKGROUND_RING = 0;
+    private static final int BACKGROUND_SQUARE = 1;
+    private static final int BACKGROUND_DISC = 2;
+    private static final int BACKGROUND_PLATFORM = 3;
+    private static final int BACKGROUND_IOS = 4;
 
     private static final int FINAL_ITEM_ANIMATION_DURATION = 200;
 
@@ -91,6 +100,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private int mNumItemsInPreview = NUM_ITEMS_IN_PREVIEW;
     private int mFolderIconStyle = STYLE_STACKED;
+    private int mFolderIconBackground = BACKGROUND_RING;
 
     // These variables are all associated with the drawing of the preview; they are stored
     // as member variables for shared usage and to avoid computation on each frame
@@ -119,8 +129,21 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     }
 
     private void init() {
-        mFolderIconStyle = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconStyle(getContext());
-        mNumItemsInPreview = (mFolderIconStyle == STYLE_GRID) ? 4 : 3;
+        mFolderIconStyle = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconStyle();
+        mFolderIconBackground = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconBackground();
+        switch (mFolderIconStyle) {
+            case STYLE_STACKED:
+            case STYLE_CAROUSEL:
+            case STYLE_FAN:
+                mNumItemsInPreview = 3;
+                break;
+            case STYLE_GRID:
+                mNumItemsInPreview = 4;
+                break;
+            case STYLE_IOS:
+                mNumItemsInPreview = 9;
+                break;
+        }
         mLongPressHelper = new CheckLongPressHelper(this);
     }
 
@@ -139,6 +162,27 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         icon.mFolderName = (BubbleTextView) icon.findViewById(R.id.folder_icon_name);
         icon.mFolderName.setText(folderInfo.title);
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
+
+        int folderIcon;
+        switch (icon.mFolderIconBackground) {
+            case BACKGROUND_SQUARE:
+                folderIcon = R.drawable.portal_square_inner_holo;
+                break;
+            case BACKGROUND_DISC:
+                folderIcon = R.drawable.portal_disc_inner_holo;
+                break;
+            case BACKGROUND_PLATFORM:
+                folderIcon = R.drawable.portal_platform_inner_holo;
+                break;
+            case BACKGROUND_IOS:
+                folderIcon = R.drawable.portal_ios_inner_holo;
+                break;
+            case BACKGROUND_RING:
+            default:
+                folderIcon = R.drawable.portal_ring_inner_holo;
+                break;
+        }
+        icon.mPreviewBackground.setImageResource(folderIcon);
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(launcher);
@@ -495,6 +539,10 @@ public class FolderIcon extends LinearLayout implements FolderListener {
                 return computePreviewItemDrawingParamsGrid(index, params);
             case STYLE_CAROUSEL:
                 return computePreviewItemDrawingParamsCarousel(index, params);
+            case STYLE_FAN:
+                return computePreviewItemDrawingParamsFan(index, params);
+            case STYLE_IOS:
+                return computePreviewItemDrawingParamsIos(index, params);
         }
         return params;
     }
@@ -556,6 +604,35 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         return params;
     }
 
+    private PreviewItemDrawingParams computePreviewItemDrawingParamsIos(int index,
+            PreviewItemDrawingParams params) {
+        //index = mNumItemsInPreview - index - 1;
+        float iconScale = 0.30f;
+
+        // We want to imagine our coordinates from the bottom left, growing up and to the
+        // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
+        float totalCellSize = mAvailableSpaceInPreview / 3;
+        float iconSize = mIntrinsicIconSize * iconScale;
+        float cellOffset = (totalCellSize - iconSize) / 3f;
+        int cellX = index % (mNumItemsInPreview / 3);
+        int cellY = index / (mNumItemsInPreview / 3);
+        float xOffset = (totalCellSize * cellX) + cellOffset;
+        float yOffset = (totalCellSize * cellY) + cellOffset + mPreviewOffsetY;
+        float transX = xOffset;
+        float transY = yOffset;
+        final int overlayAlpha = 0;
+
+        if (params == null) {
+            params = new PreviewItemDrawingParams(transX, transY, iconScale, overlayAlpha);
+        } else {
+            params.transX = transX;
+            params.transY = transY;
+            params.scale = iconScale;
+            params.overlayAlpha = overlayAlpha;
+        }
+        return params;
+    }
+
     private PreviewItemDrawingParams computePreviewItemDrawingParamsCarousel(int index,
                                                                             PreviewItemDrawingParams params) {
         float r = (index == 0) ? ((mNumItemsInPreview - 2) * 1.0f) / (mNumItemsInPreview - 1) :
@@ -572,6 +649,45 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             alpha = 80;
         } else {
             yOffset = mMaxPerspectiveShift + scaledSize/3;
+            xOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
+            alpha = 0;
+        }
+        //float scaleOffsetCorrection = (1 - scale) * mBaselineIconSize;
+
+        // We want to imagine our coordinates from the bottom left, growing up and to the
+        // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
+        float transY = yOffset;// + scaledSize + scaleOffsetCorrection);
+        float transX = xOffset;// + scaleOffsetCorrection;
+        float totalScale = mBaselineIconScale * scale;
+        final int overlayAlpha = alpha;//(int) (80 * (1 - r));
+
+        if (params == null) {
+            params = new PreviewItemDrawingParams(transX, transY, totalScale, overlayAlpha);
+        } else {
+            params.transX = transX;
+            params.transY = transY;
+            params.scale = totalScale;
+            params.overlayAlpha = overlayAlpha;
+        }
+        return params;
+    }
+
+    private PreviewItemDrawingParams computePreviewItemDrawingParamsFan(int index,
+                                                                            PreviewItemDrawingParams params) {
+        float r = (index == 0) ? ((mNumItemsInPreview - 2) * 1.0f) / (mNumItemsInPreview - 1) :
+                0;
+        float scale = (1 - PERSPECTIVE_SCALE_FACTOR * (1 - r));
+
+        float yOffset;
+        float xOffset;
+        int alpha;
+        float scaledSize = scale * mBaselineIconSize;
+        if (index > 0 ) {
+            yOffset = scaledSize/2;
+            xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - scaledSize;
+            alpha = 80;
+        } else {
+            yOffset = scaledSize/3;
             xOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
             alpha = 0;
         }

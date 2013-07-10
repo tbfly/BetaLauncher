@@ -344,8 +344,11 @@ s -->
     <string name="preferences_interface_homescreen_indicator_fade_summary">Fade away the indicator after the homescreen has changed</string>
     <string name="preferences_interface_homescreen_indicator_position_title">Indicator position</string>
     <string name="preferences_interface_homescreen_indicator_position_summary">Choose where to show the indicator on the screen</string>
+    <string name="preferences_interface_homescreen_folder_style_category">Folder icon style</string>
     <string name="preferences_interface_homescreen_folder_style_title">Style</string>
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
+    <string name="preferences_interface_homescreen_folder_background_title">Background</string>
+    <string name="preferences_interface_homescreen_folder_background_summary">Folder background icon</string>
     <string name="preferences_interface_homescreen_gestures_title">Gestures</string>
     <string name="preferences_interface_homescreen_gestures_summary">Assign actions to homescreen gestures</string>
     <string name="preferences_interface_homescreen_gestures_up_gesture_title">Swipe up</string>

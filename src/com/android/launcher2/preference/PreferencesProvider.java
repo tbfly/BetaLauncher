@@ -159,8 +159,11 @@ public final class PreferencesProvider {
             }
 
             public static class FolderIconStyle {
-                public static int getFolderIconStyle(Context context) {
+                public static int getFolderIconStyle() {
                     return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));
+                }
+                public static int getFolderIconBackground() {
+                    return Integer.parseInt(getString("ui_homescreen_folder_background", "0"));
                 }
             }
 

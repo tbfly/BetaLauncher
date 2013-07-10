@@ -49,19 +49,28 @@
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_homescreen_icon_scale"
             android:title="@string/preferences_interface_general_icon_scale_title"
             android:summary="@string/preferences_interface_general_icon_scale_summary"
-            launcher:min="80"
-            launcher:max="120"
+            launcher:min="50"
+            launcher:max="150"
             launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
         <CheckBoxPreference android:key="ui_homescreen_general_resize_any_widget"
             android:title="@string/preferences_interface_homescreen_general_resize_any_widget_title"
             android:summary="@string/preferences_interface_homescreen_general_resize_any_widget_summary"
             android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preferences_interface_homescreen_folder_style_category">
         <ListPreference
             android:key="ui_homescreen_folder_style"
             android:title="@string/preferences_interface_homescreen_folder_style_title"
             android:summary="@string/preferences_interface_homescreen_folder_style_summary"
             android:entries="@array/folder_icon_style_names"
             android:entryValues="@array/folder_icon_style_values"
+            android:defaultValue="0" />
+        <ListPreference
+            android:key="ui_homescreen_folder_background"
+            android:title="@string/preferences_interface_homescreen_folder_background_title"
+            android:summary="@string/preferences_interface_homescreen_folder_background_summary"
+            android:entries="@array/folder_icon_background_names"
+            android:entryValues="@array/folder_icon_background_values"
             android:defaultValue="0" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_scrolling_category">
@@ -152,8 +161,8 @@
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_icon_scale"
             android:title="@string/preferences_interface_general_icon_scale_title"
             android:summary="@string/preferences_interface_general_icon_scale_summary"
-            launcher:min="80"
-            launcher:max="120"
+            launcher:min="50"
+            launcher:max="150"
             launcher:defaultValueSeekbar="@integer/app_icon_scale_percentage" />
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_transparency"
             android:title="@string/preferences_interface_drawer_transparency_title"
@@ -241,8 +250,8 @@
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_dock_icon_scale"
             android:title="@string/preferences_interface_dock_icon_scale_title"
             android:summary="@string/preferences_interface_dock_icon_scale_summary"
-            launcher:min="80"
-            launcher:max="120"
+            launcher:min="50"
+            launcher:max="150"
             android:defaultValue="@integer/hotseat_item_scale_percentage" />
     </PreferenceCategory>
     </PreferenceScreen>
