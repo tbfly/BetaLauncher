@@ -58,6 +58,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
     <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
@@ -132,6 +133,28 @@
                 <action android:name="com.android.launcher.action.UNINSTALL_SHORTCUT" />
             </intent-filter>
         </receiver>
+
+        <!-- Built in activity picker -->
+        <activity android:name="com.android.launcher2.ActivityPicker"
+                android:label="@string/menu_activity_picker_label"
+                android:theme="@android:style/Theme.Holo.Dialog"
+                android:finishOnCloseSystemDialogs="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PICK_ACTIVITY" />
+                <action android:name="com.android.launcher2.PICK_ACTIVITY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Built in activity shortcut maker -->
+        <activity android:name="com.android.launcher2.ShortcutPicker"
+                android:label="@string/menu_activity_picker_label"
+                android:theme="@android:style/Theme.Holo.Dialog" >
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- Built in widget picker -->
         <activity android:name="com.android.launcher2.appwidgetpicker.AppWidgetPickerActivity"
