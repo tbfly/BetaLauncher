@@ -375,6 +375,17 @@ public final class Launcher extends Activity
                     .build());
         }
 
+        PackageManager pm = getPackageManager(); 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            pm.setComponentEnabledSetting(new ComponentName(
+                   "com.android.launcher", "com.android.launcher2.appwidgetpicker.AppWidgetPickerActivity"), 
+                   PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+        } else {
+            pm.setComponentEnabledSetting(new ComponentName(
+                   "com.android.launcher", "com.android.launcher2.appwidgetpicker.AppWidgetPickerActivity"), 
+                   PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+        }
+
         super.onCreate(savedInstanceState);
         LauncherApplication app = ((LauncherApplication)getApplication());
         mSharedPrefs = getSharedPreferences(LauncherApplication.getSharedPreferencesKey(),

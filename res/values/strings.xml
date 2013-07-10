@@ -280,6 +280,11 @@ s -->
 
     <skip />
 
+    <!-- Widget picker     -->
+    <string name="widget_picker">Widget Picker</string>
+    <string name="widget_picker_title">Choose widget</string>
+    <string name="widget_count">(%d widgets)</string>
+
     <!--             -->
     <!-- Actions     -->
     <!--             -->

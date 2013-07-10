@@ -133,6 +133,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Built in widget picker -->
+        <activity android:name="com.android.launcher2.appwidgetpicker.AppWidgetPickerActivity"
+                android:label="@string/widget_picker"
+                android:theme="@android:style/Theme.Holo.Dialog" > 
+            <intent-filter android:priority="999" >
+                <action android:name="android.appwidget.action.APPWIDGET_PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>                
+        </activity>
+
         <!-- The settings provider contains Home's data, like the workspace favorites -->
         <provider
             android:name="com.android.launcher2.LauncherProvider"
