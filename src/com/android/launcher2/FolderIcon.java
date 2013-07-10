@@ -93,7 +93,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     public static Drawable sSharedFolderLeaveBehind = null;
 
-    private ImageView mPreviewBackground;
+    public ImageView mPreviewBackground;
     private BubbleTextView mFolderName;
 
     FolderRingAnimator mFolderRingAnimator = null;

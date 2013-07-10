@@ -108,7 +108,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     FolderEditText mFolderName;
     private float mFolderIconPivotX;
     private float mFolderIconPivotY;
-    private FrameLayout mFolderFooter;
+    private LinearLayout mFolderFooter;
 
     private boolean mIsEditingName = false;
     private InputMethodManager mInputMethodManager;
@@ -170,7 +170,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mContent = (CellLayout) findViewById(R.id.folder_content);
         mContent.setGridSize(0, 0);
         mContent.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
-        mFolderFooter = (FrameLayout) findViewById(R.id.folder_footer);
+        mFolderFooter = (LinearLayout) findViewById(R.id.folder_footer);
         mFolderName = (FolderEditText) findViewById(R.id.folder_name);
         mFolderName.setFolder(this);
         if (mLauncher.getLockWorkspace()) {
@@ -372,6 +372,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
     void setFolderIcon(FolderIcon icon) {
         mFolderIcon = icon;
+        //setBackgroundDrawable(mFolderIcon.mPreviewBackground.getDrawable());
     }
 
     @Override
