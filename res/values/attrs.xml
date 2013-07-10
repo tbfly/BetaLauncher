@@ -155,7 +155,7 @@
         <attr name="min" />
         <attr name="prefix" format="string" />
         <attr name="suffix" format="string" />
-        <attr name="defaultValueSeekbar" format="string" />
+        <attr name="defaultValue" format="integer" />
     </declare-styleable>
 
 </resources>
