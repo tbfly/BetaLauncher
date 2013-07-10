@@ -4740,15 +4740,18 @@ public class Workspace extends PagedView
         setCurrentPage(index);
     }
 
-    public void expandStatusBar() {
+    public void expandStatusBar(boolean isQuickSettings) {
        String methodName = "expandNotificationsPanel";
-       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+       if (isQuickSettings) {
+            methodName = "expandSettingsPanel";
+       } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            android.util.Log.d("[LX]", "SDK " + Build.VERSION.SDK_INT);
             methodName = "expand";
        }
        try {
             Object sbservice = mLauncher.getSystemService("statusbar");
             Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
-            Method showsb = statusbarManager.getMethod("expand");
+            Method showsb = statusbarManager.getMethod(methodName);
             showsb.invoke(sbservice);
         } catch (ClassNotFoundException e) {
             // Auto-generated catch block
@@ -4781,7 +4784,7 @@ public class Workspace extends PagedView
         } else if (gestureAction.equals("voice_search")) {
             mLauncher.launchVoiceSearch();
         } else if (gestureAction.equals("expand_status_bar")) {
-            expandStatusBar();
+            expandStatusBar(false);
         } else if (gestureAction.equals("toggle_status_bar")) {
             mLauncher.toggleFullscreenMode();
         } else if (gestureAction.equals("default_homescreen")) {
@@ -4795,7 +4798,7 @@ public class Workspace extends PagedView
             mLauncher.toggleHotseat();
             setupHotseatPadding();
         } else if (gestureAction.equals("quick_settings")) {
-            // Not done
+            expandStatusBar(true);
         } else if (gestureAction.equals("show_settings")) {
             Intent preferences = new Intent().setClass(mLauncher, Preferences.class);
             preferences.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
