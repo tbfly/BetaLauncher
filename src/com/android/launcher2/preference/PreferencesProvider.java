@@ -303,8 +303,8 @@ public final class PreferencesProvider {
             public static int getIconScale(int def) {
                 return getInt("ui_dock_icon_scale", def);
             }
-            public static boolean getShowBackground() {
-                return getBoolean("ui_dock_background", true);
+            public static int getDockBackground() {
+                return Integer.parseInt(getString("ui_dock_background", "0"));
             }
             public static boolean getShowDivider() {
                 return getBoolean("ui_dock_divider", false);

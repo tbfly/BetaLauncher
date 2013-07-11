@@ -46,8 +46,8 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
     private static final String APPS_TAB_TAG = "APPS";
     private static final String WIDGETS_TAB_TAG = "WIDGETS";
 
-    private static final int TAB_STYLE_LENNOX = 0;
-    private static final int TAB_STYLE_HOLO = 1;
+    private static final int TAB_STYLE_HOLO = 0;
+    private static final int TAB_STYLE_LENNOX = 1;
 
     private final LayoutInflater mLayoutInflater;
     private ViewGroup mTabs;

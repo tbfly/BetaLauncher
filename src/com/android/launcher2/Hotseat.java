@@ -45,6 +45,10 @@ public class Hotseat extends PagedView {
 
     private static final int DEFAULT_CELL_COUNT = 5;
 
+    private static final int BACKGROUND_NONE = 0;
+    private static final int BACKGROUND_LENNOX = 1;
+    private static final int BACKGROUND_CHAOS = 2;
+
     public Hotseat(Context context) {
         this(context, null);
     }
@@ -76,10 +80,21 @@ public class Hotseat extends PagedView {
         mCellCount = a.getInt(R.styleable.Hotseat_cellCount, DEFAULT_CELL_COUNT);
         mCellCount = PreferencesProvider.Interface.Dock.getNumberIcons(mCellCount);
   
-        if (!PreferencesProvider.Interface.Dock.getShowBackground()) {
-            Drawable background = getBackground();
-            background.setAlpha(0);
+        int dockBackground = PreferencesProvider.Interface.Dock.getDockBackground();
+        int dockBackgroundResource;
+        switch (dockBackground) {
+            case BACKGROUND_NONE:
+                dockBackgroundResource = android.R.color.transparent;
+                break;
+            case BACKGROUND_LENNOX:
+                dockBackgroundResource = R.drawable.hotseat_background;
+                break;
+            case BACKGROUND_CHAOS:
+            default:
+                dockBackgroundResource = R.drawable.hotseat_background_chaos;
+                break;
         }
+        setBackgroundResource(dockBackgroundResource);
 
         LauncherModel.updateHotseatLayoutCells(mCellCount);
 

@@ -28,7 +28,7 @@ public class LauncherAction {
         DefaultScreen,
         ShowPreview,
         LockUnlock,
-        ToggleDock,
+        //ToggleDock,
         QuickSettings,
         LauncherSettings;
         int getString() {
@@ -57,8 +57,8 @@ public class LauncherAction {
                     return R.string.action_show_preview;
                 case LockUnlock:
                     return R.string.action_lock_unlock;
-                case ToggleDock:
-                    return R.string.action_toggle_dock;
+                //case ToggleDock:
+                //    return R.string.action_toggle_dock;
                 case QuickSettings:
                     return R.string.action_quick_settings;
                 case LauncherSettings:
@@ -87,8 +87,8 @@ public class LauncherAction {
                     return R.drawable.action_show_preview;
                 case LockUnlock:
                     return R.drawable.action_lock_unlock;
-                case ToggleDock:
-                    return R.drawable.action_toggle_dock;
+                //case ToggleDock:
+                //    return R.drawable.action_toggle_dock;
                 case QuickSettings:
                     return R.drawable.action_quick_settings;
                 case LauncherSettings:

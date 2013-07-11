@@ -75,6 +75,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private static final int BACKGROUND_DISC = 2;
     private static final int BACKGROUND_PLATFORM = 3;
     private static final int BACKGROUND_IOS = 4;
+    private static final int BACKGROUND_MIUI = 5;
 
     private static final int FINAL_ITEM_ANIMATION_DURATION = 200;
 
@@ -176,6 +177,9 @@ public class FolderIcon extends LinearLayout implements FolderListener {
                 break;
             case BACKGROUND_IOS:
                 folderIcon = R.drawable.portal_ios_inner_holo;
+                break;
+            case BACKGROUND_MIUI:
+                folderIcon = R.drawable.portal_miui_inner_holo;
                 break;
             case BACKGROUND_RING:
             default:

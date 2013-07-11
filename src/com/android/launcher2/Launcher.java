@@ -1661,9 +1661,10 @@ public final class Launcher extends Activity
                 case LockUnlock:
                     toggleLockWorkspace();
                     break;
-                case ToggleDock:
-                    toggleHotseat();
-                    break;
+                //case ToggleDock:
+                //    toggleHotseat();
+                //    mWorkspace.requestLayout();
+                //    break;
                 case QuickSettings:
                     mWorkspace.expandStatusBar(true);
                     break;
@@ -2291,9 +2292,10 @@ public final class Launcher extends Activity
                 case LockUnlock:
                     toggleLockWorkspace();
                     break;
-                case ToggleDock:
-                    toggleHotseat();
-                    break;
+                //case ToggleDock:
+                //    toggleHotseat();
+                //    mWorkspace.requestLayout();
+                //    break;
                 case QuickSettings:
                     mWorkspace.expandStatusBar(true);
                     break;

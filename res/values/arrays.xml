@@ -131,10 +131,22 @@
         <item>2</item>
     </string-array>
 
+    <!-- Hotseat background options -->
+    <string-array name="dock_background_names">
+        <item>None</item>
+        <item>Lennox</item>
+        <item>ChaOs</item>
+    </string-array>
+    <string-array name="dock_background_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
     <!-- Tab style options -->
     <string-array name="tab_style_names">
-        <item>Lennox</item>
         <item>Holo</item>
+        <item>Lennox</item>
     </string-array>
     <string-array name="tab_style_values">
         <item>0</item>
@@ -198,9 +210,9 @@
         <item>@string/action_default_screen</item>
         <item>@string/action_show_preview</item>
         <item>@string/action_lock_unlock</item>
-        <item>@string/action_toggle_dock</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
+    <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values_pre42" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -212,8 +224,8 @@
         <item>default_homescreen</item>
         <item>show_previews</item>
         <item>lock_unlock</item>
-        <item>toggle_dock</item>
         <item>show_settings</item>
     </string-array>
+    <!--<item>toggle_dock</item>-->
 
 </resources>
