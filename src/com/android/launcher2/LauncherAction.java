@@ -3,6 +3,7 @@ package com.android.launcher2;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -129,7 +130,9 @@ public class LauncherAction {
 
             List<Action> items = LauncherAction.getAllActions();
             for (Action item : items) {
-                mItems.add(new ItemInfo(item, res));
+                if (!(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 && item == LauncherAction.Action.QuickSettings)) {
+                    mItems.add(new ItemInfo(item, res));
+                }
             }
         }
 

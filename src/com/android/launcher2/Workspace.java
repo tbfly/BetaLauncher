@@ -2215,6 +2215,10 @@ public class Workspace extends PagedView
     }
 
     Animator getChangeStateAnimation(final State state, boolean animated, int delay) {
+        if (mState == state) {
+            return null;
+        }
+
         // Initialize animation arrays for the first time if necessary
         initAnimationArrays();
 
