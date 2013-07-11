@@ -402,6 +402,8 @@ s -->
     <string name="preferences_interface_dock_category_title">General</string>
     <string name="preferences_interface_dock_enabled_title">Show dock</string>
     <string name="preferences_interface_dock_enabled_summary">Show the dock underneath the homescreen</string>
+    <string name="preferences_interface_dock_hide_icon_labels_title">Hide icon labels</string>
+    <string name="preferences_interface_dock_hide_icon_labels_summary">Don\'t show icon labels on dock icons</string>
     <string name="preferences_interface_dock_pages_title">Pages</string>
     <string name="preferences_interface_dock_pages_summary">Number of pages in the dock</string>
     <string name="preferences_interface_dock_default_page_title">Default page</string>

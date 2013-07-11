@@ -279,6 +279,9 @@ public final class PreferencesProvider {
             public static void setShowDock(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_dock_enabled", value);
             }
+            public static boolean getHideIconLabels() {
+                return getBoolean("ui_dock_hide_icon_labels", true);
+            }
             public static int getNumberPages() {
                 return getInt("ui_dock_pages", 1);
             }

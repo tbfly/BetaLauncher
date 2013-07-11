@@ -325,11 +325,11 @@ public class Workspace extends PagedView
     // Preferences
     private int mNumberHomescreens;
     private int mDefaultHomescreen;
-    private boolean mStretchScreens;
     private boolean mShowSearchBar;
     private boolean mShowHotseat;
     private boolean mResizeAnyWidget;
     private boolean mHideIconLabels;
+    private boolean mHideDockIconLabels;
     private boolean mScrollWallpaper;
     private int mWallpaperSize;
     private boolean mShowScrollingIndicator;
@@ -349,11 +349,6 @@ public class Workspace extends PagedView
     private String mDownGestureAction;
     private String mPinchGestureAction;
     private String mSpreadGestureAction;
-
-    private int mOriginalPaddingTop;
-    private int mOriginalPaddingBottom;
-    private int mOriginalPaddingLeft;
-    private int mOriginalPaddingRight;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -426,11 +421,11 @@ public class Workspace extends PagedView
             mDefaultHomescreen = mNumberHomescreens / 2;
         }
 
-        mStretchScreens = PreferencesProvider.Interface.Homescreen.getStretchScreens();
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mResizeAnyWidget = PreferencesProvider.Interface.Homescreen.getResizeAnyWidget();
         mShowHotseat = PreferencesProvider.Interface.Dock.getShowDock();
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
+        mHideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels();
         mTransitionEffect = PreferencesProvider.Interface.Homescreen.Scrolling.getTransitionEffect(
                 res.getString(R.string.config_workspaceDefaultTransitionEffect));
         mScrollWallpaper = PreferencesProvider.Interface.Homescreen.Scrolling.getScrollWallpaper();
@@ -554,14 +549,20 @@ public class Workspace extends PagedView
         setChildrenDrawnWithCacheEnabled(true);
         mMultiTouchController = new MultiTouchController(this, false);
 
-        mOriginalPaddingTop = getPaddingTop();
-        mOriginalPaddingBottom = getPaddingBottom();
-        mOriginalPaddingLeft = getPaddingLeft();
-        mOriginalPaddingRight = getPaddingRight();
-
-        inflateLayouts();
-
         final Resources res = getResources();
+        final float iconScale = (float)PreferencesProvider.Interface.Homescreen.getIconScale(
+                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
+
+        LayoutInflater inflater =
+                (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < mNumberHomescreens; i++) {
+            CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
+            screen.setChildrenScale(iconScale);
+            screen.setCellGaps(-1, -1);
+            screen.setPadding(0, 0, 0, 0);
+            addView(screen);
+        }
+
         try {
             mBackground = res.getDrawable(R.drawable.apps_customize_bg);
         } catch (Resources.NotFoundException e) {
@@ -574,7 +575,16 @@ public class Workspace extends PagedView
             setPadding(paddingLeft, paddingTop, getPaddingRight(), getPaddingBottom());
         }
 
-        setupHotseatPadding();
+        if (!mShowHotseat) {
+            int paddingRight = (int) res.getDimension(R.dimen.workspace_right_padding_hotseat_hidden);
+            int paddingBottom = (int) res.getDimension(R.dimen.workspace_bottom_padding_hotseat_hidden);
+            setPadding(getPaddingLeft(), getPaddingTop(), paddingRight, paddingBottom);
+
+            View dockScrollingIndicator = findViewById(R.id.paged_view_indicator_dock);
+            if (dockScrollingIndicator != null) {
+                ((MarginLayoutParams)dockScrollingIndicator.getLayoutParams()).bottomMargin = 0;
+            }
+        }
 
         if (!mShowScrollingIndicator) {
             disableScrollingIndicator();
@@ -590,35 +600,6 @@ public class Workspace extends PagedView
 
         mMaxDistanceForFolderCreation = (0.55f * res.getDimensionPixelSize(R.dimen.app_icon_size));
         mFlingThresholdVelocity = (int) (FLING_THRESHOLD_VELOCITY * mDensity);
-    }
-
-    public void setupHotseatPadding() {
-        final Resources res = getResources();
-        if (!mShowHotseat) {
-            int paddingRight = (int) res.getDimension(R.dimen.workspace_right_padding_hotseat_hidden);
-            int paddingBottom = (int) res.getDimension(R.dimen.workspace_bottom_padding_hotseat_hidden);
-            setPadding(getPaddingLeft(), getPaddingTop(), paddingRight, paddingBottom);
-        } else {
-            setPadding(mOriginalPaddingLeft, mOriginalPaddingTop, mOriginalPaddingRight, mOriginalPaddingBottom);
-        }
-        invalidate();
-    }
-
-    private void inflateLayouts() {
-        final Resources res = getResources();
-        final float iconScale = (float)PreferencesProvider.Interface.Homescreen.getIconScale(
-                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
-        LayoutInflater inflater =
-                (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        for (int i = 0; i < mNumberHomescreens; i++) {
-            CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
-            screen.setChildrenScale(iconScale);
-            if (mStretchScreens) {
-                screen.setCellGaps(-1, -1);
-                screen.setPadding(0, 0, 0, 0);
-            }
-            addView(screen);
-        }
     }
 
     protected void checkWallpaper() {
@@ -741,10 +722,12 @@ public class Workspace extends PagedView
             child.setOnKeyListener(null);
 
             // Hide titles in the hotseat
-            if (child instanceof FolderIcon) {
-                ((FolderIcon) child).setTextVisible(false);
-            } else if (child instanceof BubbleTextView) {
-                ((BubbleTextView) child).setTextVisible(false);
+            if (mHideDockIconLabels) {
+                if (child instanceof FolderIcon) {
+                    ((FolderIcon) child).setTextVisible(false);
+                } else if (child instanceof BubbleTextView) {
+                    ((BubbleTextView) child).setTextVisible(false);
+                }
             }
         } else {
             if (!mHideIconLabels) {
@@ -4651,9 +4634,7 @@ public class Workspace extends PagedView
             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             CellLayout screen = (CellLayout)inflater.inflate(R.layout.workspace_screen, null);
-            if (mStretchScreens) {
-                screen.setCellGaps(-1, -1);
-            }
+            screen.setCellGaps(-1, -1);
             addView(screen, index);
             mNumberHomescreens++;
         }
@@ -4834,7 +4815,6 @@ public class Workspace extends PagedView
             mLauncher.toggleLockWorkspace();
         } else if (gestureAction.equals("toggle_dock")) {
             mLauncher.toggleHotseat();
-            setupHotseatPadding();
         } else if (gestureAction.equals("quick_settings")) {
             expandStatusBar(true);
         } else if (gestureAction.equals("show_settings")) {

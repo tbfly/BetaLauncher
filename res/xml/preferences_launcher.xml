@@ -226,6 +226,11 @@
         android:dependency="ui_dock_enabled"
         launcher:max="5"
         launcher:min="1" />
+    <CheckBoxPreference android:key="ui_dock_hide_icon_labels"
+        android:title="@string/preferences_interface_dock_hide_icon_labels_title"
+        android:summary="@string/preferences_interface_dock_hide_icon_labels_summary"
+        android:dependency="ui_dock_enabled"
+        android:defaultValue="true" />
     <com.android.launcher2.preference.NumberPickerPreference android:key="ui_dock_icons"
         android:title="@string/preferences_interface_dock_icons_title"
         android:summary="@string/preferences_interface_dock_icons_summary"
