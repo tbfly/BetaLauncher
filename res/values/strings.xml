@@ -438,4 +438,11 @@ s -->
     <string name="menu_folder_sort_ascending">Sort A->Z</string>
     <string name="menu_folder_sort_descending">Sort Z->A</string>
     <string name="menu_folder_sort_usage">Sort by usage</string>
+
+    <string name="wallpaper_label">Lennox Beam</string>
+    <string name="wallpaper_author">Lennox</string>
+    <string name="live_wallpaper_beam_colour_pref_title">Beam Colour</string>
+    <string name="live_wallpaper_dot_colour_pref_title">Dot</string>
+    <string name="live_wallpaper_background_colour_pref_title">Background Colour</string>
+
 </resources>

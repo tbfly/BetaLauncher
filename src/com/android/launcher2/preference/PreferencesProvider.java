@@ -328,6 +328,18 @@ public final class PreferencesProvider {
                 setBoolean(ctx, "ui_general_fullscreen", value);
             }
         }
+
+        public static class LiveWallpaper {
+            public static int getBeamColour() {
+                return Integer.parseInt(getString("livewallpaper_beam_colour", "0"));
+            }
+            public static int getDotColour() {
+                return Integer.parseInt(getString("livewallpaper_dot_colour", "0"));
+            }
+            public static int getBackgroundColour() {
+                return Integer.parseInt(getString("livewallpaper_background_colour", "0"));
+            }
+        }
     }
 
     public static class Application {

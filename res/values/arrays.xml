@@ -228,4 +228,16 @@
     </string-array>
     <!--<item>toggle_dock</item>-->
 
+    <!-- Live wallpaper colours -->
+    <string-array name="live_wallpaper_colour_names">
+        <item>Sun Beam</item>
+        <item>Phase Beam</item>
+        <item>Envy Beam</item>
+    </string-array>
+    <string-array name="live_wallpaper_colour_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 </resources>

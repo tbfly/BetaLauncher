@@ -57,11 +57,15 @@
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
+    <uses-permission android:name="android.permission.BIND_WALLPAPER"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
     <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
+
+    <uses-feature android:name="android.software.live_wallpaper" />
 
     <uses-sdk
         android:minSdkVersion="15"
@@ -162,6 +166,28 @@
                 android:theme="@android:style/Theme.Holo.Dialog" > 
             <intent-filter android:priority="999" >
                 <action android:name="android.appwidget.action.APPWIDGET_PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>                
+        </activity>
+
+        <!-- Sunbeam live wallpaper -->
+        <service
+            android:name="com.lennox.sunbeam.PhaseBeamWallpaper"
+            android:label="@string/wallpaper_label"
+            android:process=":remote"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper" />
+        </service>
+        <activity android:name="com.lennox.sunbeam.PhaseBeamSettingsActivity"
+             android:label="@string/wallpaper_label"
+             android:excludeFromRecents="true"
+             android:process=":remote"
+             android:theme="@android:style/Theme.Holo" > 
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>                
         </activity>
