@@ -122,6 +122,10 @@ public class DoubleNumberPickerPreference extends DialogPreference {
             pickerTitle2.setText(mPickerTitle2);
         }
 
+        // No keyboard popup
+        mNumberPicker1.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        mNumberPicker2.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+
         return view;
     }
 

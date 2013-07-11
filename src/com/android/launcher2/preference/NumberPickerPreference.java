@@ -82,6 +82,9 @@ public class NumberPickerPreference extends DialogPreference {
         mNumberPicker.setValue(getPersistedInt(mDefault));
         mNumberPicker.setWrapSelectorWheel(false);
 
+        // No keyboard popup
+        mNumberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+
         return view;
     }
 
