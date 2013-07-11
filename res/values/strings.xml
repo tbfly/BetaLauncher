@@ -278,7 +278,9 @@ s -->
     <string name="hidden_apps_title">Hidden Apps</string>
 
     <!-- Workspace is locked -->
-    <string name="workspace_locked">Homescreen is locked, unlock in settings to rearrange</string>
+    <string name="workspace_locked">Homescreen is locked</string>
+    <string name="workspace_unlocked">Homescreen is unlocked</string>
+
 
     <skip />
 
@@ -377,6 +379,8 @@ s -->
     <string name="preferences_interface_drawer_widget_icon_style_summary">Make widgets use icon style in drawer rather than preview</string>
     <string name="preferences_interface_drawer_widgets_join_apps_title">Join with apps</string>
     <string name="preferences_interface_drawer_widgets_join_apps_summary">Swipe from apps drawer to widgets drawer without changing tabs</string>
+    <string name="preferences_interface_drawer_widgets_list_actions_title">List actions</string>
+    <string name="preferences_interface_drawer_widgets_list_actions_summary">List launcher actions in the widget drawer</string>
     <string name="preferences_interface_drawer_scrolling_category">Scrolling</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>

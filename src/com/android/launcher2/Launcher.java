@@ -1663,7 +1663,6 @@ public final class Launcher extends Activity
                     break;
                 case ToggleDock:
                     toggleHotseat();
-                    mWorkspace.setupHotseatPadding();
                     break;
                 case QuickSettings:
                     mWorkspace.expandStatusBar(true);
@@ -1910,7 +1909,7 @@ public final class Launcher extends Activity
             .setIcon(R.drawable.ic_launcher_market_holo)
             .setIntent(playStore)
             .setAlphabeticShortcut('M');
-        menu.add(0, MENU_LOCK_WORKSPACE, 0, !mLockWorkspace ? R.string.menu_lock_workspace : R.string.menu_unlock_workspace)
+        menu.add(MENU_GROUP_WALLPAPER, MENU_LOCK_WORKSPACE, 0, !mLockWorkspace ? R.string.menu_lock_workspace : R.string.menu_unlock_workspace)
             .setAlphabeticShortcut('L');
         menu.add(0, MENU_MANAGE_APPS, 0, R.string.menu_manage_apps)
             .setIcon(android.R.drawable.ic_menu_manage)
@@ -1972,7 +1971,6 @@ public final class Launcher extends Activity
             PreferencesProvider.Interface.General.setLockWorkspace(this, mLockWorkspace);
             return true;
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -2295,7 +2293,6 @@ public final class Launcher extends Activity
                     break;
                 case ToggleDock:
                     toggleHotseat();
-                    mWorkspace.setupHotseatPadding();
                     break;
                 case QuickSettings:
                     mWorkspace.expandStatusBar(true);
@@ -2788,6 +2785,8 @@ public final class Launcher extends Activity
     void toggleLockWorkspace() {
         mLockWorkspace = !mLockWorkspace;
         PreferencesProvider.Interface.General.setLockWorkspace(this, mLockWorkspace);
+        int toast = mLockWorkspace ? R.string.workspace_locked : R.string.workspace_unlocked;
+        Toast.makeText(this, getString(toast), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -2845,14 +2844,14 @@ public final class Launcher extends Activity
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
-        Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
+        Intent pickIntent = new Intent("com.android.launcher2.PICK_ACTIVITY");
         pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
         pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_application));
         startActivityForResultSafely(pickIntent, REQUEST_PICK_APPLICATION);
     }
 
     private void pickShortcut() {
-        Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
+        Intent pickIntent = new Intent("com.android.launcher2.PICK_ACTIVITY");
         pickIntent.putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_CREATE_SHORTCUT));
         pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_shortcut));
 
@@ -3764,6 +3763,7 @@ public final class Launcher extends Activity
             dialog.setOnCancelListener(this);
             dialog.setOnDismissListener(this);
             dialog.setOnShowListener(this);
+            dialog.setTitle(R.string.menu_item_add_item);
 
             return dialog;
         }
@@ -3841,7 +3841,6 @@ public final class Launcher extends Activity
 
         Dialog createDialog() {
             mAdapter = new LauncherAction.AddAdapter(Launcher.this);
-
             final AlertDialog.Builder builder = new AlertDialog.Builder(Launcher.this,
                     AlertDialog.THEME_HOLO_DARK);
             builder.setAdapter(mAdapter, this);
@@ -3850,6 +3849,7 @@ public final class Launcher extends Activity
             dialog.setOnCancelListener(this);
             dialog.setOnDismissListener(this);
             dialog.setOnShowListener(this);
+            dialog.setTitle(R.string.group_actions);
 
             return dialog;
         }

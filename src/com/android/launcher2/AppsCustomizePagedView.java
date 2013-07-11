@@ -355,6 +355,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     // Preferences
     private boolean mJoinWidgetsApps;
     private boolean mFadeScrollingIndicator;
+    private boolean mListActions;
     private boolean mWidgetIconStyle;
     private int mScrollingIndicatorPosition;
 
@@ -386,6 +387,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mTransitionEffect = PreferencesProvider.Interface.Drawer.Scrolling.getTransitionEffect(
                 resources.getString(R.string.config_drawerDefaultTransitionEffect));
         mFadeInAdjacentScreens = PreferencesProvider.Interface.Drawer.Scrolling.getFadeInAdjacentScreens();
+        mListActions = PreferencesProvider.Interface.Drawer.getListActions();
         mWidgetIconStyle = PreferencesProvider.Interface.Drawer.getWidgetIcons();
         boolean showScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getShowScrollingIndicator();
         mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
@@ -617,7 +619,6 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             AppWidgetManager.getInstance(mLauncher).getInstalledProviders();
         Intent shortcutsIntent = new Intent(Intent.ACTION_CREATE_SHORTCUT);
         List<ResolveInfo> shortcuts = mPackageManager.queryIntentActivities(shortcutsIntent, 0);
-        List<LauncherAction.Action> launcherActions = LauncherAction.getAllActions();
         for (AppWidgetProviderInfo widget : widgets) {
             if (widget.minWidth > 0 && widget.minHeight > 0) {
                 // Ensure that all widgets we show can be added on a workspace of this size
@@ -638,7 +639,10 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             }
         }
         mWidgets.addAll(shortcuts);
-        mWidgets.addAll(launcherActions);
+        if (mListActions) {
+            List<LauncherAction.Action> launcherActions = LauncherAction.getAllActions();
+            mWidgets.addAll(launcherActions);
+        }
         Collections.sort(mWidgets,
                 new LauncherModel.WidgetAndShortcutNameComparator(mLauncher, mPackageManager));
         updatePageCounts();
