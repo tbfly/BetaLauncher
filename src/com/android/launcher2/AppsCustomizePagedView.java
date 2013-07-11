@@ -420,6 +420,9 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         a.recycle();
         mWidgetSpacingLayout = new PagedViewCellLayout(getContext());
 
+        float childrenScale = mIconScale;
+        mWidgetSpacingLayout.setChildrenScale(childrenScale);
+
         // Unless otherwise specified this view is important for accessibility.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
@@ -1420,51 +1423,39 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         return preview;
     }
 
-    private Bitmap getWidgetIcon(ComponentName provider, int iconId, int maxWidth, int maxHeight) {
-        final Canvas c = mCachedShortcutPreviewCanvas.get();
-        Bitmap tempBitmap = Bitmap.createBitmap(maxWidth, maxHeight, Config.ARGB_8888);
-        mCachedShortcutPreviewBitmap.set(tempBitmap);
+    private Bitmap getWidgetIcon(LauncherAction.Action action) {
+        int offset = 0;
+        int bitmapSize = mAppIconSize;
+        Bitmap preview = Bitmap.createBitmap(bitmapSize,bitmapSize, Config.ARGB_8888);
+        mCachedShortcutPreviewBitmap.set(preview);
 
-        String packageName = provider.getPackageName();
-        Drawable icon = null;
-        if (iconId > 0) {
-            icon = mIconCache.getFullResIcon(packageName, iconId);
-            if (icon == null) {
-                Log.w(TAG, "Can't load widget icon 0x" +
-                    Integer.toHexString(iconId) + " for provider: " + provider);
-            }
-        }
-
-        int paddingTop =
-                getResources().getDimensionPixelOffset(R.dimen.shortcut_preview_padding_top);
-        int paddingLeft =
-                getResources().getDimensionPixelOffset(R.dimen.shortcut_preview_padding_left);
-        int paddingRight =
-                getResources().getDimensionPixelOffset(R.dimen.shortcut_preview_padding_right);
-
-        int scaledIconWidth = (maxWidth - paddingLeft - paddingRight);
-
-        renderDrawableToBitmap(
-                icon, tempBitmap, paddingLeft, paddingTop, scaledIconWidth, scaledIconWidth);
-
-        Bitmap preview = Bitmap.createBitmap(maxWidth, maxHeight, Config.ARGB_8888);
-        c.setBitmap(preview);
-        Paint p = mCachedShortcutPreviewPaint.get();
-        if (p == null) {
-            p = new Paint();
-            ColorMatrix colorMatrix = new ColorMatrix();
-            colorMatrix.setSaturation(0);
-            p.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
-            p.setAlpha((int) (255 * 0.06f));
-            //float density = 1f;
-            //p.setMaskFilter(new BlurMaskFilter(15*density, BlurMaskFilter.Blur.NORMAL));
-            mCachedShortcutPreviewPaint.set(p);
-        }
-        c.drawBitmap(tempBitmap, 0, 0, p);
-        c.setBitmap(null);
-
+        // Render the icon
+        Drawable icon = mIconCache.getFullResIcon(getContext().getPackageName(), action.getDrawable());
         renderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
+        return preview;
+    }
 
+    private Bitmap getWidgetIcon(AppWidgetProviderInfo info, int iconId) {
+        int offset = 0;
+        int bitmapSize = mAppIconSize;
+        Bitmap preview = Bitmap.createBitmap(bitmapSize,bitmapSize, Config.ARGB_8888);
+        mCachedShortcutPreviewBitmap.set(preview);
+
+        // Render the icon
+        Drawable icon = mIconCache.getFullResIcon(info.provider.getPackageName(), iconId);
+        renderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
+        return preview;
+    }
+
+    private Bitmap getWidgetIcon(ResolveInfo info) {
+        int offset = 0;
+        int bitmapSize = mAppIconSize;
+        Bitmap preview = Bitmap.createBitmap(bitmapSize,bitmapSize, Config.ARGB_8888);
+        mCachedShortcutPreviewBitmap.set(preview);
+
+        // Render the icon
+        Drawable icon = mIconCache.getFullResIcon(info);
+        renderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
         return preview;
     }
 
@@ -1669,9 +1660,16 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     GridLayout.spec(ix, GridLayout.TOP));
             lp.width = cellWidth;
             lp.height = cellHeight;
-            lp.setGravity(Gravity.TOP | Gravity.LEFT);
-            if (ix > 0) lp.leftMargin = mWidgetWidthGap;
-            if (iy > 0) lp.topMargin = mWidgetHeightGap;
+            if (!mWidgetIconStyle) {
+                lp.setGravity(Gravity.TOP | Gravity.LEFT);
+                if (ix > 0) lp.leftMargin = mWidgetWidthGap;
+                if (iy > 0) lp.topMargin = mWidgetHeightGap;
+            } else {
+                if (ix > 0) lp.leftMargin = mWidgetWidthGap;
+                if (iy > 0) lp.topMargin = mWidgetHeightGap;
+            }
+            widget.setScaleX(mIconScale);
+            widget.setScaleY(mIconScale);
             layout.addView(widget, lp);
         }
 
@@ -1726,7 +1724,18 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 task.syncThreadPriority();
             }
 
-            if (item instanceof AppWidgetProviderInfo) {
+            if (mWidgetIconStyle) {
+                if (item instanceof AppWidgetProviderInfo) {
+                    AppWidgetProviderInfo info = (AppWidgetProviderInfo) item;
+                    images.add(getWidgetIcon(info, info.icon));
+                } else if (item instanceof ResolveInfo) {
+                    ResolveInfo info = (ResolveInfo) item;
+                    images.add(getWidgetIcon(info));
+                } else if (item instanceof LauncherAction.Action) {
+                    LauncherAction.Action action = (LauncherAction.Action) item;
+                    images.add(getWidgetIcon(action));
+                }
+            } else if (item instanceof AppWidgetProviderInfo) {
                 AppWidgetProviderInfo info = (AppWidgetProviderInfo) item;
                 int[] cellSpans = Launcher.getSpanForWidget(mLauncher, info);
 
@@ -1734,13 +1743,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         mWidgetSpacingLayout.estimateCellWidth(cellSpans[0]));
                 int maxHeight = Math.min(data.maxImageHeight,
                         mWidgetSpacingLayout.estimateCellHeight(cellSpans[1]));
-                Bitmap b;
-                if (mWidgetIconStyle) {
-                    b = getWidgetIcon(info.provider, info.icon, maxWidth, maxHeight);
-                } else {
-                    b = getWidgetPreview(info.provider, info.previewImage, info.icon,
+                Bitmap b = getWidgetPreview(info.provider, info.previewImage, info.icon,
                         cellSpans[0], cellSpans[1], maxWidth, maxHeight);
-                }
                 images.add(b);
             } else if (item instanceof ResolveInfo) {
                 // Fill in the shortcuts information
@@ -1768,7 +1772,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 PagedViewWidget widget = (PagedViewWidget) layout.getChildAt(i);
                 if (widget != null) {
                     Bitmap preview = data.generatedImages.get(i);
-                    widget.applyPreview(new FastBitmapDrawable(preview));
+                    widget.applyPreview(new FastBitmapDrawable(preview), mWidgetIconStyle);
                 }
             }
 

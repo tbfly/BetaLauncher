@@ -19,39 +19,42 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
     android:layout_weight="1"
     android:orientation="vertical"
 
     android:background="@drawable/focusable_view_bg"
     android:focusable="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
     <!-- The preview of the widget or shortcut. -->
-    <com.android.launcher2.PagedViewWidgetImageView
+    <ImageView
         android:id="@+id/widget_preview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         android:layout_weight="1"
-        android:scaleType="center"
-        android:layout_centerHorizontal="true" />
+        android:scaleType="centerInside" />
 
         <!-- The name of the widget. -->
         <TextView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/widget_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
             android:layout_weight="1"
-            android:layout_above="@+id/widget_dims"
-            android:layout_centerHorizontal="true"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
             android:textColor="#FFFFFFFF"
-            android:textSize="13sp" />
+            android:textSize="11sp" />
 
         <!-- The original dimensions of the widget (can't be the same text as above due to different
              style. -->
@@ -59,13 +62,13 @@
             android:id="@id/widget_dims"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_weight="0"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:layout_weight="1"
             android:textColor="#FFFFFFFF"
-            android:textSize="12sp" />
+            android:textSize="10sp" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 
 </com.android.launcher2.PagedViewWidget>

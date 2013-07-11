@@ -45,6 +45,9 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     private int mWidthGap;
     private int mHeightGap;
     private int mMaxGap;
+
+    private float mChildrenScale = 1f;
+
     protected PagedViewCellLayoutChildren mChildren;
 
     public PagedViewCellLayout(Context context) {
@@ -84,6 +87,14 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
 
     public int getCellHeight() {
         return mCellHeight;
+    }
+
+    public void setChildrenScale(float childrenScale) {
+        mChildrenScale = childrenScale;
+    }
+
+    public float getChildrenScale() {
+        return mChildrenScale;
     }
 
     void destroyHardwareLayers() {
