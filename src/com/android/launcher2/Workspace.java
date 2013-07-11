@@ -120,13 +120,6 @@ public class Workspace extends PagedView
     private ObjectAnimator mChildrenOutlineFadeOutAnimation;
     private float mChildrenOutlineAlpha = 0;
 
-    // These properties refer to the background protection gradient used for AllApps and Customize
-    private ValueAnimator mBackgroundFadeInAnimation;
-    private ValueAnimator mBackgroundFadeOutAnimation;
-    private Drawable mBackground;
-    boolean mDrawBackground = true;
-    private float mBackgroundAlpha = 0;
-
     private float mWallpaperScrollRatio = 1.0f;
 
     private final WallpaperManager mWallpaperManager;
@@ -565,12 +558,6 @@ public class Workspace extends PagedView
                 screen.setPadding(0, 0, 0, 0);
             }
             addView(screen);
-        }
-
-        try {
-            mBackground = res.getDrawable(R.drawable.apps_customize_bg);
-        } catch (Resources.NotFoundException e) {
-            // In this case, we will skip drawing background protection
         }
 
         if (!mShowSearchBar) {
@@ -1379,52 +1366,6 @@ public class Workspace extends PagedView
         return mChildrenOutlineAlpha;
     }
 
-    void disableBackground() {
-        mDrawBackground = false;
-    }
-    void enableBackground() {
-        mDrawBackground = true;
-    }
-
-    private void animateBackgroundGradient(float finalAlpha, boolean animated) {
-        if (mBackground == null) return;
-        if (mBackgroundFadeInAnimation != null) {
-            mBackgroundFadeInAnimation.cancel();
-            mBackgroundFadeInAnimation = null;
-        }
-        if (mBackgroundFadeOutAnimation != null) {
-            mBackgroundFadeOutAnimation.cancel();
-            mBackgroundFadeOutAnimation = null;
-        }
-        float startAlpha = getBackgroundAlpha();
-        if (finalAlpha != startAlpha) {
-            if (animated) {
-                mBackgroundFadeOutAnimation = LauncherAnimUtils.ofFloat(startAlpha, finalAlpha);
-                mBackgroundFadeOutAnimation.addUpdateListener(new AnimatorUpdateListener() {
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        setBackgroundAlpha((Float) animation.getAnimatedValue());
-                    }
-                });
-                mBackgroundFadeOutAnimation.setInterpolator(new DecelerateInterpolator(1.5f));
-                mBackgroundFadeOutAnimation.setDuration(BACKGROUND_FADE_OUT_DURATION);
-                mBackgroundFadeOutAnimation.start();
-            } else {
-                setBackgroundAlpha(finalAlpha);
-            }
-        }
-    }
-
-    public void setBackgroundAlpha(float alpha) {
-        if (alpha != mBackgroundAlpha) {
-            mBackgroundAlpha = alpha;
-            invalidate();
-        }
-    }
-
-    public float getBackgroundAlpha() {
-        return mBackgroundAlpha;
-    }
-
     /**
      * Due to 3D transformations, if two CellLayouts are theoretically touching each other,
      * on the xy plane, when one is rotated along the y-axis, the gap between them is perceived
@@ -1937,23 +1878,10 @@ public class Workspace extends PagedView
             canvas.drawBitmap(mWallpaperBitmap, x, y, mPaint);
         }
 
-        // Draw the background gradient if necessary
-        if (mBackground != null && mBackgroundAlpha > 0.0f && mDrawBackground) {
-            int alpha = (int) (mBackgroundAlpha * 255);
-            mBackground.setAlpha(alpha);
-            mBackground.setBounds(getScrollX(), 0, getScrollX() + getMeasuredWidth(),
-                    getMeasuredHeight());
-            mBackground.draw(canvas);
-        }
-
         super.onDraw(canvas);
 
         // Call back to LauncherModel to finish binding after the first draw
         post(mBindPages);
-    }
-
-    boolean isDrawingBackgroundGradient() {
-        return (mBackground != null && mBackgroundAlpha > 0.0f && mDrawBackground);
     }
 
     @Override
@@ -2215,10 +2143,6 @@ public class Workspace extends PagedView
     }
 
     Animator getChangeStateAnimation(final State state, boolean animated, int delay) {
-        if (mState == state) {
-            return null;
-        }
-
         // Initialize animation arrays for the first time if necessary
         initAnimationArrays();
 
@@ -2479,16 +2403,6 @@ public class Workspace extends PagedView
             anim.setStartDelay(delay);
         }
 
-        if (stateIsSpringLoaded) {
-            // Right now we're covered by Apps Customize
-            // Show the background gradient immediately, so the gradient will
-            // be showing once AppsCustomize disappears
-            animateBackgroundGradient(getResources().getInteger(
-                    R.integer.config_appsCustomizeSpringLoadedBgAlpha) / 100f, false);
-        } else {
-            // Fade the background gradient away
-            animateBackgroundGradient(0f, true);
-        }
         return anim;
     }
 
