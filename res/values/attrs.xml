@@ -133,6 +133,7 @@
         <attr name="min" format="integer" />
         <attr name="maxExternal" format="string" />
         <attr name="minExternal" format="string" />
+        <attr name="defaultValue" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="DoubleNumberPickerPreference">
@@ -155,7 +156,7 @@
         <attr name="min" />
         <attr name="prefix" format="string" />
         <attr name="suffix" format="string" />
-        <attr name="defaultValue" format="integer" />
+        <attr name="defaultValue" />
     </declare-styleable>
 
 </resources>

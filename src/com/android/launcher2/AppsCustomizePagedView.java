@@ -1964,7 +1964,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
-                float rotationAmount = (in ? 90.0f : 110.0f);
+                float rotationAmount = (in ? 90.0f : 120.0f);
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
                 float scale = 1.0f - Math.abs(scrollProgress) * 0.2f;

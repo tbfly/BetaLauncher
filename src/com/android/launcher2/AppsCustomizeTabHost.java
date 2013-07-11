@@ -115,9 +115,8 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         mAppsCustomizePane = appsCustomizePane;
         mAnimationBuffer = (FrameLayout) findViewById(R.id.animation_buffer);
         mContent = (LinearLayout) findViewById(R.id.apps_customize_content);
-        Drawable background = mContent.getBackground();
-        int alpha = PreferencesProvider.Interface.Drawer.getDrawerTransparency() * 255 / 100;
-        background.setAlpha(alpha);
+
+        mContent.getBackground().setAlpha(PreferencesProvider.Interface.Drawer.getDrawerTransparency() * 255 / 100);
 
         if (tabs == null || mAppsCustomizePane == null) throw new Resources.NotFoundException();
 

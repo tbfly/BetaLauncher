@@ -325,6 +325,7 @@ public class Workspace extends PagedView
     // Preferences
     private int mNumberHomescreens;
     private int mDefaultHomescreen;
+    private boolean mStretchScreens;
     private boolean mShowSearchBar;
     private boolean mShowHotseat;
     private boolean mResizeAnyWidget;
@@ -421,6 +422,7 @@ public class Workspace extends PagedView
             mDefaultHomescreen = mNumberHomescreens / 2;
         }
 
+        mStretchScreens = PreferencesProvider.Interface.Homescreen.getStretchScreens();
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mResizeAnyWidget = PreferencesProvider.Interface.Homescreen.getResizeAnyWidget();
         mShowHotseat = PreferencesProvider.Interface.Dock.getShowDock();
@@ -558,8 +560,10 @@ public class Workspace extends PagedView
         for (int i = 0; i < mNumberHomescreens; i++) {
             CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
             screen.setChildrenScale(iconScale);
-            screen.setCellGaps(-1, -1);
-            screen.setPadding(0, 0, 0, 0);
+            if (mStretchScreens) {
+                screen.setCellGaps(-1, -1);
+                screen.setPadding(0, 0, 0, 0);
+            }
             addView(screen);
         }
 
@@ -1556,7 +1560,7 @@ public class Workspace extends PagedView
         for (int i = 0; i < getChildCount(); i++) {
             CellLayout cl = (CellLayout) getPageAt(i);
             if (cl != null) {
-                float rotationAmount = (in ? 90.0f : 110.0f);
+                float rotationAmount = (in ? 90.0f : 120.0f);
                 float scrollProgress = getScrollProgress(screenScroll, cl, i);
                 float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
                 float scale = 1.0f - Math.abs(scrollProgress) * 0.1f;
@@ -2319,9 +2323,9 @@ public class Workspace extends PagedView
             // Cube Effects
             if ((mTransitionEffect == TransitionEffect.CubeIn || mTransitionEffect == TransitionEffect.CubeOut) && stateIsNormal) {
                 if (i < mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? -110.0f : 90.0f;
+                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? -120.0f : 90.0f;
                 } else if (i > mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? 110.0f : -90.0f;
+                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? 120.0f : -90.0f;
                 }
             }
 
@@ -4634,7 +4638,9 @@ public class Workspace extends PagedView
             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             CellLayout screen = (CellLayout)inflater.inflate(R.layout.workspace_screen, null);
-            screen.setCellGaps(-1, -1);
+            if (mStretchScreens) {
+                screen.setCellGaps(-1, -1);
+            }
             addView(screen, index);
             mNumberHomescreens++;
         }

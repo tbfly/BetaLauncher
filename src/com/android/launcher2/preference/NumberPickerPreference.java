@@ -52,6 +52,8 @@ public class NumberPickerPreference extends DialogPreference {
         mMax = numberPickerType.getInt(R.styleable.NumberPickerPreference_max, 5);
         mMin = numberPickerType.getInt(R.styleable.NumberPickerPreference_min, 0);
 
+        mDefault = numberPickerType.getInt(R.styleable.NumberPickerPreference_defaultValue, 5);
+
         numberPickerType.recycle();
     }
 
@@ -88,6 +90,16 @@ public class NumberPickerPreference extends DialogPreference {
         if (positiveResult) {
             persistInt(mNumberPicker.getValue());
         }
+    }
+
+    public void setMin(int min) {
+        mMin = min;
+    }
+    public void setMax(int max) {
+        mMax = max;
+    }
+    public void setDefault(int def) {
+        mDefault = def;
     }
 
 }

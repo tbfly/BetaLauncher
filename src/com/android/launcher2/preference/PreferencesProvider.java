@@ -98,6 +98,9 @@ public final class PreferencesProvider {
                     return def;
                 }
             }
+            public static boolean getStretchScreens() {
+                return getBoolean("ui_homescreen_stretch_screens", true);
+            }
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
@@ -221,7 +224,7 @@ public final class PreferencesProvider {
                 return getBoolean("ui_drawer_widget_icon_style", false);
             }
             public static int getDrawerTransparency() {
-                return Integer.parseInt(getString("ui_drawer_transparency", "50"));
+                return getInt("ui_drawer_transparency", 50);
             }
             public static boolean getVertical() {
                 return getString("ui_drawer_orientation", "horizontal").equals("vertical");
