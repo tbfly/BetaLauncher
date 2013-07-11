@@ -108,6 +108,7 @@
         <item>Disc</item>
         <item>Platform</item>
         <item>iOS</item>
+        <item>MIUI</item>
     </string-array>
     <string-array name="folder_icon_background_values">
         <item>0</item>
@@ -115,6 +116,19 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <!-- Search bar background options -->
+    <string-array name="search_bar_background_names">
+        <item>Jellybean</item>
+        <item>Ice Cream Sandwich</item>
+        <item>MIUI V5</item>
+    </string-array>
+    <string-array name="search_bar_background_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
 
     <string-array name="preferences_interface_drawer_transparency_names">

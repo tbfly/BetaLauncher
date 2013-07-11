@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="drawable" name="search_frame">#00000000</item>
+    <item type="drawable" name="search_frame_ics">#00000000</item>
+    <item type="drawable" name="search_frame_miuiv5">#00000000</item>
+</resources>

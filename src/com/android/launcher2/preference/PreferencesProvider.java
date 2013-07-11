@@ -104,6 +104,9 @@ public final class PreferencesProvider {
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
+            public static int getSearchBarBackground() {
+                return Integer.parseInt(getString("ui_homescreen_search_bar_background", "0"));
+            }
             public static boolean getResizeAnyWidget() {
                 return getBoolean("ui_homescreen_general_resize_any_widget", true);
             }

@@ -319,8 +319,10 @@ s -->
     <string name="preferences_interface_homescreen_general_screens_summary">Number of screens on the homescreen</string>
     <string name="preferences_interface_homescreen_general_default_screen_title">Default screen</string>
     <string name="preferences_interface_homescreen_general_default_screen_summary">Choose the default homescreen</string>
-    <string name="preferences_interface_homescreen_general_search_title">Search bar</string>
+    <string name="preferences_interface_homescreen_general_search_title">Quick search bar</string>
     <string name="preferences_interface_homescreen_general_search_summary">Enable persistent search bar</string>
+    <string name="preferences_interface_homescreen_search_bar_background_title">Search bar style</string>
+    <string name="preferences_interface_homescreen_search_bar_background_summary">Choose the style of the persistent search bar (portrait only)</string>
     <string name="preferences_interface_homescreen_general_grid_title">Grid size</string>
     <string name="preferences_interface_homescreen_general_grid_summary">Choose the number of rows/columns on the homescreen</string>
     <string name="preferences_interface_homescreen_general_grid_rows_title">Rows</string>

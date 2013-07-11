@@ -52,6 +52,14 @@
             android:title="@string/preferences_interface_homescreen_general_search_title"
             android:summary="@string/preferences_interface_homescreen_general_search_summary"
             android:defaultValue="true" />
+        <ListPreference
+            android:key="ui_homescreen_search_bar_background"
+            android:title="@string/preferences_interface_homescreen_search_bar_background_title"
+            android:summary="@string/preferences_interface_homescreen_search_bar_background_summary"
+            android:entries="@array/search_bar_background_names"
+            android:entryValues="@array/search_bar_background_values"
+            android:defaultValue="0"
+            android:dependency="ui_drawer_indicator_enable" />
         <CheckBoxPreference android:key="ui_homescreen_general_resize_any_widget"
             android:title="@string/preferences_interface_homescreen_general_resize_any_widget_title"
             android:summary="@string/preferences_interface_homescreen_general_resize_any_widget_summary"
