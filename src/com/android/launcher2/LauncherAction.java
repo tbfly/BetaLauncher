@@ -100,7 +100,14 @@ public class LauncherAction {
     }
 
     public static List<Action> getAllActions() {
-        return Arrays.asList(Action.values());
+        final List<Action> items = Arrays.asList(Action.values());
+        List<Action> returnItems = new ArrayList<Action>();
+        for (Action item : items) {
+            if (!(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 && item == LauncherAction.Action.QuickSettings)) {
+                returnItems.add(item);
+            }
+        }
+        return returnItems;
     }
 
     public static class AddAdapter extends BaseAdapter {
@@ -130,9 +137,7 @@ public class LauncherAction {
 
             List<Action> items = LauncherAction.getAllActions();
             for (Action item : items) {
-                if (!(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 && item == LauncherAction.Action.QuickSettings)) {
-                    mItems.add(new ItemInfo(item, res));
-                }
+                mItems.add(new ItemInfo(item, res));
             }
         }
 
