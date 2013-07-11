@@ -121,6 +121,7 @@ public class PreviewLayout extends FrameLayout
      * @param index
      */
     public void addPlusWorkspaceButtonAt(int index) {
+        if (mLauncher.getLockWorkspace()) return;
         ViewGroup layout = (ViewGroup)mLauncher.getLayoutInflater().inflate(R.layout.preview_boxed, null);
         CellLayout.LayoutParams params = new CellLayout.LayoutParams(index % 3, index / 3, 1, 1);
         layout.setLayoutParams(params);
@@ -133,9 +134,7 @@ public class PreviewLayout extends FrameLayout
         ((ImageView)layout.findViewById(R.id.home_button)).setVisibility(View.GONE);
         ImageView image = (ImageView)layout.findViewById(R.id.preview_screen);
         image.setScaleType(ImageView.ScaleType.CENTER);
-        if (!mLauncher.getLockWorkspace()) {
-            image.setOnClickListener(this);
-        }
+        image.setOnClickListener(this);
         image.setImageResource(R.drawable.preview_new_screen);
         mContent.addViewToCellLayout(layout, -1, 0, params, true);
     }
@@ -162,30 +161,36 @@ public class PreviewLayout extends FrameLayout
         layout.setLayoutParams(params);
         ImageView image = (ImageView)layout.findViewById(R.id.delete_button);
 
-        if (!iscellLayoutEmpty) {
+        if (mLauncher.getLockWorkspace()) {
+            // don't let this screen be deleted since workspace is locked
+            image.setVisibility(View.GONE);
+            image = (ImageView)layout.findViewById(R.id.preview_screen);
+            image.setClickable(false);
+            if (bitmap != null)
+                image.setImageBitmap(bitmap);
+            image.setOnClickListener(this);
+            image = (ImageView)layout.findViewById(R.id.home_button);
+            if (isDefault)
+                image.setSelected(true);
+            else
+                image.setVisibility(View.GONE);
+        } else if (!iscellLayoutEmpty) {
             // don't let this screen be deleted since it has content
             image.setVisibility(View.GONE);
             image = (ImageView)layout.findViewById(R.id.preview_screen);
             image.setClickable(false);
             if (bitmap != null)
                 image.setImageBitmap(bitmap);
-
-            if (!mLauncher.getLockWorkspace()) {
-                image.setOnClickListener(this);
-                image.setOnLongClickListener(this);
-            }
+            image.setOnClickListener(this);
+            image.setOnLongClickListener(this);
 
             image = (ImageView)layout.findViewById(R.id.home_button);
-
-            if (!mLauncher.getLockWorkspace()) {
-                image.setOnClickListener(this);
-            }
-
+            image.setOnClickListener(this);
             if (isDefault)
                 image.setSelected(true);
             else
                 image.setSelected(false);
-        } else if (!mLauncher.getLockWorkspace()) {
+        } else {
             image.setOnClickListener(this);
             image = (ImageView)layout.findViewById(R.id.preview_screen);
             image.setOnClickListener(this);
@@ -203,11 +208,8 @@ public class PreviewLayout extends FrameLayout
         info.cellY = cellY;
         info.id = cellX + cellY * 3;
         layout.setTag(info);
-
-        if (!mLauncher.getLockWorkspace()) {
-            layout.setOnClickListener(this);
-            layout.setOnLongClickListener(this);
-        }
+        layout.setOnClickListener(this);
+        layout.setOnLongClickListener(this);
 
         this.mContent.addViewToCellLayout(layout, -1, 0, params, true);
     }
@@ -262,6 +264,7 @@ public class PreviewLayout extends FrameLayout
 
     @Override
     public boolean onLongClick(View v) {
+        if (mLauncher.getLockWorkspace()) return false;
         if (!(v instanceof RelativeLayout))
             v = (View)v.getParent();
         beginDrag(v, this);
