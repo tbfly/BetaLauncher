@@ -46,6 +46,9 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
     private static final String APPS_TAB_TAG = "APPS";
     private static final String WIDGETS_TAB_TAG = "WIDGETS";
 
+    private static final int TAB_STYLE_LENNOX = 0;
+    private static final int TAB_STYLE_HOLO = 1;
+
     private final LayoutInflater mLayoutInflater;
     private ViewGroup mTabs;
     private ViewGroup mTabsContainer;
@@ -61,6 +64,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
     // Preferences
     private boolean mJoinWidgetsApps;
     private boolean mFadeScrollingIndicator;
+    private int mTabIndicatorStyle;
 
     public AppsCustomizeTabHost(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -128,12 +132,30 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
             }
         };
 
+        mTabIndicatorStyle = PreferencesProvider.Interface.Drawer.getTabStyle();
+        int tabResource, actionBarResource, overflowButtonResource;
+        switch (mTabIndicatorStyle) {
+            case TAB_STYLE_LENNOX:
+                tabResource = R.drawable.tab_widget_indicator_selector_lennox;
+                actionBarResource = R.drawable.ab_solid_dark_lennox;
+                overflowButtonResource = R.drawable.ic_menu_overflow_lennox;
+                break;
+            case TAB_STYLE_HOLO:
+            default:
+                tabResource = R.drawable.tab_widget_indicator_selector;
+                actionBarResource = R.drawable.tab_unselected_holo;
+                overflowButtonResource = R.drawable.ic_menu_overflow;
+                break;
+        }
+        mTabsContainer.setBackgroundResource(actionBarResource);
+
         // Create the tabs
         TextView tabView;
         String label;
         label = getContext().getString(R.string.all_apps_button_label);
         tabView = (TextView) mLayoutInflater.inflate(R.layout.tab_widget_indicator, tabs, false);
         tabView.setText(label);
+        tabView.setBackgroundResource(tabResource);
         tabView.setContentDescription(label);
         if (getContext() instanceof Launcher) {
             tabView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -150,6 +172,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         label = getContext().getString(R.string.widgets_tab_label);
         tabView = (TextView) mLayoutInflater.inflate(R.layout.tab_widget_indicator, tabs, false);
         tabView.setText(label);
+        tabView.setBackgroundResource(tabResource);
         tabView.setContentDescription(label);
         addTab(newTabSpec(WIDGETS_TAB_TAG).setIndicator(tabView).setContent(contentFactory));
         setOnTabChangedListener(this);
@@ -160,8 +183,9 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         lastTab.setOnKeyListener(keyListener);
 
         // Soft menu button
-        View overflowMenuButton = findViewById(R.id.overflow_menu_button);
+        TextView overflowMenuButton = (TextView) findViewById(R.id.overflow_menu_button);
         overflowMenuButton.setOnKeyListener(keyListener);
+        overflowMenuButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, overflowButtonResource, 0);
 
         // Hide the tab bar until we measure
         mTabsContainer.setAlpha(0f);

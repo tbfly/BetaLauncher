@@ -397,6 +397,8 @@ s -->
     <string name="preferences_interface_drawer_indicator_fade_summary">Fade away the indicator after the page has changed</string>
     <string name="preferences_interface_drawer_indicator_position_title">Indicator position</string>
     <string name="preferences_interface_drawer_indicator_position_summary">Choose where to show the indicator on the screen</string>
+    <string name="preferences_interface_drawer_tab_style_title">Tab style</string>
+    <string name="preferences_interface_drawer_tab_style_summary">Set the style of the tab bar in app drawer</string>
     <string name="preferences_interface_drawer_transparency_title">Transparency</string>
     <string name="preferences_interface_drawer_transparency_summary">Set transparency of app drawer background (0 being transparent, 100 being opaque)</string>
 

@@ -131,6 +131,16 @@
         <item>2</item>
     </string-array>
 
+    <!-- Tab style options -->
+    <string-array name="tab_style_names">
+        <item>Lennox</item>
+        <item>Holo</item>
+    </string-array>
+    <string-array name="tab_style_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
     <string-array name="preferences_interface_drawer_transparency_names">
         <item>Opaque</item>
         <item>25%</item>

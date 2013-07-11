@@ -28,7 +28,6 @@
              with the text in the tabs in AppsCustomizeTabHost. -->
         <FrameLayout
             android:id="@+id/tabs_container"
-            android:background="@drawable/ab_solid_dark_holo"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/apps_customize_tab_bar_height"
             android:layout_marginTop="@dimen/apps_customize_tab_bar_margin_top"
@@ -40,12 +39,25 @@
                 android:layout_gravity="left"
                 android:tabStripEnabled="false"
                 android:divider="@null" />
-            <include
-                android:id="@+id/overflow_menu_button"
-                layout="@layout/overflow_menu_button"
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="right" />
+                android:id="@+id/overflow_menu_button"
+                android:layout_gravity="right"
+                style="@style/MarketButton"
+                android:onClick="onClickOverflowMenuButton"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:contentDescription="@string/menu"
+                android:shadowColor="@color/workspace_all_apps_and_delete_zone_text_shadow_color"
+                android:shadowDx="0.0"
+                android:shadowDy="0.0"
+                android:shadowRadius="2.0"
+                android:focusable="true"
+                android:clickable="true" />
+
         </FrameLayout>
         <FrameLayout
             android:id="@android:id/tabcontent"

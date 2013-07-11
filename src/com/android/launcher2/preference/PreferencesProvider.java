@@ -226,6 +226,9 @@ public final class PreferencesProvider {
             public static boolean getWidgetIcons() {
                 return getBoolean("ui_drawer_widget_icon_style", false);
             }
+            public static int getTabStyle() {
+                return Integer.parseInt(getString("ui_drawer_tab_style", "0"));
+            }
             public static int getDrawerTransparency() {
                 return getInt("ui_drawer_transparency", 50);
             }

@@ -173,6 +173,13 @@
             launcher:min="50"
             launcher:max="150"
             launcher:defaultValue="@integer/app_icon_scale_percentage" />
+        <ListPreference
+            android:key="ui_drawer_tab_style"
+            android:title="@string/preferences_interface_drawer_tab_style_title"
+            android:summary="@string/preferences_interface_drawer_tab_style_summary"
+            android:entries="@array/tab_style_names"
+            android:entryValues="@array/tab_style_values"
+            android:defaultValue="0" />
         <com.android.launcher2.preference.SeekBarDialogPreference android:key="ui_drawer_transparency"
             android:title="@string/preferences_interface_drawer_transparency_title"
             android:summary="@string/preferences_interface_drawer_transparency_summary"

@@ -128,7 +128,7 @@
         <item name="android:gravity">center</item>
         <item name="android:paddingLeft">20dp</item>
         <item name="android:paddingRight">20dp</item>
-        <item name="android:background">@drawable/tab_widget_indicator_selector</item>
+        <item name="android:minWidth">64dp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textStyle">bold</item>
