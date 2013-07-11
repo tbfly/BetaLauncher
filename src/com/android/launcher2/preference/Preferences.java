@@ -19,6 +19,7 @@ package com.android.launcher2.preference;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -58,6 +59,25 @@ public class Preferences extends PreferenceActivity implements
         addPreferencesFromResource(R.xml.preferences_launcher);
         mIconTheme = (ListPreference) findPreference("icon_theme");
 
+        initGesturePreference("ui_homescreen_up_gesture",
+                PreferencesProvider.Interface.Homescreen.Gestures.getUpGestureAction());
+        initGesturePreference("ui_homescreen_down_gesture",
+                PreferencesProvider.Interface.Homescreen.Gestures.getDownGestureAction());
+        initGesturePreference("ui_homescreen_pinch_gesture",
+                PreferencesProvider.Interface.Homescreen.Gestures.getPinchGestureAction());
+        initGesturePreference("ui_homescreen_spread_gesture",
+                PreferencesProvider.Interface.Homescreen.Gestures.getSpreadGestureAction());
+
+    }
+
+    private void initGesturePreference(String key, String action) {
+        ListPreference pref;
+        pref = (ListPreference)getPreferenceScreen().findPreference(key);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            pref.setEntries(getResources().getStringArray(R.array.gesture_target_names_pre42));
+            pref.setEntryValues(getResources().getStringArray(R.array.gesture_target_values_pre42));
+        }
+        pref.setSummary(pref.getEntries()[pref.findIndexOfValue(action)]);
     }
 
     @Override

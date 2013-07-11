@@ -169,16 +169,16 @@ public final class PreferencesProvider {
 
             public static class Gestures {
                 public static String getUpGestureAction() {
-                    return getString("ui_homescreen_up_gesture", "nothing");
+                    return getString("ui_homescreen_up_gesture", "toggle_status_bar");
                 }
                 public static String getDownGestureAction() {
-                    return getString("ui_homescreen_down_gesture", "nothing");
+                    return getString("ui_homescreen_down_gesture", "expand_status_bar");
                 }
                 public static String getPinchGestureAction() {
-                    return getString("ui_homescreen_pinch_gesture", "nothing");
+                    return getString("ui_homescreen_pinch_gesture", "show_previews");
                 }
                 public static String getSpreadGestureAction() {
-                    return getString("ui_homescreen_spread_gesture", "nothing");
+                    return getString("ui_homescreen_spread_gesture", "open_app_drawer");
                 }
             }
         }

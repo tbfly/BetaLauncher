@@ -138,7 +138,10 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         if (getContext() instanceof Launcher) {
             tabView.setOnLongClickListener(new View.OnLongClickListener() {
                     public boolean onLongClick(View v) {
-                        ((Launcher) getContext()).onLongClickAppsTab(v);
+                        if (!((Launcher) getContext()).getLockWorkspace()) {
+                            ((Launcher) getContext()).onLongClickAppsTab(v);
+                            return false;
+                        }
                         return true;
                     }
             });

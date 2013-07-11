@@ -162,4 +162,34 @@
         <item>quick_settings</item>
         <item>show_settings</item>
     </string-array>
+
+    <string-array name="gesture_target_names_pre42">
+        <item>Nothing</item>
+        <item>@string/all_apps_button_label</item>
+        <item>@string/action_recent_apps</item>
+        <item>@string/action_search</item>
+        <item>@string/action_voice_search</item>
+        <item>@string/action_expand_notifications</item>
+        <item>@string/action_toggle_fullscreen</item>
+        <item>@string/action_default_screen</item>
+        <item>@string/action_show_preview</item>
+        <item>@string/action_lock_unlock</item>
+        <item>@string/action_toggle_dock</item>
+        <item>@string/action_launcher_settings</item>
+    </string-array>
+    <string-array name="gesture_target_values_pre42" translatable="false" >
+        <item>nothing</item>
+        <item>open_app_drawer</item>
+        <item>recent_apps</item>
+        <item>search</item>
+        <item>voice_search</item>
+        <item>expand_status_bar</item>
+        <item>toggle_status_bar</item>
+        <item>default_homescreen</item>
+        <item>show_previews</item>
+        <item>lock_unlock</item>
+        <item>toggle_dock</item>
+        <item>show_settings</item>
+    </string-array>
+
 </resources>

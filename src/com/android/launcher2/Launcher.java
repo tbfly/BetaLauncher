@@ -2728,8 +2728,7 @@ public final class Launcher extends Activity
     }
 
     public boolean onLongClick(View v) {
-        if (!isDraggingEnabled()) return false;
-        if (isWorkspaceLocked()) return false;
+        if (!isDraggingEnabled() || isWorkspaceLocked() || getLockWorkspace()) return false;
         if (mState != State.WORKSPACE) return false;
 
         if (!(v instanceof CellLayout)) {

@@ -1253,11 +1253,11 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         // TODO-APPS_CUSTOMIZE: detect number of cores and set thread priorities accordingly below
         int pageDiff = getWidgetPageLoadPriority(page);
         if (pageDiff <= 0) {
-            return Process.THREAD_PRIORITY_FOREGROUND;
+            return Process.THREAD_PRIORITY_LESS_FAVORABLE;
         } else if (pageDiff <= 1) {
-            return Process.THREAD_PRIORITY_MORE_FAVORABLE;
+            return Process.THREAD_PRIORITY_LOWEST;
         } else {
-            return Process.THREAD_PRIORITY_DEFAULT;
+            return Process.THREAD_PRIORITY_LOWEST;
         }
     }
     private int getSleepForPage(int page) {
