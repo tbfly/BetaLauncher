@@ -326,7 +326,10 @@ public class PreviewLayout extends FrameLayout
             int childCount = ((CellLayout)cl).getShortcutsAndWidgets().getChildCount();
             Bitmap bitmap = null;
             if (childCount > 0) {
+                float originalAlpha = ((CellLayout)cl).getShortcutsAndWidgets().getAlpha();
+                ((CellLayout)cl).getShortcutsAndWidgets().setAlpha(1f);
                 bitmap = cl.getDrawingCache();
+                ((CellLayout)cl).getShortcutsAndWidgets().setAlpha(originalAlpha);
             }
 
             int m = j % 3;
