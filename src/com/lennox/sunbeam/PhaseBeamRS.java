@@ -36,7 +36,6 @@ import android.util.Log;
 
 import com.android.launcher.R;
 import com.lennox.utils.LennoxColorFilter;
-import com.android.launcher2.preference.PreferencesProvider;
 
 public class PhaseBeamRS {
     public static String LOG_TAG = "PhaseBeam";
@@ -71,7 +70,8 @@ public class PhaseBeamRS {
     private int mDotColour;
     private int mBackgroundColour;
 
-    public void init(int dpi, RenderScriptGL rs, Resources res, int width, int height, int beam, int dot, int back) {
+    public void init(int dpi, RenderScriptGL rs, Resources res,
+                              int width, int height, int beam, int dot, int back) {
 
         mBeamColour = beam;
         mDotColour = dot;

@@ -15,27 +15,20 @@ implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        getPreferenceManager().setSharedPreferencesName(
-            PreferencesProvider.PREFERENCES_KEY);
+        getPreferenceManager().setSharedPreferencesName(PreferencesProvider.PREFERENCES_KEY);
         addPreferencesFromResource(R.xml.preferences_lwp);
-        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(
-            this);
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
-        // Load all preferences
-        PreferencesProvider.load(this);
-
-        initColourPreference("livewallpaper_beam_colour",
-            PreferencesProvider.Interface.LiveWallpaper.getBeamColour());
-        initColourPreference("livewallpaper_dot_colour",
-            PreferencesProvider.Interface.LiveWallpaper.getDotColour());
-        initColourPreference("livewallpaper_background_colour",
-            PreferencesProvider.Interface.LiveWallpaper.getBackgroundColour());
+        initColourPreference("livewallpaper_beam_colour");
+        initColourPreference("livewallpaper_dot_colour");
+        initColourPreference("livewallpaper_background_colour");
     }
 
-    private void initColourPreference(String key, int index) {
+    private void initColourPreference(String key) {
         ListPreference pref;
         pref = (ListPreference) getPreferenceScreen().findPreference(key);
-        pref.setSummary(pref.getEntries()[index]);
+        pref.setSummary(pref.getEntries()[Integer.parseInt(getPreferenceManager()
+                        .getSharedPreferences().getString(key, "0"))]);
     }
 
     @Override
@@ -45,12 +38,14 @@ implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Override
     protected void onDestroy() {
-        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(
-                this);
+        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
             String key) {
+        ListPreference pref;
+        pref = (ListPreference) getPreferenceScreen().findPreference(key);
+        pref.setSummary(pref.getEntry());
     }
 }
