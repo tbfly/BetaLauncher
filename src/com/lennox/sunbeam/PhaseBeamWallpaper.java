@@ -1,7 +1,5 @@
 package com.lennox.sunbeam;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.app.Service;
@@ -14,14 +12,19 @@ import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
-import com.android.launcher2.preference.PreferencesProvider;
-
 public class PhaseBeamWallpaper extends WallpaperService {
+
+    public final static String LWP_PREFS = "livewallpaper_prefs";
 
     @Override
     public Engine onCreateEngine() {
-
         return new RenderScriptEngine();
+    }
+
+    public enum PrefKeys {
+        livewallpaper_beam_colour,
+        livewallpaper_dot_colour,
+        livewallpaper_background_colour
     }
 
     private class RenderScriptEngine extends Engine implements OnSharedPreferenceChangeListener {
@@ -29,19 +32,10 @@ public class PhaseBeamWallpaper extends WallpaperService {
         private PhaseBeamRS mWallpaperRS = null;
         private int mDensityDPI;
 
-        private Context mContext;
         private SharedPreferences mSharedPref;
-
-        private static final int COLOUR_RED = 0;
-        private static final int COLOUR_BLUE = 1;
-        private static final int COLOUR_GREEN = 2;
 
         private int mHeight;
         private int mWidth;
-
-        private int mBeamColour;
-        private int mDotColour;
-        private int mBackgroundColour;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -50,8 +44,7 @@ public class PhaseBeamWallpaper extends WallpaperService {
             surfaceHolder.setSizeFromLayout();
             surfaceHolder.setFormat(PixelFormat.OPAQUE);
 
-            mContext = getApplicationContext();
-            mSharedPref = mContext.getSharedPreferences(PreferencesProvider.PREFERENCES_KEY, 0);
+            mSharedPref = getApplicationContext().getSharedPreferences(LWP_PREFS, 0);
             mSharedPref.registerOnSharedPreferenceChangeListener(this);
 
             DisplayMetrics metrics = new DisplayMetrics();
@@ -62,7 +55,16 @@ public class PhaseBeamWallpaper extends WallpaperService {
         }
 
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            startUp(true);
+            PrefKeys currentKey = PrefKeys.valueOf(key);
+            switch (currentKey) {
+                case livewallpaper_beam_colour:
+                case livewallpaper_dot_colour:
+                case livewallpaper_background_colour:
+                    startUp(true);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void startUp(boolean force) {
@@ -70,13 +72,13 @@ public class PhaseBeamWallpaper extends WallpaperService {
                 mWallpaperRS.stop();
                 mWallpaperRS = null;
             }
-            mBeamColour = Integer.parseInt(mSharedPref.getString("livewallpaper_beam_colour","0"));
-            mDotColour = Integer.parseInt(mSharedPref.getString("livewallpaper_dot_colour","0"));
-            mBackgroundColour = Integer.parseInt(mSharedPref.getString("livewallpaper_background_colour","0"));
+            final int beam = Integer.parseInt(mSharedPref.getString("livewallpaper_beam_colour","0"));
+            final int dot = Integer.parseInt(mSharedPref.getString("livewallpaper_dot_colour","0"));
+            final int mesh = Integer.parseInt(mSharedPref.getString("livewallpaper_background_colour","0"));
             if (mWallpaperRS == null) {
                 mWallpaperRS = new PhaseBeamRS();
                 mWallpaperRS.init(mDensityDPI, mRenderScript, getResources(),
-                                  mWidth, mHeight, mBeamColour, mDotColour, mBackgroundColour);
+                                  mWidth, mHeight, beam, dot, mesh);
                 mWallpaperRS.start();
             }
         }
@@ -107,7 +109,7 @@ public class PhaseBeamWallpaper extends WallpaperService {
 
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
             mRenderScript = new RenderScriptGL(PhaseBeamWallpaper.this, sc);
-            mRenderScript.setPriority(RenderScript.Priority.NORMAL);
+            mRenderScript.setPriority(RenderScript.Priority.LOW);
         }
 
         @Override

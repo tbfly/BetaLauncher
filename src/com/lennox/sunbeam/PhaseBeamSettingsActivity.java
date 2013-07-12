@@ -2,12 +2,11 @@ package com.lennox.sunbeam;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.preference.*;
-import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.ListPreference;
+import android.preference.PreferenceActivity;
 import android.os.Bundle;
 
 import com.android.launcher.R;
-import com.android.launcher2.preference.PreferencesProvider;
 
 public class PhaseBeamSettingsActivity extends PreferenceActivity
 implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -15,7 +14,7 @@ implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        getPreferenceManager().setSharedPreferencesName(PreferencesProvider.PREFERENCES_KEY);
+        getPreferenceManager().setSharedPreferencesName(PhaseBeamWallpaper.LWP_PREFS);
         addPreferencesFromResource(R.xml.preferences_lwp);
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 

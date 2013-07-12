@@ -4,11 +4,6 @@ import static android.renderscript.Sampler.Value.NEAREST;
 import static android.renderscript.Sampler.Value.WRAP;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.renderscript.Allocation;
 import android.renderscript.Matrix4f;
 import android.renderscript.Mesh;
@@ -35,7 +30,6 @@ import java.util.ArrayList;
 import android.util.Log;
 
 import com.android.launcher.R;
-import com.lennox.utils.LennoxColorFilter;
 
 public class PhaseBeamRS {
     public static String LOG_TAG = "PhaseBeam";
@@ -66,16 +60,8 @@ public class PhaseBeamRS {
     private static final int COLOUR_BLUE = 1;
     private static final int COLOUR_GREEN = 2;
 
-    private int mBeamColour;
-    private int mDotColour;
-    private int mBackgroundColour;
-
     public void init(int dpi, RenderScriptGL rs, Resources res,
-                              int width, int height, int beam, int dot, int back) {
-
-        mBeamColour = beam;
-        mDotColour = dot;
-        mBackgroundColour = back;
+                              int width, int height, int beam, int dot, int mesh) {
 
         if (!mInited) {
             mDensityDPI = dpi;
@@ -110,8 +96,8 @@ public class PhaseBeamRS {
             createProgramRaster();
             createProgramFragmentStore();
             createProgramFragment();
-            createBackgroundMesh();
-            loadTextures();
+            createBackgroundMesh(mesh);
+            loadTextures(beam, dot);
 
             mScript.set_densityDPI(mDensityDPI);
 
@@ -154,13 +140,13 @@ public class PhaseBeamRS {
         mPvConsts.set(i, 0, true);
     }
 
-    private void createBackgroundMesh() {
+    private void createBackgroundMesh(int paramMesh) {
         // The composition and colors of the background mesh were plotted on paper and photoshop
         // first then translated to the csv file in raw. Points and colors are not random.
         ArrayList meshData = new ArrayList();
 
         int mesh;
-        switch (mBackgroundColour) {
+        switch (paramMesh) {
             case COLOUR_BLUE:
                 mesh = R.raw.bgmesh_blue;
                 break;
@@ -212,18 +198,14 @@ public class PhaseBeamRS {
     }
 
     private Allocation loadTexture(int id) {
-        //Bitmap tempBitmap = ((BitmapDrawable) mRes.getDrawable(id)).getBitmap();
-        //if (mColourSwitch) {
-        //    return Allocation.createFromBitmap(mRS, LennoxColorFilter.adjustColor(tempBitmap, 180));
-        //} else {
-            return Allocation.createFromBitmapResource(mRS, mRes, id);
-        //}
+        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mRes, id);
+        return allocation;
     }
 
-    private void loadTextures() {
+    private void loadTextures(int paramBeam, int paramDot) {
 
         int dot, beam;
-        switch (mBeamColour) {
+        switch (paramBeam) {
             case COLOUR_BLUE:
                 beam = R.drawable.beam_blue;
                 break;
@@ -235,7 +217,7 @@ public class PhaseBeamRS {
                 beam = R.drawable.beam_red;
                 break;
         }
-        switch (mDotColour) {
+        switch (paramDot) {
             case COLOUR_BLUE:
                 dot = R.drawable.dot_blue;
                 break;
