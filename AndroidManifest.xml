@@ -150,7 +150,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Built in activity shortcut maker -->
+        <!-- Built in activity shortcut maker
         <activity android:name="com.android.launcher2.ShortcutPicker"
                 android:label="@string/menu_activity_picker_label"
                 android:theme="@android:style/Theme.Holo.Dialog" >
@@ -158,7 +158,7 @@
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+        </activity> -->
 
         <!-- Built in widget picker -->
         <activity android:name="com.android.launcher2.appwidgetpicker.AppWidgetPickerActivity"
