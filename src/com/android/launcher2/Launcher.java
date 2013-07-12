@@ -676,6 +676,7 @@ public final class Launcher extends Activity
             final PendingAddArguments args = new PendingAddArguments();
             args.requestCode = requestCode;
             args.intent = data;
+            if (args.container == 0) args.container = LauncherSettings.Favorites.CONTAINER_DESKTOP;
             args.container = mPendingAddInfo.container;
             args.screen = mPendingAddInfo.screen;
             args.cellX = mPendingAddInfo.cellX;
@@ -2833,7 +2834,7 @@ public final class Launcher extends Activity
 
     private void showAddDialog(CellLayout.CellInfo cell) {
         resetAddInfo();
-        mPendingAddInfo.container = cell.container;
+        mPendingAddInfo.container = LauncherSettings.Favorites.CONTAINER_DESKTOP;
         mPendingAddInfo.screen = cell.screen;
         mPendingAddInfo.cellX = cell.cellX;
         mPendingAddInfo.cellY = cell.cellY;
@@ -3260,9 +3261,6 @@ public final class Launcher extends Activity
                     mStateAnimation.start();
                 }
             });
-            if (mSearchDropTargetBar != null) {
-                mSearchDropTargetBar.showSearchBar(true);
-            }
             if (mWorkspace != null) {
                 mWorkspace.showScrollingIndicator(true);
             }
@@ -3277,9 +3275,6 @@ public final class Launcher extends Activity
             dispatchOnLauncherTransitionStart(toView, animated, true);
             dispatchOnLauncherTransitionEnd(toView, animated, true);
             mWorkspace.hideScrollingIndicator(false);
-            if (mSearchDropTargetBar != null) {
-                mSearchDropTargetBar.showSearchBar(false);
-            }
             if (mWorkspace != null) {
                 mWorkspace.showScrollingIndicator(false);
             }
@@ -3754,19 +3749,24 @@ public final class Launcher extends Activity
         private AddAdapter mAdapter;
 
         Dialog createDialog() {
-            mAdapter = new AddAdapter(Launcher.this);
+            if (Launcher.this.getLockWorkspace()) {
+                cleanup();
+                return null;
+            } else {
+                mAdapter = new AddAdapter(Launcher.this);
 
-            final AlertDialog.Builder builder = new AlertDialog.Builder(Launcher.this,
-                    AlertDialog.THEME_HOLO_DARK);
-            builder.setAdapter(mAdapter, this);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(Launcher.this,
+                        AlertDialog.THEME_HOLO_DARK);
+                builder.setAdapter(mAdapter, this);
 
-            AlertDialog dialog = builder.create();
-            dialog.setOnCancelListener(this);
-            dialog.setOnDismissListener(this);
-            dialog.setOnShowListener(this);
-            dialog.setTitle(R.string.menu_item_add_item);
+                AlertDialog dialog = builder.create();
+                dialog.setOnCancelListener(this);
+                dialog.setOnDismissListener(this);
+                dialog.setOnShowListener(this);
+                dialog.setTitle(R.string.menu_item_add_item);
 
-            return dialog;
+                return dialog;
+            }
         }
 
         public void onCancel(DialogInterface dialog) {
