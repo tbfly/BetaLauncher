@@ -17,8 +17,11 @@
 package com.android.launcher2.preference;
 
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 import com.android.launcher2.LauncherApplication;
 import com.android.launcher2.Workspace;
@@ -315,11 +318,35 @@ public final class PreferencesProvider {
             public static boolean getAutoRotate(boolean def) {
                 return getBoolean("ui_general_orientation", def);
             }
+            public static boolean getLiveWallpaperFix(Context ctx) {
+                PackageManager pm = ctx.getPackageManager();
+                ComponentName lwpfix = new ComponentName("com.android.launcher",
+                                      "com.lennox.livewallpaperpicker.LiveWallpaperFix");
+                int value = pm.getComponentEnabledSetting(lwpfix);
+                if (value != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            public static void setLiveWallpaperFix(Context ctx, boolean value) {
+                PackageManager pm = ctx.getPackageManager();
+                ComponentName lwpfix = new ComponentName("com.android.launcher",
+                                      "com.lennox.livewallpaperpicker.LiveWallpaperFix");
+                int setState = value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
+                                       PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+                pm.setComponentEnabledSetting((lwpfix), setState, PackageManager.DONT_KILL_APP);
+            }
             public static boolean getLockWorkspace() {
                 return getBoolean("ui_general_lock_workspace", false);
             }
             public static void setLockWorkspace(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_general_lock_workspace", value);
+            }
+            public static boolean getFirstLaunch(Context ctx) {
+                boolean returnValue = getBoolean("ui_general_is_first_launch", true);
+                setBoolean(ctx, "ui_general_is_first_launch", false);
+                return returnValue;
             }
             public static boolean getFullscreenMode() {
                 return getBoolean("ui_general_fullscreen", false);

@@ -18,6 +18,6 @@
 -->
 
 <wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
-    android:author="@string/wallpaper_author"
-    android:thumbnail="@drawable/wallpaper_thumb"
+    android:author="@string/live_wallpaper_author"
+    android:thumbnail="@drawable/live_wallpaper_thumb"
     android:settingsActivity="com.lennox.sunbeam.PhaseBeamSettingsActivity" />

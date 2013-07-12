@@ -48,6 +48,7 @@ public class Preferences extends PreferenceActivity implements
 
     private Context mContext;
     private SharedPreferences mPreferences;
+    private CheckBoxPreference mLWPFix;
     private ListPreference mIconTheme;
 
     @Override
@@ -67,6 +68,8 @@ public class Preferences extends PreferenceActivity implements
                 PreferencesProvider.Interface.Homescreen.Gestures.getPinchGestureAction());
         initGesturePreference("ui_homescreen_spread_gesture",
                 PreferencesProvider.Interface.Homescreen.Gestures.getSpreadGestureAction());
+
+        mLWPFix = (CheckBoxPreference) getPreferenceScreen().findPreference("ui_live_wallpaper_fix");
 
     }
 
@@ -91,6 +94,8 @@ public class Preferences extends PreferenceActivity implements
         String currentThemeName = ThemeUtils.getThemeName(mContext, currentPackage); 
         mIconTheme.setSummary(currentThemeName);
 
+        mLWPFix.setChecked(PreferencesProvider.Interface.General.getLiveWallpaperFix(mContext));
+
         mPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -107,6 +112,8 @@ public class Preferences extends PreferenceActivity implements
         if (key.equals("icon_theme")) {
             ThemeUtils.setThemePackageName(mContext, mIconTheme.getValue());
             mIconTheme.setSummary(mIconTheme.getEntry());
+        } else if (key.equals("ui_live_wallpaper_fix")) {
+            PreferencesProvider.Interface.General.setLiveWallpaperFix(mContext, mLWPFix.isChecked());
         }
         editor.commit();
     }

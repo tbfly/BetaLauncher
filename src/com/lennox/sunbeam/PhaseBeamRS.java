@@ -56,9 +56,9 @@ public class PhaseBeamRS {
 
     boolean mInited = false;
 
-    private static final int COLOUR_RED = 0;
-    private static final int COLOUR_BLUE = 1;
-    private static final int COLOUR_GREEN = 2;
+    private static final int COLOUR_GREEN = 0;
+    private static final int COLOUR_RED = 1;
+    private static final int COLOUR_BLUE = 2;
 
     public void init(int dpi, RenderScriptGL rs, Resources res,
                               int width, int height, int beam, int dot, int mesh) {
@@ -151,10 +151,10 @@ public class PhaseBeamRS {
                 mesh = R.raw.bgmesh_blue;
                 break;
             case COLOUR_GREEN:
+            default:
                 mesh = R.raw.bgmesh_green;
                 break;
             case COLOUR_RED:
-            default:
                 mesh = R.raw.bgmesh_red;
                 break;
         }
@@ -210,10 +210,10 @@ public class PhaseBeamRS {
                 beam = R.drawable.beam_blue;
                 break;
             case COLOUR_GREEN:
+            default:
                 beam = R.drawable.beam_green;
                 break;
             case COLOUR_RED:
-            default:
                 beam = R.drawable.beam_red;
                 break;
         }
@@ -222,10 +222,10 @@ public class PhaseBeamRS {
                 dot = R.drawable.dot_blue;
                 break;
             case COLOUR_GREEN:
+            default:
                 dot = R.drawable.dot_green;
                 break;
             case COLOUR_RED:
-            default:
                 dot = R.drawable.dot_red;
                 break;
         }

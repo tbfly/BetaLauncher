@@ -173,16 +173,18 @@
         <!-- Sunbeam live wallpaper -->
         <service
             android:name="com.lennox.sunbeam.PhaseBeamWallpaper"
-            android:label="@string/wallpaper_label"
+            android:icon="@drawable/live_wallpaper_icon"
+            android:label="@string/live_wallpaper_label"
             android:process=":remote"
             android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
-            <meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper" />
+            <meta-data android:name="android.service.wallpaper" android:resource="@xml/live_wallpaper" />
         </service>
         <activity android:name="com.lennox.sunbeam.PhaseBeamSettingsActivity"
-             android:label="@string/wallpaper_label"
+             android:icon="@drawable/live_wallpaper_icon"
+             android:label="@string/live_wallpaper_label"
              android:excludeFromRecents="true"
              android:process=":remote"
              android:theme="@android:style/Theme.Holo" > 
@@ -190,6 +192,21 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>                
+        </activity>
+
+        <!-- Live wallpaper picker fix -->
+        <activity android:name="com.lennox.livewallpaperpicker.LiveWallpaperFix"
+             android:label="@string/live_wallpaper_fix"
+             android:icon="@drawable/ic_launcher_live_wallpaper"
+             android:finishOnCloseSystemDialogs="true"
+             android:enabled="false"
+             android:process=":wallpaper_chooser">
+            <intent-filter>
+                <action android:name="android.intent.action.SET_WALLPAPER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.wallpaper.preview"
+                android:resource="@xml/live_wallpaper_picker_preview" />
         </activity>
 
         <!-- The settings provider contains Home's data, like the workspace favorites -->

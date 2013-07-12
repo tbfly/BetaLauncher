@@ -430,6 +430,8 @@ s -->
     <string name="preferences_interface_general_orientation_title">Auto-rotate screen</string>
     <string name="preferences_interface_general_fullscreen_title">Fullscreen mode</string>
     <string name="preferences_interface_general_fullscreen_summary">Hide the status bar to extend the homescreen</string>
+    <string name="preferences_interface_enable_live_wallpaper_fix_title">Enable live wallpaper picker</string>
+    <string name="preferences_interface_enable_live_wallpaper_fix_summary">This enables setting live wallpapers on some problem devices such as the HTC Desire C</string>
     <string name="preferences_interface_general_lock_workspace_title">Lock homescreen</string>
     <string name="preferences_interface_general_lock_workspace_summary">Lock shortcuts and folders positions in the homescreen, dock and apps and widgets drawer</string>
 
@@ -439,8 +441,9 @@ s -->
     <string name="menu_folder_sort_descending">Sort Z->A</string>
     <string name="menu_folder_sort_usage">Sort by usage</string>
 
-    <string name="wallpaper_label">Lennox Beam</string>
-    <string name="wallpaper_author">Lennox</string>
+    <string name="live_wallpaper_fix">Live Wallpapers</string>
+    <string name="live_wallpaper_label">Lennox Beam</string>
+    <string name="live_wallpaper_author">Lennox</string>
     <string name="live_wallpaper_beam_colour_pref_title">Beam Colour</string>
     <string name="live_wallpaper_dot_colour_pref_title">Dot</string>
     <string name="live_wallpaper_background_colour_pref_title">Background Colour</string>

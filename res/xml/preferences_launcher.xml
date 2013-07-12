@@ -332,6 +332,10 @@
                 android:entryValues="@array/gesture_target_values"
                 android:defaultValue="open_app_drawer" />
         </PreferenceScreen>
+        <CheckBoxPreference android:key="ui_live_wallpaper_fix"
+            android:title="@string/preferences_interface_enable_live_wallpaper_fix_title"
+            android:summary="@string/preferences_interface_enable_live_wallpaper_fix_summary"
+            android:defaultValue="false" />
     </PreferenceScreen>
 
 </PreferenceScreen>
