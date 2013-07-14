@@ -19,34 +19,34 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string-array name="preferences_interface_homescreen_indicator_position_entries">
-        <item>Above Dock</item>
-        <item>Top</item>
-        <item>Bottom</item>
+        <item>@string/indicator_position_above_dock</item>
+        <item>@string/indicator_position_top</item>
+        <item>@string/indicator_position_bottom</item>
     </string-array>
     <string-array name="preferences_interface_homescreen_indicator_position_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
     </string-array>
-    <string-array name="preferences_interface_homescreen_scrolling_transition_effect_entries">
-        <item>Standard</item>
-        <item>Tablet</item>
-        <item>Zoom In</item>
-        <item>Zoom Out</item>
-        <item>Rotate Up</item>
-        <item>Rotate Down</item>
-        <item>Cylinder In</item>
-        <item>Cylinder Out</item>
-        <item>Cube In</item>
-        <item>Cube Out</item>
-        <item>Bouncy Cube In</item>
-        <item>Bouncy Cube Out</item>
-        <item>Spin</item>
-        <item>Flip</item>
-        <item>Stack</item>
-        <item>Accordion</item>
-        <item>Carousel Left</item>
-        <item>Carousel Right</item>
+    <string-array name="preferences_interface_homescreen_scrolling_transition_effect_entries" translatable="false">
+        <item>@string/effects_standard</item>
+        <item>@string/effects_tablet</item>
+        <item>@string/effects_zoom_in</item>
+        <item>@string/effects_zoom_out</item>
+        <item>@string/effects_rotate_up</item>
+        <item>@string/effects_rotate_down</item>
+        <item>@string/effects_cylinder_in</item>
+        <item>@string/effects_cylinder_out</item>
+        <item>@string/effects_cube_in</item>
+        <item>@string/effects_cube_out</item>
+        <item>@string/effects_bouncy_cube_in</item>
+        <item>@string/effects_bouncy_cube_out</item>
+        <item>@string/effects_spin</item>
+        <item>@string/effects_flip</item>
+        <item>@string/effects_stack</item>
+        <item>@string/effects_accordion</item>
+        <item>@string/effects_carousel_left</item>
+        <item>@string/effects_carousel_right</item>
     </string-array>
     <string-array name="preferences_interface_homescreen_scrolling_transition_effect_values" translatable="false">
         <item>Standard</item>
@@ -68,17 +68,57 @@
         <item>CarouselLeft</item>
         <item>CarouselRight</item>
     </string-array>
+    <string-array name="preferences_interface_drawer_scrolling_transition_effect_entries" translatable="false">
+        <item>@string/effects_standard</item>
+        <item>@string/effects_tablet</item>
+        <item>@string/effects_zoom_in</item>
+        <item>@string/effects_zoom_out</item>
+        <item>@string/effects_rotate_up</item>
+        <item>@string/effects_rotate_down</item>
+        <item>@string/effects_cylinder_in</item>
+        <item>@string/effects_cylinder_out</item>
+        <item>@string/effects_cube_in</item>
+        <item>@string/effects_cube_out</item>
+        <item>@string/effects_bouncy_cube_in</item>
+        <item>@string/effects_bouncy_cube_out</item>
+        <item>@string/effects_spin</item>
+        <item>@string/effects_flip</item>
+        <item>@string/effects_stack</item>
+        <item>@string/effects_accordion</item>
+        <item>@string/effects_carousel_left</item>
+        <item>@string/effects_carousel_right</item>
+    </string-array>
+    <string-array name="preferences_interface_drawer_scrolling_transition_effect_values" translatable="false">
+        <item>Standard</item>
+        <item>Tablet</item>
+        <item>ZoomIn</item>
+        <item>ZoomOut</item>
+        <item>RotateUp</item>
+        <item>RotateDown</item>
+        <item>CylinderIn</item>
+        <item>CylinderOut</item>
+        <item>CubeIn</item>
+        <item>CubeOut</item>
+        <item>CubeBouncyIn</item>
+        <item>CubeBouncyOut</item>
+        <item>Spin</item>
+        <item>Flip</item>
+        <item>Stack</item>
+        <item>Accordion</item>
+        <item>CarouselLeft</item>
+        <item>CarouselRight</item>
+    </string-array>
     <string-array name="preferences_interface_drawer_indicator_position_entries">
-        <item>Top/Left</item>
-        <item>Bottom/Right</item>
+        <item>@string/drawer_indicator_position_top</item>
+        <item>@string/drawer_indicator_position_bottom</item>
     </string-array>
     <string-array name="preferences_interface_drawer_indicator_position_values" translatable="false">
         <item>1</item>
         <item>0</item>
     </string-array>
     <string-array name="preferences_interface_drawer_orientation_entries">
-        <item>Horizontal</item>
-        <item>Vertical</item>
+        <item>@string/drawer_orientation_horizontal</item>
+        <item>@string/drawer_orientation_vertical</item>
     </string-array>
     <string-array name="preferences_interface_drawer_orientation_values" translatable="false">
         <item>horizontal</item>
@@ -87,11 +127,11 @@
 
     <!-- Folder icon options -->
     <string-array name="folder_icon_style_names">
-        <item>Stacked</item>
-        <item>Grid</item>
-        <item>Carousel</item>
-        <item>Fan</item>
-        <item>iOS</item>
+        <item>@string/folder_icon_style_stacked</item>
+        <item>@string/folder_icon_style_grid</item>
+        <item>@string/folder_icon_style_carousel</item>
+        <item>@string/folder_icon_style_fan</item>
+        <item>@string/folder_icon_style_ios</item>
     </string-array>
     <string-array name="folder_icon_style_values">
         <item>0</item>
@@ -101,75 +141,8 @@
         <item>4</item>
     </string-array>
 
-    <!-- Folder icon options -->
-    <string-array name="folder_icon_background_names">
-        <item>Ring</item>
-        <item>Square</item>
-        <item>Disc</item>
-        <item>Platform</item>
-        <item>iOS</item>
-        <item>MIUI</item>
-    </string-array>
-    <string-array name="folder_icon_background_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
-
-    <!-- Search bar background options -->
-    <string-array name="search_bar_background_names">
-        <item>Jellybean</item>
-        <item>Ice Cream Sandwich</item>
-        <item>MIUI V5</item>
-    </string-array>
-    <string-array name="search_bar_background_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-
-    <!-- Hotseat background options -->
-    <string-array name="dock_background_names">
-        <item>None</item>
-        <item>Lennox</item>
-        <item>ChaOs</item>
-    </string-array>
-    <string-array name="dock_background_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-
-    <!-- Tab style options -->
-    <string-array name="tab_style_names">
-        <item>Holo</item>
-        <item>Lennox</item>
-    </string-array>
-    <string-array name="tab_style_values">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
-
-    <string-array name="preferences_interface_drawer_transparency_names">
-        <item>Opaque</item>
-        <item>25%</item>
-        <item>50%</item>
-        <item>75%</item>
-        <item>Transparent</item>
-    </string-array>
-    <string-array name="preferences_interface_drawer_transparency_values" translatable="false">
-        <item>255</item>
-        <item>192</item>
-        <item>128</item>
-        <item>64</item>
-        <item>0</item>
-    </string-array>
-
     <string-array name="gesture_target_names">
-        <item>Nothing</item>
+        <item>@string/action_nothing</item>
         <item>@string/all_apps_button_label</item>
         <item>@string/action_recent_apps</item>
         <item>@string/action_search</item>
@@ -179,10 +152,10 @@
         <item>@string/action_default_screen</item>
         <item>@string/action_show_preview</item>
         <item>@string/action_lock_unlock</item>
-        <item>@string/action_toggle_dock</item>
         <item>@string/action_quick_settings</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
+        <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -194,13 +167,13 @@
         <item>default_homescreen</item>
         <item>show_previews</item>
         <item>lock_unlock</item>
-        <item>toggle_dock</item>
         <item>quick_settings</item>
         <item>show_settings</item>
     </string-array>
+        <!--<item>toggle_dock</item>-->
 
     <string-array name="gesture_target_names_pre42">
-        <item>Nothing</item>
+        <item>@string/action_nothing</item>
         <item>@string/all_apps_button_label</item>
         <item>@string/action_recent_apps</item>
         <item>@string/action_search</item>
@@ -212,7 +185,7 @@
         <item>@string/action_lock_unlock</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
-    <!--<item>@string/action_toggle_dock</item>-->
+        <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values_pre42" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -226,18 +199,6 @@
         <item>lock_unlock</item>
         <item>show_settings</item>
     </string-array>
-    <!--<item>toggle_dock</item>-->
-
-    <!-- Live wallpaper colours -->
-    <string-array name="live_wallpaper_colour_names">
-        <item>Green</item>
-        <item>Red</item>
-        <item>Blue</item>
-    </string-array>
-    <string-array name="live_wallpaper_colour_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
+        <!--<item>toggle_dock</item>-->
 
 </resources>

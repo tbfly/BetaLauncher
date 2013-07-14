@@ -107,12 +107,6 @@ public final class PreferencesProvider {
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
-            public static int getSearchBarBackground() {
-                return Integer.parseInt(getString("ui_homescreen_search_bar_background", "0"));
-            }
-            public static boolean getResizeAnyWidget() {
-                return getBoolean("ui_homescreen_general_resize_any_widget", true);
-            }
             public static int getIconScale(int def) {
                 return getInt("ui_homescreen_icon_scale", def);
             }
@@ -167,9 +161,6 @@ public final class PreferencesProvider {
             public static class FolderIconStyle {
                 public static int getFolderIconStyle() {
                     return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));
-                }
-                public static int getFolderIconBackground() {
-                    return Integer.parseInt(getString("ui_homescreen_folder_background", "0"));
                 }
             }
 
@@ -226,17 +217,23 @@ public final class PreferencesProvider {
                     return def;
                 }
             }
-            public static boolean getWidgetIcons() {
-                return getBoolean("ui_drawer_widget_icon_style", false);
-            }
-            public static int getTabStyle() {
-                return Integer.parseInt(getString("ui_drawer_tab_style", "0"));
-            }
             public static int getDrawerTransparency() {
                 return getInt("ui_drawer_transparency", 50);
             }
+            public static boolean getStretchScreens() {
+                return getBoolean("ui_drawer_stretch_screens", false);
+            }
             public static boolean getVertical() {
                 return getString("ui_drawer_orientation", "horizontal").equals("vertical");
+            }
+            public static String getHiddenApps() {
+                return getString("ui_drawer_hidden_apps", "");
+            }
+            public static boolean getRemoveShortcutsOfHiddenApps() {
+                return getBoolean("ui_drawer_remove_hidden_apps_shortcuts", true);
+            }
+            public static boolean getRemoveWidgetsOfHiddenApps() {
+                return getBoolean("ui_drawer_remove_hidden_apps_widgets", true);
             }
             public static boolean getJoinWidgetsApps() {
                 return getBoolean("ui_drawer_widgets_join_apps", true);
@@ -244,11 +241,11 @@ public final class PreferencesProvider {
             public static boolean getListActions() {
                 return getBoolean("ui_drawer_widgets_list_actions", false);
             }
-            public static String getHiddenApps() {
-                return getString("ui_drawer_hidden_apps", "");
-            }
             public static int getIconScale(int def) {
                 return getInt("ui_drawer_icon_scale", def);
+            }
+            public static int getWidgetScale(int def) {
+                return getInt("ui_drawer_widgets_scale", def);
             }
             public static class Scrolling {
                 public static AppsCustomizePagedView.TransitionEffect getTransitionEffect(String def) {
@@ -291,8 +288,8 @@ public final class PreferencesProvider {
             public static void setShowDock(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_dock_enabled", value);
             }
-            public static boolean getHideIconLabels() {
-                return getBoolean("ui_dock_hide_icon_labels", true);
+            public static boolean getDockAsOverlay() {
+                return getBoolean("ui_dock_as_overlay", false);
             }
             public static int getNumberPages() {
                 return getInt("ui_dock_pages", 1);
@@ -303,42 +300,27 @@ public final class PreferencesProvider {
             public static int getNumberIcons(int def) {
                 return getInt("ui_dock_icons", def);
             }
+            public static boolean getHideIconLabels() {
+                return getBoolean("ui_dock_hide_icon_labels", true);
+            }
             public static int getIconScale(int def) {
                 return getInt("ui_dock_icon_scale", def);
             }
-            public static int getDockBackground() {
-                return Integer.parseInt(getString("ui_dock_background", "0"));
-            }
             public static boolean getShowDivider() {
-                return getBoolean("ui_dock_divider", false);
+                return getBoolean("ui_dock_divider", true);
             }
+        }
+
+        public static class Icons {
+
         }
 
         public static class General {
             public static boolean getAutoRotate(boolean def) {
                 return getBoolean("ui_general_orientation", def);
             }
-            public static boolean getLiveWallpaperFix(Context ctx) {
-                PackageManager pm = ctx.getPackageManager();
-                ComponentName lwpfix = new ComponentName("com.android.launcher",
-                                      "com.lennox.livewallpaperpicker.LiveWallpaperFix");
-                int value = pm.getComponentEnabledSetting(lwpfix);
-                if (value != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-            public static void setLiveWallpaperFix(Context ctx, boolean value) {
-                PackageManager pm = ctx.getPackageManager();
-                ComponentName lwpfix = new ComponentName("com.android.launcher",
-                                      "com.lennox.livewallpaperpicker.LiveWallpaperFix");
-                int setState = value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                                       PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-                pm.setComponentEnabledSetting((lwpfix), setState, PackageManager.DONT_KILL_APP);
-            }
-            public static boolean getLockWorkspace() {
-                return getBoolean("ui_general_lock_workspace", false);
+            public static boolean getLockWorkspace(boolean def) {
+                return getBoolean("ui_general_lock_workspace", def);
             }
             public static void setLockWorkspace(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_general_lock_workspace", value);
@@ -353,18 +335,6 @@ public final class PreferencesProvider {
             }
             public static void setFullscreenMode(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_general_fullscreen", value);
-            }
-        }
-
-        public static class LiveWallpaper {
-            public static int getBeamColour() {
-                return Integer.parseInt(getString("livewallpaper_beam_colour", "0"));
-            }
-            public static int getDotColour() {
-                return Integer.parseInt(getString("livewallpaper_dot_colour", "0"));
-            }
-            public static int getBackgroundColour() {
-                return Integer.parseInt(getString("livewallpaper_background_colour", "0"));
             }
         }
     }
