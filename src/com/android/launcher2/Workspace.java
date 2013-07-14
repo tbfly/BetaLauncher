@@ -1516,6 +1516,16 @@ public class Workspace extends PagedView
                 }
                 cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
                 cl.setRotationY(rotation);
+
+                // If the view has 0 alpha, we set it to be invisible so as to prevent
+                // it from accepting touches. Move the view to its original position to
+                // prevent overlap between views
+                if (alpha <= 0) {
+                    cl.setVisibility(INVISIBLE);
+                    cl.setTranslationX(0);
+                } else if (cl.getVisibility() != VISIBLE) {
+                    cl.setVisibility(VISIBLE);
+                }
                 if (mFadeInAdjacentScreens && !isSmall()) {
                     setCellLayoutFadeAdjacent(cl, scrollProgress);
                 }

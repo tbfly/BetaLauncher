@@ -1993,6 +1993,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     float alpha = 1 - Math.abs(scrollProgress);
                     v.setAlpha(alpha);
                 }
+
+                // If the view has 0 alpha, we set it to be invisible so as to prevent
+                // it from accepting touches
+                if (alpha <= 0) {
+                    v.setVisibility(INVISIBLE);
+                } else if (v.getVisibility() != VISIBLE) {
+                    v.setVisibility(VISIBLE);
+                }
             }
         }
     }
