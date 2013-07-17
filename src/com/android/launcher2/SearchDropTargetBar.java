@@ -36,10 +36,6 @@ import com.android.launcher2.preference.PreferencesProvider;
  */
 public class SearchDropTargetBar extends FrameLayout implements DragController.DragListener {
 
-    private static final int BACKGROUND_JELLYBEAN = 0;
-    private static final int BACKGROUND_ICS = 1;
-    private static final int BACKGROUND_MIUIV5 = 2;
-
     private static final int sTransitionInDuration = 200;
     private static final int sTransitionOutDuration = 175;
 
@@ -49,7 +45,6 @@ public class SearchDropTargetBar extends FrameLayout implements DragController.D
             new AccelerateInterpolator();
 
     private boolean mShowQSBSearchBar;
-    private int mSearchBarBackground;
 
     private boolean mIsSearchBarHidden;
     private View mQSBSearchBar;
@@ -71,7 +66,6 @@ public class SearchDropTargetBar extends FrameLayout implements DragController.D
         super(context, attrs, defStyle);
 
         mShowQSBSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
-        mSearchBarBackground = PreferencesProvider.Interface.Homescreen.getSearchBarBackground();
     }
 
     public void setup(Launcher launcher, DragController dragController) {
@@ -112,22 +106,7 @@ public class SearchDropTargetBar extends FrameLayout implements DragController.D
 
         // Get the individual components
         mQSBSearchBar = findViewById(R.id.qsb_search_bar);
-
-        int background;
-        switch (mSearchBarBackground) {
-            case BACKGROUND_MIUIV5:
-                background = R.drawable.search_frame_miuiv5;
-                break;
-            case BACKGROUND_ICS:
-                background = R.drawable.search_frame_ics;
-                break;
-            case BACKGROUND_JELLYBEAN:
-            default:
-                background = R.drawable.search_frame;
-                break;
-        }
-        mQSBSearchBar.setBackgroundResource(background);
-
+        mQSBSearchBar.setBackgroundResource(R.drawable.search_frame);
         mDropTargetBar = findViewById(R.id.drag_target_bar);
         mInfoDropTarget = (ButtonDropTarget) mDropTargetBar.findViewById(R.id.info_target_text);
         mDeleteDropTarget = (ButtonDropTarget) mDropTargetBar.findViewById(R.id.delete_target_text);

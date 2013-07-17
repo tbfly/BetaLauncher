@@ -23,7 +23,7 @@
         android:title="@string/icon_theme" />
     <CheckBoxPreference android:key="ui_general_orientation"
         android:title="@string/preferences_interface_general_orientation_title"
-        android:defaultValue="@bool/auto_rotate" />
+        android:defaultValue="@bool/allow_rotation" />
     <CheckBoxPreference android:key="ui_general_lock_workspace"
         android:title="@string/preferences_interface_general_lock_workspace_title"
         android:summary="@string/preferences_interface_general_lock_workspace_summary"
@@ -31,5 +31,5 @@
     <CheckBoxPreference android:key="ui_general_fullscreen"
         android:title="@string/preferences_interface_general_fullscreen_title"
         android:summary="@string/preferences_interface_general_fullscreen_summary"
-        android:defaultValue="@bool/run_in_fullscreen" />
+        android:defaultValue="false" />
 </PreferenceScreen>

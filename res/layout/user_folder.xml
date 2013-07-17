@@ -20,6 +20,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:layout_margin="5.0dip"
     android:background="@drawable/portal_container_holo">
 
     <com.android.launcher2.CellLayout
@@ -32,6 +33,7 @@
         android:paddingBottom="@dimen/folder_padding"
         android:cacheColorHint="#ff333333"
         android:hapticFeedbackEnabled="false"
+        launcher:cellLayoutType="@integer/cell_layout_folder"
         launcher:widthGap="@dimen/folder_width_gap"
         launcher:heightGap="@dimen/folder_height_gap"
         launcher:cellWidth="@dimen/folder_cell_width"
@@ -67,6 +69,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1.0"
             android:layout_margin="1dp"
+            android:paddingLeft="10dp"
             android:scaleType="center"
             android:layout_gravity="right|center_horizontal"
             android:src="@android:drawable/ic_menu_sort_by_size" />

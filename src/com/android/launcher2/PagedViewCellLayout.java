@@ -81,6 +81,16 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         addView(mChildren);
     }
 
+    void setStretchCells() {
+        setCellGaps(-1, -1);
+        setPadding(0, 0, 0, 0);
+    }
+
+    void setCellGaps(int widthGap, int heightGap) {
+        mWidthGap = mOriginalWidthGap = widthGap;
+        mHeightGap = mOriginalHeightGap = heightGap;
+    }
+
     public int getCellWidth() {
         return mCellWidth;
     }
@@ -123,6 +133,11 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     public boolean addViewToCellLayout(View child, int index, int childId,
             PagedViewCellLayout.LayoutParams params) {
         final PagedViewCellLayout.LayoutParams lp = params;
+
+        if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
+            child.setScaleX(getChildrenScale());
+            child.setScaleY(getChildrenScale());
+        }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells
         // per workspace screen

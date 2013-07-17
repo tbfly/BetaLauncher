@@ -25,7 +25,7 @@ import android.widget.TextView;
  * An icon on a PagedView, specifically for items in the launcher's paged view (with compound
  * drawables on the top).
  */
-public class PagedViewIcon extends TextView {
+public class PagedViewIcon extends BubbleTextView {
     /** A simple callback interface to allow a PagedViewIcon to notify when it has been pressed */
     public static interface PressedCallback {
         void iconPressed(PagedViewIcon icon);
@@ -52,25 +52,10 @@ public class PagedViewIcon extends TextView {
         super(context, attrs, defStyle);
     }
 
-    public void applyFromApplicationInfo(ApplicationInfo info, boolean scaleUp,
-            PagedViewIcon.PressedCallback cb) {
+    public void applyFromApplicationInfo(ApplicationInfo info, PagedViewIcon.PressedCallback cb) {
         mIcon = info.iconBitmap;
         mPressedCallback = cb;
         setCompoundDrawablesWithIntrinsicBounds(null, new FastBitmapDrawable(mIcon), null, null);
-        setCompoundDrawablePadding(0);
-        setText(info.title);
-        setTag(info);
-    }
-
-    public void applyFromApplicationInfo(ApplicationInfo info, float scale, boolean scaleUp,
-            PagedViewIcon.PressedCallback cb) {
-        mIcon = info.iconBitmap;
-        int width = (int)((float)mIcon.getWidth() * scale);
-        int height = (int)((float)mIcon.getHeight() * scale);
-        FastBitmapDrawable d = new FastBitmapDrawable(Bitmap.createScaledBitmap(mIcon,
-                width, height, true));
-        mPressedCallback = cb;
-        setCompoundDrawablesWithIntrinsicBounds(null, d, null, null);
         setCompoundDrawablePadding(0);
         setText(info.title);
         setTag(info);

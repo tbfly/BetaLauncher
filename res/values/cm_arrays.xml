@@ -47,6 +47,7 @@
         <item>@string/effects_accordion</item>
         <item>@string/effects_carousel_left</item>
         <item>@string/effects_carousel_right</item>
+        <item>@string/effects_shutter</item>
     </string-array>
     <string-array name="preferences_interface_homescreen_scrolling_transition_effect_values" translatable="false">
         <item>Standard</item>
@@ -67,6 +68,7 @@
         <item>Accordion</item>
         <item>CarouselLeft</item>
         <item>CarouselRight</item>
+        <item>Shutter</item>
     </string-array>
     <string-array name="preferences_interface_drawer_scrolling_transition_effect_entries" translatable="false">
         <item>@string/effects_standard</item>
@@ -108,6 +110,22 @@
         <item>CarouselLeft</item>
         <item>CarouselRight</item>
     </string-array>
+    <string-array name="preferences_interface_dock_scrolling_transition_effect_entries" translatable="false">
+        <item>@string/effects_standard</item>
+        <item>@string/effects_flip</item>
+        <item>@string/effects_accordion</item>
+        <item>@string/effects_carousel_left</item>
+        <item>@string/effects_carousel_right</item>
+        <item>@string/effects_shutter</item>
+    </string-array>
+    <string-array name="preferences_interface_dock_scrolling_transition_effect_values" translatable="false">
+        <item>Standard</item>
+        <item>Flip</item>
+        <item>Accordion</item>
+        <item>CarouselLeft</item>
+        <item>CarouselRight</item>
+        <item>Shutter</item>
+    </string-array>
     <string-array name="preferences_interface_drawer_indicator_position_entries">
         <item>@string/drawer_indicator_position_top</item>
         <item>@string/drawer_indicator_position_bottom</item>
@@ -127,8 +145,8 @@
 
     <!-- Folder icon options -->
     <string-array name="folder_icon_style_names">
-        <item>@string/folder_icon_style_stacked</item>
         <item>@string/folder_icon_style_grid</item>
+        <item>@string/folder_icon_style_stacked</item>
         <item>@string/folder_icon_style_carousel</item>
         <item>@string/folder_icon_style_fan</item>
         <item>@string/folder_icon_style_ios</item>
@@ -183,9 +201,9 @@
         <item>@string/action_default_screen</item>
         <item>@string/action_show_preview</item>
         <item>@string/action_lock_unlock</item>
+        <item>@string/action_toggle_dock</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
-        <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values_pre42" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -197,8 +215,8 @@
         <item>default_homescreen</item>
         <item>show_previews</item>
         <item>lock_unlock</item>
+        <item>toggle_dock</item>
         <item>show_settings</item>
     </string-array>
-        <!--<item>toggle_dock</item>-->
 
 </resources>

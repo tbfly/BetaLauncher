@@ -22,7 +22,6 @@ import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -38,6 +37,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -51,9 +51,12 @@ import android.view.animation.LayoutAnimationController;
 
 import com.android.launcher.R;
 import com.android.launcher2.FolderIcon.FolderRingAnimator;
+import com.android.launcher2.preference.PreferencesProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -70,6 +73,7 @@ public class CellLayout extends ViewGroup {
     private int mCountX;
     private int mCountY;
 
+    private int mCellLayoutType;
     private int mOriginalWidthGap;
     private int mOriginalHeightGap;
     private int mWidthGap;
@@ -167,6 +171,11 @@ public class CellLayout extends ViewGroup {
             new PorterDuffXfermode(PorterDuff.Mode.ADD);
     private final static Paint sPaint = new Paint();
 
+    static final int CELL_LAYOUT_WORKSPACE = 0;
+    static final int CELL_LAYOUT_HOTSEAT = 1;
+    static final int CELL_LAYOUT_FOLDER = 2;
+    static final int CELL_LAYOUT_PREVIEW = 3;
+
     public CellLayout(Context context) {
         this(context, null);
     }
@@ -186,6 +195,7 @@ public class CellLayout extends ViewGroup {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CellLayout, defStyle, 0);
 
+        mCellLayoutType = a.getInteger(R.styleable.CellLayout_cellLayoutType, 0);
         mCellWidth = mOriginalCellWidth = a.getDimensionPixelSize(R.styleable.CellLayout_cellWidth, 10);
         mCellHeight = mOriginalCellHeight = a.getDimensionPixelSize(R.styleable.CellLayout_cellHeight, 10);
         mWidthGap = mOriginalWidthGap = a.getDimensionPixelSize(R.styleable.CellLayout_widthGap, 0);
@@ -201,7 +211,9 @@ public class CellLayout extends ViewGroup {
         a.recycle();
 
         setAlwaysDrawnWithCacheEnabled(false);
-        setDrawingCacheEnabled(true);
+        if (mCellLayoutType == CELL_LAYOUT_WORKSPACE) {
+            setDrawingCacheEnabled(true);
+        }
 
         final Resources res = getResources();
         mNormalBackground = res.getDrawable(R.drawable.homescreen_blue_normal_holo);
@@ -282,36 +294,8 @@ public class CellLayout extends ViewGroup {
         mForegroundRect = new Rect();
 
         mShortcutsAndWidgets = new ShortcutAndWidgetContainer(context);
-
-        if (!LauncherApplication.isScreenLarge()){
-            mCellWidth = (mCellWidth * res.getInteger(R.integer.default_cell_count_x)) / mCountX;
-            mCellHeight = (mCellHeight * res.getInteger(R.integer.default_cell_count_y)) / mCountY;
-        }
-
         mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
         addView(mShortcutsAndWidgets);
-    }
-
-    static int widthInPortrait(Resources r, int numCells) {
-        // We use this method from Workspace to figure out how many rows/columns Launcher should
-        // have. We ignore the left/right padding on CellLayout because it turns out in our design
-        // the padding extends outside the visible screen size, but it looked fine anyway.
-        int cellWidth = r.getDimensionPixelSize(R.dimen.workspace_cell_width);
-        int minGap = Math.min(r.getDimensionPixelSize(R.dimen.workspace_width_gap),
-                r.getDimensionPixelSize(R.dimen.workspace_height_gap));
-
-        return  minGap * (numCells - 1) + cellWidth * numCells;
-    }
-
-    static int heightInLandscape(Resources r, int numCells) {
-        // We use this method from Workspace to figure out how many rows/columns Launcher should
-        // have. We ignore the left/right padding on CellLayout because it turns out in our design
-        // the padding extends outside the visible screen size, but it looked fine anyway.
-        int cellHeight = r.getDimensionPixelSize(R.dimen.workspace_cell_height);
-        int minGap = Math.min(r.getDimensionPixelSize(R.dimen.workspace_width_gap),
-                r.getDimensionPixelSize(R.dimen.workspace_height_gap));
-
-        return minGap * (numCells - 1) + cellHeight * numCells;
     }
 
     public void enableHardwareLayers() {
@@ -335,17 +319,40 @@ public class CellLayout extends ViewGroup {
     }
 
     public void setGridSize(int x, int y) {
+        setGridSize(x, y, false);
+    }
+
+    public void setGridSize(int x, int y, boolean isVerticalHotseat) {
         mCountX = x;
         mCountY = y;
         mOccupied = new boolean[mCountX][mCountY];
         mTmpOccupied = new boolean[mCountX][mCountY];
         mTempRectStack.clear();
 
-        // Reset scaling if the grid has been modified. This is a folder or the hotseat
-        mCellWidth = mOriginalCellWidth;
-        mCellHeight = mOriginalCellHeight;
+        if (mCellLayoutType == CELL_LAYOUT_HOTSEAT) {
+            // Scale dock better when icon number is changed.
+            if (!isVerticalHotseat) {
+                mCellWidth = mOriginalCellWidth * 5 / mCountX;
+                mCellHeight = mCellWidth;
+            } else {
+                mCellHeight = mOriginalCellHeight * 5 / mCountY;
+                mCellWidth = mCellHeight;
+            }
+        } else {
+            mCellWidth = mOriginalCellWidth;
+            mCellHeight = mOriginalCellHeight;
+        }
         mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
 
+        requestLayout();
+    }
+
+    void setCellDimensions(int cellWidth, int cellHeight, int widthGap, int heightGap) {
+        mCellWidth = cellWidth;
+        mCellHeight = cellHeight;
+        mWidthGap = widthGap;
+        mHeightGap = heightGap;
+        mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
         requestLayout();
     }
 
@@ -457,7 +464,7 @@ public class CellLayout extends ViewGroup {
             final float alpha = mDragOutlineAlphas[i];
             if (alpha > 0) {
                 final Rect r = mDragOutlines[i];
-                scaleRectAboutCenter(r, temp, 1f);
+                scaleRectAboutCenter(r, temp, getChildrenScale());
                 final Bitmap b = (Bitmap) mDragOutlineAnims[i].getTag();
                 paint.setAlpha((int)(alpha + .5f));
                 canvas.drawBitmap(b, null, temp, paint);
@@ -622,7 +629,11 @@ public class CellLayout extends ViewGroup {
 
             Resources res = getResources();
             bubbleChild.setTextColor(res.getColor(R.color.workspace_icon_text_color));
-            bubbleChild.setIconScale(getChildrenScale());
+        }
+
+        if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
+            child.setScaleX(getChildrenScale());
+            child.setScaleY(getChildrenScale());
         }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells
@@ -895,6 +906,33 @@ public class CellLayout extends ViewGroup {
         mHeightGap = mOriginalHeightGap = heightGap;
     }
 
+    void setStretchCells(boolean resizeCells) {
+        setCellGaps(-1, -1);
+        int iconPaddingTop = getResources().getDimensionPixelSize(R.dimen.app_icon_padding_top);
+        int padding = (int) (10f * (float) getChildrenScale());
+        setPadding(padding, padding, padding, padding);
+        if (resizeCells) {
+            mCellWidth = getMaxCellWidth();
+            mCellHeight = getMaxCellHeight();
+            mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
+            requestLayout();
+        }
+        //mShortcutsAndWidgets.setCenterCells();
+    }
+
+    /*void setStretchCells(boolean resizeCells) {
+        setCellGaps(-1, -1);
+        int topPadding = (int) ((float) getPaddingTop() * (float) getChildrenScale());
+        setPadding(0, topPadding, 0, 0);
+        if (resizeCells) {
+            mCellWidth = getMaxCellWidth();
+            mCellHeight = getMaxCellHeight();
+            mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
+            requestLayout();
+        }
+        //mShortcutsAndWidgets.setCenterCells();
+    }*/
+
     int getCellWidth() {
         return mCellWidth;
     }
@@ -968,6 +1006,39 @@ public class CellLayout extends ViewGroup {
             heightGap = Math.min(maxGap, numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0);
         }
         metrics.set(cellWidth, cellHeight, widthGap, heightGap);
+    }
+
+    private int getMaxCellWidth() {
+        if ( mCountX == 0 ) return mCellWidth;
+        boolean landscape = LauncherApplication.isScreenLandscape(getContext());
+        boolean landscapeDockOnBottom = landscape && PreferencesProvider.Interface.Dock.getLandscapeDockOnBottom();
+        boolean showSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
+        boolean showDock = PreferencesProvider.Interface.Dock.getShowDock();
+        int searchBarWidth = (landscape && !landscapeDockOnBottom) ? (showSearchBar
+                ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0) : 0;
+        int dockWidth = (landscape && !landscapeDockOnBottom && showDock) ?
+                getResources().getDimensionPixelSize(
+                R.dimen.button_bar_height) : 0;
+        int width = (int) (getResources().getConfiguration().screenWidthDp *
+                LauncherApplication.getScreenDensity()) - searchBarWidth - dockWidth;
+        return (width - getPaddingRight() - getPaddingLeft()) / mCountX;
+    }
+
+    private int getMaxCellHeight() {
+        if ( mCountY == 0 ) return mCellHeight;
+        boolean landscape = LauncherApplication.isScreenLandscape(getContext());
+        boolean landscapeDockOnBottom = landscape && PreferencesProvider.Interface.Dock.getLandscapeDockOnBottom();
+        boolean showSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
+        boolean showDock = PreferencesProvider.Interface.Dock.getShowDock();
+        int searchBarHeight = (landscape && !landscapeDockOnBottom) ? 0 : (showSearchBar
+                ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0);
+        int dockHeight = ((landscape && !landscapeDockOnBottom) || !showDock) ? 0 :
+                getResources().getDimensionPixelSize(
+                R.dimen.button_bar_height);
+        int statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+        int height = (int) (getResources().getConfiguration().screenHeightDp *
+                LauncherApplication.getScreenDensity()) - searchBarHeight - dockHeight - statusBarHeight;
+        return (height - getPaddingTop() - getPaddingBottom()) / mCountY;
     }
 
     @Override
@@ -2136,7 +2207,7 @@ public class CellLayout extends ViewGroup {
             }
             initDeltaX = child.getTranslationX();
             initDeltaY = child.getTranslationY();
-            finalScale = 1.0f - 4.0f / child.getWidth();
+            finalScale = getChildrenScale() - 4.0f / child.getWidth();
             initScale = child.getScaleX();
             this.child = child;
         }
@@ -2178,7 +2249,7 @@ public class CellLayout extends ViewGroup {
                     // We make sure to end only after a full period
                     initDeltaX = 0;
                     initDeltaY = 0;
-                    initScale = 1f;
+                    initScale = getChildrenScale();
                 }
             });
             mShakeAnimators.put(child, this);
@@ -2199,8 +2270,8 @@ public class CellLayout extends ViewGroup {
             AnimatorSet s = LauncherAnimUtils.createAnimatorSet();
             a = s;
             s.playTogether(
-                LauncherAnimUtils.ofFloat(child, "scaleX", 1f),
-                LauncherAnimUtils.ofFloat(child, "scaleY", 1f),
+                LauncherAnimUtils.ofFloat(child, "scaleX", getChildrenScale()),
+                LauncherAnimUtils.ofFloat(child, "scaleY", getChildrenScale()),
                 LauncherAnimUtils.ofFloat(child, "translationX", 0f),
                 LauncherAnimUtils.ofFloat(child, "translationY", 0f)
             );

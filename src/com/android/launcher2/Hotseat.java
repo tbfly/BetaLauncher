@@ -18,6 +18,7 @@ package com.android.launcher2;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.Matrix;
@@ -35,19 +36,31 @@ import java.util.Arrays;
 public class Hotseat extends PagedView {
     private int mCellCount;
 
+    private int mHotseatPages;
     private int mDefaultPage;
 
     private boolean mTransposeLayoutWithOrientation;
     private boolean mIsLandscape;
+    private boolean mScrollTransformsDirty = false;
+    private boolean mOverscrollTransformsDirty = false;
+    private int mCameraDistance;
 
     private float[] mTempCellLayoutCenterCoordinates = new float[2];
     private Matrix mTempInverseMatrix = new Matrix();
 
+    private static final int DEFAULT_PAGE = 0;
+
     private static final int DEFAULT_CELL_COUNT = 5;
 
-    private static final int BACKGROUND_NONE = 0;
-    private static final int BACKGROUND_LENNOX = 1;
-    private static final int BACKGROUND_CHAOS = 2;
+    public enum TransitionEffect {
+        Standard,
+        Flip,
+        Accordion,
+        CarouselLeft,
+        CarouselRight,
+        Shutter
+    }
+    private TransitionEffect mTransitionEffect = TransitionEffect.Standard;
 
     public Hotseat(Context context) {
         this(context, null);
@@ -60,13 +73,23 @@ public class Hotseat extends PagedView {
     public Hotseat(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        mFadeInAdjacentScreens = false;
+        final Resources res = getResources();
+
+        mIsLandscape = res.getConfiguration().orientation ==
+            Configuration.ORIENTATION_LANDSCAPE;
+
+        mTransitionEffect = PreferencesProvider.Interface.Dock.Scrolling.getTransitionEffect(
+                res.getString(R.string.config_dockDefaultTransitionEffect));
+
+        mFadeInAdjacentScreens = PreferencesProvider.Interface.Dock.getFadeInAdjacentScreens();
         mHandleScrollIndicator = true;
 
-        int hotseatPages = PreferencesProvider.Interface.Dock.getNumberPages();
-        int defaultPage = PreferencesProvider.Interface.Dock.getDefaultPage(hotseatPages / 2);
-        if (defaultPage >= hotseatPages) {
-            defaultPage = hotseatPages / 2;
+        mCameraDistance = res.getInteger(R.integer.config_cameraDistance);
+
+        mHotseatPages = PreferencesProvider.Interface.Dock.getNumberPages(mIsLandscape);
+        int defaultPage = PreferencesProvider.Interface.Dock.getDefaultPage(DEFAULT_PAGE, mIsLandscape);
+        if (defaultPage >= mHotseatPages) {
+            defaultPage = mHotseatPages / 2;
         }
 
         mCurrentPage = mDefaultPage = defaultPage;
@@ -74,42 +97,36 @@ public class Hotseat extends PagedView {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Hotseat, defStyle, 0);
         mTransposeLayoutWithOrientation =
-                context.getResources().getBoolean(R.bool.hotseat_transpose_layout_with_orientation);
-        mIsLandscape = context.getResources().getConfiguration().orientation ==
-            Configuration.ORIENTATION_LANDSCAPE;
+                res.getBoolean(R.bool.hotseat_transpose_layout_with_orientation);
         mCellCount = a.getInt(R.styleable.Hotseat_cellCount, DEFAULT_CELL_COUNT);
-        mCellCount = PreferencesProvider.Interface.Dock.getNumberIcons(mCellCount);
-  
-        int dockBackground = PreferencesProvider.Interface.Dock.getDockBackground();
-        int dockBackgroundResource;
-        switch (dockBackground) {
-            case BACKGROUND_NONE:
-                dockBackgroundResource = android.R.color.transparent;
-                break;
-            case BACKGROUND_LENNOX:
-                dockBackgroundResource = R.drawable.hotseat_background;
-                break;
-            case BACKGROUND_CHAOS:
-            default:
-                dockBackgroundResource = R.drawable.hotseat_background_chaos;
-                break;
-        }
-        setBackgroundResource(dockBackgroundResource);
+        mCellCount = PreferencesProvider.Interface.Dock.getNumberIcons(mCellCount, mIsLandscape);
+        setBackgroundResource(R.drawable.hotseat_background);
 
         LauncherModel.updateHotseatLayoutCells(mCellCount);
 
         mVertical = hasVerticalHotseat();
 
+        boolean hideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels() ||
+                (mVertical && !LauncherApplication.isScreenLarge());
+        int cellHeight = (int)res.getDimension(R.dimen.hotseat_cell_height);
 
-        float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(
-                getResources().getInteger(R.integer.hotseat_item_scale_percentage)) / 100f;
+        float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(mIsLandscape) / 100f;
 
         LayoutInflater inflater =
                 (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        for (int i = 0; i < hotseatPages; i++) {
+        for (int i = 0; i < mHotseatPages; i++) {
             CellLayout cl = (CellLayout) inflater.inflate(R.layout.hotseat_page, null);
             cl.setChildrenScale(childrenScale);
-            cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1));
+            cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1), mVertical);
+            cl.setCellDimensions(cl.getCellWidth(), cellHeight, cl.getWidthGap(), cl.getHeightGap());
+            int topPadding = (int)res.getDimension(R.dimen.hotseat_cell_top_padding);
+            if (hideDockIconLabels) {
+                cl.setPadding(0, topPadding, 0, 0);
+            } else {
+                cl.setPadding(0, 0, 0, 0);
+            }
+            cl.setCellGaps(-1, -1);
+
             addView(cl);
         }
 
@@ -128,7 +145,7 @@ public class Hotseat extends PagedView {
         return false;
     }
 
-    private boolean hasVerticalHotseat() {
+    boolean hasVerticalHotseat() {
         return (mIsLandscape && mTransposeLayoutWithOrientation);
     }
 
@@ -143,8 +160,23 @@ public class Hotseat extends PagedView {
     int getCellYFromOrder(int rank) {
         return hasVerticalHotseat() ? (mCellCount - rank - 1) : 0;
     }
+    int getInverterCellXFromOrder(int rank) {
+        return hasVerticalHotseat() ? (mCellCount - rank - 1) : 0;
+    }
+    int getInverterCellYFromOrder(int rank) {
+        return hasVerticalHotseat() ? 0 : rank;
+    }
     int getScreenFromOrder(int screen) {
         return hasVerticalHotseat() ? (getChildCount() - screen - 1) : screen;
+    }
+    int[] getDatabaseCellsFromLayout(int[] lpCells) {
+        if (!hasVerticalHotseat()) {
+            return lpCells;
+        }
+        // On landscape with vertical hotseat, the items are stored in y axis and from up to down,
+        // so we need to convert to x axis and left to right prior to save to database. In screen
+        // the item has the right coordinates
+        return new int[]{mCellCount - lpCells[1] - 1, lpCells[0]};
     }
 
     /*
@@ -213,41 +245,6 @@ public class Hotseat extends PagedView {
                 return cl;
             }
 
-        /*Drawable appDrawerIcon = null;
-        String[] possibleNames = { "all_apps_button_icon", "ic_allapps", "allapp" };
-        String[] possibleNames = { "all_apps_button_icon", "ic_allapps" };
-        for ( String s : possibleNames ) {
-             appDrawerIcon = ThemeUtils.getDrawable(context, s);
-             if ( appDrawerIcon != null ) {
-                 break;
-             }
-        }
-        if ( appDrawerIcon == null ) {
-            appDrawerIcon  = context.getResources().getDrawable(R.drawable.all_apps_button_icon);
-        }
-        
-        Bitmap bitmap = ((BitmapDrawable)appDrawerIcon).getBitmap();
-        int width=96;
-        int height=96;
-        Bitmap resizedbitmap=Bitmap.createScaledBitmap(bitmap, width, height, true);
-
-        allAppsButton.setImageDrawable(appDrawerIcon);
-
-        allAppsButton.setLayoutParams(new ViewGroup.LayoutParams(64,64));
-
-        allAppsButton.setCompoundDrawablesWithIntrinsicBounds(null,appDrawerIcon, null, null);
-        allAppsButton.setContentDescription(context.getString(R.string.all_apps_button_label));
-        allAppsButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mLauncher != null &&
-                    (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
-                    mLauncher.onTouchDownAllAppsButton(v);
-                }
-                return false;
-            }
-        });*/
-
             if (!exact) {
                 // Get the center of the cell layout in screen coordinates
                 final float[] cellLayoutCenter = mTempCellLayoutCenterCoordinates;
@@ -260,7 +257,8 @@ public class Hotseat extends PagedView {
 
                 // Calculate the distance between the center of the CellLayout
                 // and the touch point
-                float dist = Workspace.squaredDistance(touchXy, cellLayoutCenter);
+                float dist = Workspace.squaredDistance(
+                                    touchXy, cellLayoutCenter, hasVerticalHotseat());
 
                 if (dist < smallestDistSoFar) {
                     smallestDistSoFar = dist;
@@ -284,6 +282,218 @@ public class Hotseat extends PagedView {
         resetLayout();
     }
 
+    // Transition effects
+    @Override
+    protected void screenScrolled(int screenScroll) {
+        super.screenScrolled(screenScroll);
+
+        boolean isInOverscroll = !mVertical ? (mOverScrollX < 0 || mOverScrollX > mMaxScrollX) :
+                (mOverScrollY < 0 || mOverScrollY > mMaxScrollY);
+        if (isInOverscroll && !mOverscrollTransformsDirty) {
+            mScrollTransformsDirty = true;
+        }
+        if (!isInOverscroll || mScrollTransformsDirty) {
+            // Limit the "normal" effects to mScrollX/Y
+            int scroll = !mVertical ? getScrollX() : getScrollY();
+
+            // Reset transforms when we aren't in overscroll
+            if (mOverscrollTransformsDirty) {
+                mOverscrollTransformsDirty = false;
+                View v0 = getPageAt(0);
+                View v1 = getPageAt(getChildCount() - 1);
+                if (!mVertical) {
+                    v0.setTranslationX(0);
+                    v1.setTranslationX(0);
+                    v0.setRotationY(0);
+                    v1.setRotationY(0);
+                } else {
+                    v0.setTranslationY(0);
+                    v1.setTranslationY(0);
+                    v0.setRotationX(0);
+                    v1.setRotationX(0);
+                }
+                v0.setCameraDistance(mDensity * 1280);
+                v1.setCameraDistance(mDensity * 1280);
+                v0.setPivotX(v0.getMeasuredWidth() / 2);
+                v1.setPivotX(v1.getMeasuredWidth() / 2);
+                v0.setPivotY(v0.getMeasuredHeight() / 2);
+                v1.setPivotY(v1.getMeasuredHeight() / 2);
+            }
+
+            switch (mTransitionEffect) {
+                case Standard:
+                    screenScrolledStandard(scroll);
+                    break;
+                case Flip:
+                    screenScrolledFlip(scroll);
+                    break;
+                case Accordion:
+                    screenScrolledAccordion(scroll);
+                    break;
+                case CarouselLeft:
+                    screenScrolledCarousel(scroll, true);
+                    break;
+                case CarouselRight:
+                    screenScrolledCarousel(scroll, false);
+                    break;
+                case Shutter:
+                    screenScrolledShutter(scroll, false, false);
+                    break;
+            }
+            mScrollTransformsDirty = false;
+        }
+
+        if (isInOverscroll) {
+            int index = (!mVertical ? mOverScrollX : mOverScrollY) < 0 ? 0 : getChildCount() - 1;
+            View v = getPageAt(index);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, index);
+                float rotation = -24f * scrollProgress;
+                if (!mOverscrollTransformsDirty) {
+                    mOverscrollTransformsDirty = true;
+                    if (!mVertical) {
+                        v.setPivotX(v.getMeasuredWidth() * (index == 0 ? 0.65f : 1 - 0.65f));
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setTranslationX(0);
+                    } else {
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * (index == 0 ? 0.65f : 1 - 0.65f));
+                        v.setTranslationY(0);
+                    }
+                }
+                if (!mVertical) {
+                    v.setRotationY(rotation);
+                } else {
+                    v.setRotationX(-rotation);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledCarousel(int screenScroll, boolean left) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getPageAt(i);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, i);
+                float rotation = 90.0f * scrollProgress;
+
+                v.setCameraDistance(mDensity * mCameraDistance);
+                if (!mVertical) {
+                    v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
+                    v.setPivotX(left ? 0f : v.getMeasuredWidth());
+                    v.setPivotY(v.getMeasuredHeight() / 2);
+                    v.setRotationY(-rotation);
+                } else {
+                    v.setTranslationY(v.getMeasuredHeight() * scrollProgress);
+                    v.setPivotX(v.getMeasuredWidth() / 2);
+                    v.setPivotY(left ? 0f : v.getMeasuredHeight());
+                    v.setRotationX(rotation);
+                }
+
+                if (mFadeInAdjacentScreens) {
+                    float alpha = 1 - Math.abs(scrollProgress);
+                    v.setAlpha(alpha);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledFlip(int screenScroll) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getPageAt(i);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, i);
+                float rotation = -180.0f * scrollProgress;
+
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                    if (!mVertical) {
+                        v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
+                        v.setRotationY(rotation);
+                    } else {
+                        v.setTranslationY(v.getMeasuredHeight() * scrollProgress);
+                        v.setRotationX(-rotation);
+                    }
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        v.setAlpha(alpha);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledAccordion(int screenScroll) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getPageAt(i);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, i);
+                float scale = 1.0f - Math.abs(scrollProgress);
+
+                if (!mVertical) {
+                    v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                    v.setScaleX(scale);
+                } else {
+                    v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                    v.setScaleY(scale);
+                }
+
+                if (mFadeInAdjacentScreens) {
+                    float alpha = 1 - Math.abs(scrollProgress);
+                    v.setAlpha(alpha);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledStandard(int screenScroll) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getPageAt(i);
+            if (v != null) {
+                float scrollProgress = getScrollProgress(screenScroll, v, i);
+                if (mFadeInAdjacentScreens) {
+                    float alpha = 1 - Math.abs(scrollProgress);
+                    v.setAlpha(alpha);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledShutter(int screenScroll, boolean horizontal, boolean reverse) {
+        for (int i = 0; i < getChildCount(); i++) {
+            CellLayout cl = (CellLayout) getPageAt(i);
+            if (cl != null) {
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
+                ShortcutAndWidgetContainer widgets = cl.getShortcutsAndWidgets();
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    cl.setVisibility(VISIBLE);
+                    cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    for (int j = 0; j < widgets.getChildCount(); j++) {
+                        View v = widgets.getChildAt(j);
+                        v.setTranslationX(0);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (horizontal) {
+                            v.setRotationX(rotation);
+                        } else {
+                            v.setRotationY(rotation);
+                        }
+                    }
+                } else {
+                    cl.setVisibility(INVISIBLE);
+                }
+            }
+        }
+        invalidate();
+    }
+
     void resetLayout() {
         for (int i = 0; i < getChildCount(); i++) {
             CellLayout cl = (CellLayout) getPageAt(i);
@@ -292,12 +502,13 @@ public class Hotseat extends PagedView {
     }
 
     void moveToDefaultScreen(boolean animate) {
+        int page = hasVerticalHotseat() ? (mHotseatPages - mDefaultPage - 1) : mDefaultPage;
         if (animate) {
-            snapToPage(mDefaultPage);
+            snapToPage(page);
         } else {
-            setCurrentPage(mDefaultPage);
+            setCurrentPage(page);
         }
-        getChildAt(mDefaultPage).requestFocus();
+        getChildAt(page).requestFocus();
     }
 
     @Override

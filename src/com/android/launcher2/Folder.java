@@ -22,7 +22,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -143,9 +142,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
             mMaxNumItems = mMaxCountX * mMaxCountY;
         }
 
-        mIconScale = (float) PreferencesProvider.Interface.Homescreen.getIconScale(
-                res.getInteger(R.integer.app_icon_scale_percentage)) / 100f;
-
+        boolean isLandscape = LauncherApplication.isScreenLandscape(context);
+        mIconScale = (float) PreferencesProvider.Interface.Homescreen.FolderIconStyle.getIconScale(isLandscape) / 100f;
         mInputMethodManager = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -169,6 +167,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         super.onFinishInflate();
         mContent = (CellLayout) findViewById(R.id.folder_content);
         mContent.setGridSize(0, 0);
+        mContent.setStretchCells(true);
+        mContent.setChildrenScale(mIconScale);
         mContent.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
         mFolderFooter = (LinearLayout) findViewById(R.id.folder_footer);
         mFolderName = (FolderEditText) findViewById(R.id.folder_name);
@@ -372,7 +372,6 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
     void setFolderIcon(FolderIcon icon) {
         mFolderIcon = icon;
-        //setBackgroundDrawable(mFolderIcon.mPreviewBackground.getDrawable());
     }
 
     @Override
@@ -605,14 +604,9 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
     protected boolean createAndAddShortcut(ShortcutInfo item) {
         final BubbleTextView textView =
             (BubbleTextView) mInflater.inflate(R.layout.application, this, false);
-
-        Bitmap b = item.getIcon(mIconCache);
-        int width = (int)((float)b.getWidth() * mIconScale);
-        int height = (int)((float)b.getHeight() * mIconScale);
-        FastBitmapDrawable d = new FastBitmapDrawable(b);
-        d.setBounds(new Rect(0, 0, width, height));
-        textView.setCompoundDrawables(null,
-                d, null, null);
+        textView.setCompoundDrawablesWithIntrinsicBounds(null,
+                new FastBitmapDrawable(item.getIcon(mIconCache)), null, null);
+        textView.setCompoundDrawablePadding(0);
         textView.setText(item.title);
         textView.setTag(item);
 
@@ -790,8 +784,9 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
                 mOnExitAlarm.cancelAlarm();
                 completeDragExit();
             }
-        } else
+        } else {
             mInfo.sortType = SORT_NONE;
+        }
 
         mDeleteFolderOnDropCompleted = false;
         mDragInProgress = false;
@@ -1114,16 +1109,28 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         Runnable onCompleteRunnable = new Runnable() {
             @Override
             public void run() {
-                CellLayout cellLayout = mLauncher.getCellLayout(mInfo.container, mInfo.screen);
+                final int screen = mInfo.screen;
+                if (mInfo.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
+                    mInfo.screen = mLauncher.getHotseat().getScreenFromOrder(mInfo.screen);
+                }
 
-               View child = null;
+                final CellLayout cellLayout = mLauncher.getCellLayout(mInfo.container, mInfo.screen);
+
+                View child = null;
                 // Move the item from the folder to the workspace, in the position of the folder
                 if (getItemCount() == 1) {
                     ShortcutInfo finalItem = mInfo.contents.get(0);
                     child = mLauncher.createShortcut(R.layout.application, cellLayout,
                             finalItem);
+                    int x = mInfo.cellX, y = mInfo.cellY;
+                    if (mInfo.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
+                        mLauncher.getHotseat().hasVerticalHotseat()) {
+                        // Note: We need the correct position in order to save to db
+                        y = mLauncher.getHotseat().getCellYFromOrder(x);
+                        x = mLauncher.getHotseat().getCellXFromOrder(x);
+                    }
                     LauncherModel.addOrMoveItemInDatabase(mLauncher, finalItem, mInfo.container,
-                            mInfo.screen, mInfo.cellX, mInfo.cellY);
+                            screen, x, y);
                 }
                 if (getItemCount() <= 1) {
                     // Remove the folder
@@ -1137,7 +1144,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
                 // We add the child after removing the folder to prevent both from existing at
                 // the same time in the CellLayout.
                 if (child != null) {
-                    mLauncher.getWorkspace().addInScreen(child, mInfo.container, mInfo.screen,
+                    mLauncher.getWorkspace().addInScreen(child, mInfo.container, screen,
                             mInfo.cellX, mInfo.cellY, mInfo.spanX, mInfo.spanY);
                 }
             }

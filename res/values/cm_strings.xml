@@ -115,10 +115,16 @@
     <string name="preferences_interface_homescreen_general_grid_columns_title">Columns</string>
     <string name="preferences_interface_homescreen_general_stretch_screens_title">Stretch screens</string>
     <string name="preferences_interface_homescreen_general_stretch_screens_summary">Expand homescreens to fill the size of display</string>
+    <string name="preferences_interface_homescreen_general_fit_to_cells_title">Fit icons to cells</string>
+    <string name="preferences_interface_homescreen_general_fit_to_cells_summary">Resize cells to fit screen and force icon to stay within the cell</string>
+    <string name="preferences_interface_homescreen_general_resize_any_widget_title">Resize any widget</string>
+    <string name="preferences_interface_homescreen_general_resize_any_widget_summary">Allow resizing of widgets that normally aren\'t resizeable</string>
     <string name="preferences_interface_homescreen_general_hide_icon_labels_title">Hide icon labels</string>
     <string name="preferences_interface_homescreen_general_hide_icon_labels_summary">Hide homescreen icon labels</string>
     <string name="preferences_interface_homescreen_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_homescreen_icon_scale_summary">Scale of icons on homescreens</string>
+    <string name="preferences_interface_homescreen_general_auto_install_shortcuts_title">Automatically add shortcuts</string>
+    <string name="preferences_interface_homescreen_general_auto_install_shortcuts_summary">Allow applications to automatically add shortcuts to the homescreen</string>
     <string name="preferences_interface_homescreen_scrolling_category">Scrolling</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_homescreen_scrolling_transition_effect_summary">Scrolling effect when scrolling homescreens</string>
@@ -142,6 +148,8 @@
     <string name="preferences_interface_homescreen_folder_style_category">Folder icon style</string>
     <string name="preferences_interface_homescreen_folder_style_title">Style</string>
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
+    <string name="preferences_interface_homescreen_folder_icon_scale_title">Icon scale</string>
+    <string name="preferences_interface_homescreen_folder_icon_scale_summary">Scale of icons inside folders on homescreen</string>
     <string name="preferences_interface_homescreen_folder_background_title">Background</string>
     <string name="preferences_interface_homescreen_folder_background_summary">Folder background icon</string>
     <!-- Drawer -->
@@ -162,6 +170,8 @@
     <string name="preferences_interface_drawer_widgets_category">Widgets</string>
     <string name="preferences_interface_drawer_widget_grid_title">Widget grid size</string>
     <string name="preferences_interface_drawer_widget_grid_summary">Choose the number of rows/columns for widgets in drawer</string>
+    <string name="preferences_interface_drawer_stretch_screens_title">Stretch screens</string>
+    <string name="preferences_interface_drawer_stretch_screens_summary">Expand app pages to fill the size of display</string>
     <!--<string name="preferences_interface_drawer_widget_icon_style_title">Icon style widgets</string>
     <string name="preferences_interface_drawer_widget_icon_style_summary">Make widgets use icon style in drawer rather than preview</string>-->
     <string name="preferences_interface_drawer_widgets_join_apps_title">Join with apps</string>
@@ -184,10 +194,15 @@
     <string name="preferences_interface_drawer_indicator_fade_summary">Fade away the indicator after the page has changed</string>
     <string name="preferences_interface_drawer_indicator_position_title">Indicator position</string>
     <string name="preferences_interface_drawer_indicator_position_summary">Choose where to show the indicator on the screen</string>
+    <string name="preferences_interface_drawer_grid_title">App grid size</string>
+    <string name="preferences_interface_drawer_grid_land_title">App grid size landscape</string>
+    <string name="preferences_interface_drawer_grid_summary">Choose the number of rows/columns in the app drawer</string>
+    <string name="preferences_interface_drawer_dismiss_on_tap_title">Tap to dismiss</string>
+    <string name="preferences_interface_drawer_dismiss_on_tap_summary">Tap empty space to dismiss drawer</string>
     <string name="preferences_interface_drawer_transparency_title">Transparency</string>
     <string name="preferences_interface_drawer_transparency_summary">Set transparency of app drawer background (0 being transparent, 100 being opaque)</string>
-    <string name="preferences_interface_drawer_general_stretch_screens_title">Stretch screens</string>
-    <string name="preferences_interface_drawer_general_stretch_screens_summary">Expand app drawer screens to fill the size of display</string>
+    <string name="preferences_interface_drawer_fade_title">Fade out</string>
+    <string name="preferences_interface_drawer_fade_summary">Animate fading out of background</string>
 
     <!-- Dock -->
     <string name="preferences_interface_dock_title">Dock</string>
@@ -204,12 +219,20 @@
     <string name="preferences_interface_dock_default_page_summary">Choose the default page</string>
     <string name="preferences_interface_dock_icons_title">Icons</string>
     <string name="preferences_interface_dock_icons_summary">Number of icons/columns in the dock</string>
+    <string name="preferences_interface_dock_scrolling_transition_effect_title">Transition effect</string>
+    <string name="preferences_interface_dock_scrolling_transition_effect_summary">Scrolling effect when scrolling pages</string>
+    <string name="preferences_interface_dock_stretch_screens_title">Stretch pages</string>
+    <string name="preferences_interface_dock_stretch_screens_summary">Expand dock pages to fill the size of the dock</string>
     <string name="preferences_interface_dock_hide_icon_labels_title">Hide icon labels</string>
     <string name="preferences_interface_dock_hide_icon_labels_summary">Hide dock icon labels</string>
     <string name="preferences_interface_dock_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_dock_icon_scale_summary">Scale of icons in the dock</string>
     <string name="preferences_interface_dock_divider_title">Show dock divider</string>
     <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
+    <string name="preferences_interface_dock_bottom_title">Dock on bottom</string>
+    <string name="preferences_interface_dock_bottom_summary">Show dock on the bottom of the screen in landscape</string>
+    <string name="preferences_interface_dock_scrolling_fade_adjacent_screens_title">Fade side pages</string>
+    <string name="preferences_interface_dock_scrolling_fade_adjacent_screens_summary">Fade the side pages when scrolling</string>
 
     <!-- Gestures -->
     <string name="preferences_interface_gestures_title">Gestures</string>
@@ -218,6 +241,7 @@
     <string name="preferences_interface_gestures_down_gesture_title">Swipe down</string>
     <string name="preferences_interface_gestures_pinch_gesture_title">Pinch</string>
     <string name="preferences_interface_gestures_spread_gesture_title">Spread</string>
+    <string name="preferences_interface_gestures_double_tap_gesture_title">Double tap</string>
 
     <!-- Icons -->
     <string name="preferences_interface_icons_title">Icons</string>
@@ -255,6 +279,13 @@
     <string name="drawer_orientation_horizontal">Horizontal</string>
     <string name="drawer_orientation_vertical">Vertical</string>
 
+    <!-- Launcher orientation     -->
+    <string name="orientation_portrait">Portrait</string>
+    <string name="orientation_portrait_prefix">"Portrait: "</string>
+    <string name="orientation_landscape">Landscape</string>
+    <string name="orientation_landscape_prefix">"Landscape: "</string>
+    <string name="orientation_auto">Auto-Rotate</string>
+
     <!-- Effects -->
     <string name="effects_standard">Standard</string>
     <string name="effects_tablet">Tablet</string>
@@ -274,4 +305,5 @@
     <string name="effects_accordion">Accordion</string>
     <string name="effects_carousel_left">Carousel Left</string>
     <string name="effects_carousel_right">Carousel Right</string>
+    <string name="effects_shutter">Shutter</string>
 </resources>

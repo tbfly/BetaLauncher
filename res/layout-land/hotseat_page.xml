@@ -26,6 +26,7 @@
     android:paddingLeft="@dimen/button_bar_height_top_padding"
     android:paddingRight="@dimen/button_bar_height_bottom_padding"
 
+    launcher:cellLayoutType="@integer/cell_layout_hotseat"
     launcher:cellWidth="@dimen/hotseat_cell_width"
     launcher:cellHeight="@dimen/hotseat_cell_height"
     launcher:widthGap="@dimen/hotseat_width_gap"

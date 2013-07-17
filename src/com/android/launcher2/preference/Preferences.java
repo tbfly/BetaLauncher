@@ -78,6 +78,9 @@ public class Preferences extends PreferenceActivity
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(PreferencesProvider.PREFERENCES_VISITED, true);
+        editor.commit();
         mPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -114,7 +117,7 @@ public class Preferences extends PreferenceActivity
 
     @Override
     public void setListAdapter(ListAdapter adapter) {
-        if (adapter == null) {
+        if (adapter == null || mHeaders == null) {
             super.setListAdapter(null);
         } else {
             super.setListAdapter(new HeaderAdapter(this, mHeaders));
@@ -134,21 +137,6 @@ public class Preferences extends PreferenceActivity
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.preferences_homescreen);
-
-            PreferenceCategory general = (PreferenceCategory)findPreference("ui_homescreen_general");
-            if (general != null && LauncherApplication.isScreenLarge()) {
-                boolean workspaceTabletGrid = getResources().getBoolean(R.bool.config_workspaceTabletGrid);
-                if (workspaceTabletGrid == false) {
-                    Preference grid = findPreference("ui_homescreen_grid");
-                    if (grid != null) {
-                        general.removePreference(grid);
-                    }
-                    Preference stretch = findPreference("ui_homescreen_stretch_screens");
-                    if (stretch != null) {
-                        general.removePreference(stretch);
-                    }
-                }
-            }
         }
     }
 
@@ -156,7 +144,6 @@ public class Preferences extends PreferenceActivity
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
             addPreferencesFromResource(R.xml.preferences_drawer);
         }
     }
@@ -214,20 +201,22 @@ public class Preferences extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences_gestures);
 
             initGesturePreference("ui_homescreen_up_gesture",
-                PreferencesProvider.Interface.Homescreen.Gestures.getUpGestureAction());
+                PreferencesProvider.Interface.Gestures.getUpGestureAction());
             initGesturePreference("ui_homescreen_down_gesture",
-                PreferencesProvider.Interface.Homescreen.Gestures.getDownGestureAction());
+                PreferencesProvider.Interface.Gestures.getDownGestureAction());
             initGesturePreference("ui_homescreen_pinch_gesture",
-                PreferencesProvider.Interface.Homescreen.Gestures.getPinchGestureAction());
+                PreferencesProvider.Interface.Gestures.getPinchGestureAction());
             initGesturePreference("ui_homescreen_spread_gesture",
-                PreferencesProvider.Interface.Homescreen.Gestures.getSpreadGestureAction());
+                PreferencesProvider.Interface.Gestures.getSpreadGestureAction());
+            initGesturePreference("ui_homescreen_double_tap_gesture",
+                PreferencesProvider.Interface.Gestures.getDoubleTapGestureAction());
         }
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object o) {
             String key = preference.getKey();
             if (key.equals("ui_homescreen_up_gesture") || key.equals("ui_homescreen_down_gesture") ||
-                    key.equals("ui_homescreen_pinch_gesture") || key.equals("ui_homescreen_spread_gesture")) {
+                    key.equals("ui_homescreen_pinch_gesture") || key.equals("ui_homescreen_spread_gesture") || key.equals("ui_homescreen_double_tap_gesture")) {
                 ListPreference gesturePref = (ListPreference)preference;
                 gesturePref.setSummary(gesturePref.getEntries()[gesturePref.findIndexOfValue((String)o)]);
                 return true;
@@ -244,7 +233,6 @@ public class Preferences extends PreferenceActivity
             }
             pref.setSummary(pref.getEntries()[pref.findIndexOfValue(action)]);
         }
-
     }
 
     private static class HeaderAdapter extends ArrayAdapter<Header> {

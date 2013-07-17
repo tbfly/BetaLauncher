@@ -147,29 +147,23 @@ public class PagedViewWidget extends LinearLayout {
         return maxSize;
     }
 
-    void applyPreview(FastBitmapDrawable preview, boolean isImageView) {
-        if (isImageView) {
-            final ImageView image =
-                (ImageView) findViewById(R.id.widget_preview);
+    void applyPreview(FastBitmapDrawable preview) {
+        final PagedViewWidgetImageView image =
+            (PagedViewWidgetImageView) findViewById(R.id.widget_preview);
+        if (preview != null) {
+            image.mAllowRequestLayout = false;
             image.setImageDrawable(preview);
-        } else {
-            final PagedViewWidgetImageView image =
-                (PagedViewWidgetImageView) findViewById(R.id.widget_preview);
-            if (preview != null) {
-                image.mAllowRequestLayout = false;
-                image.setImageDrawable(preview);
-                if (mIsAppWidget) {
-                    // center horizontally
-                    int[] imageSize = getPreviewSize();
-                    int centerAmount = (imageSize[0] - preview.getIntrinsicWidth()) / 2;
-                    image.setPadding(mOriginalImagePadding.left + centerAmount,
-                            mOriginalImagePadding.top,
-                            mOriginalImagePadding.right,
-                            mOriginalImagePadding.bottom);
-                }
-                image.setAlpha(1f);
-                image.mAllowRequestLayout = true;
+            if (mIsAppWidget) {
+                // center horizontally
+                int[] imageSize = getPreviewSize();
+                int centerAmount = (imageSize[0] - preview.getIntrinsicWidth()) / 2;
+                image.setPadding(mOriginalImagePadding.left + centerAmount,
+                        mOriginalImagePadding.top,
+                        mOriginalImagePadding.right,
+                        mOriginalImagePadding.bottom);
             }
+            image.setAlpha(1f);
+            image.mAllowRequestLayout = true;
         }
     }
 

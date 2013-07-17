@@ -14,21 +14,21 @@
      limitations under the License.
 -->
 
-<com.android.launcher2.CellLayout
+<com.android.launcher2.FolderIcon
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:paddingTop="@dimen/button_bar_height_top_padding"
-    android:paddingBottom="@dimen/button_bar_height_bottom_padding"
-    android:paddingLeft="@dimen/button_bar_width_left_padding"
-    android:paddingRight="@dimen/button_bar_width_right_padding"
-
-    launcher:cellLayoutType="@integer/cell_layout_hotseat"
-    launcher:cellWidth="@dimen/hotseat_cell_width"
-    launcher:cellHeight="@dimen/hotseat_cell_height"
-    launcher:widthGap="@dimen/hotseat_width_gap"
-    launcher:heightGap="@dimen/hotseat_height_gap"
-    launcher:maxGap="@dimen/workspace_max_gap" />
+    android:orientation="vertical"
+    android:focusable="true"
+    android:paddingTop="@dimen/folder_icon_padding_top"
+    android:background="@drawable/focusable_view_bg">
+    <ImageView
+        android:id="@+id/preview_background"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="@dimen/folder_preview_size"
+        android:layout_height="@dimen/folder_preview_size"
+        android:src="@drawable/portal_ring_inner_holo"/>
+    <com.android.launcher2.BubbleTextView
+        android:id="@+id/folder_icon_name"
+        style="@style/WorkspaceIcon.Folder"/>
+</com.android.launcher2.FolderIcon>

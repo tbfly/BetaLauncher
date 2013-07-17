@@ -22,7 +22,6 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -64,18 +63,11 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private static final int DROP_IN_ANIMATION_DURATION = 400;
     private static final int INITIAL_ITEM_ANIMATION_DURATION = 350;
 
-    private static final int STYLE_STACKED = 0;
-    private static final int STYLE_GRID = 1;
-    private static final int STYLE_CAROUSEL = 2;
-    private static final int STYLE_FAN = 3;
-    private static final int STYLE_IOS = 4;
-
-    private static final int BACKGROUND_RING = 0;
-    private static final int BACKGROUND_SQUARE = 1;
-    private static final int BACKGROUND_DISC = 2;
-    private static final int BACKGROUND_PLATFORM = 3;
-    private static final int BACKGROUND_IOS = 4;
-    private static final int BACKGROUND_MIUI = 5;
+    public static final int STYLE_GRID = 0;
+    public static final int STYLE_STACKED = 1;
+    public static final int STYLE_CAROUSEL = 2;
+    public static final int STYLE_FAN = 3;
+    public static final int STYLE_IOS = 4;
 
     private static final int FINAL_ITEM_ANIMATION_DURATION = 200;
 
@@ -94,14 +86,13 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     public static Drawable sSharedFolderLeaveBehind = null;
 
-    public ImageView mPreviewBackground;
+    private ImageView mPreviewBackground;
     private BubbleTextView mFolderName;
 
     FolderRingAnimator mFolderRingAnimator = null;
 
     private int mNumItemsInPreview = NUM_ITEMS_IN_PREVIEW;
-    private int mFolderIconStyle = STYLE_STACKED;
-    private int mFolderIconBackground = BACKGROUND_RING;
+    public int mFolderIconStyle = STYLE_STACKED;
 
     // These variables are all associated with the drawing of the preview; they are stored
     // as member variables for shared usage and to avoid computation on each frame
@@ -131,14 +122,15 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private void init() {
         mFolderIconStyle = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconStyle();
-        mFolderIconBackground = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconBackground();
+
         switch (mFolderIconStyle) {
             case STYLE_STACKED:
-            case STYLE_CAROUSEL:
             case STYLE_FAN:
+            case STYLE_CAROUSEL:
                 mNumItemsInPreview = 3;
                 break;
             case STYLE_GRID:
+            default:
                 mNumItemsInPreview = 4;
                 break;
             case STYLE_IOS:
@@ -163,30 +155,6 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         icon.mFolderName = (BubbleTextView) icon.findViewById(R.id.folder_icon_name);
         icon.mFolderName.setText(folderInfo.title);
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
-
-        int folderIcon;
-        switch (icon.mFolderIconBackground) {
-            case BACKGROUND_SQUARE:
-                folderIcon = R.drawable.portal_square_inner_holo;
-                break;
-            case BACKGROUND_DISC:
-                folderIcon = R.drawable.portal_disc_inner_holo;
-                break;
-            case BACKGROUND_PLATFORM:
-                folderIcon = R.drawable.portal_platform_inner_holo;
-                break;
-            case BACKGROUND_IOS:
-                folderIcon = R.drawable.portal_ios_inner_holo;
-                break;
-            case BACKGROUND_MIUI:
-                folderIcon = R.drawable.portal_miui_inner_holo;
-                break;
-            case BACKGROUND_RING:
-            default:
-                folderIcon = R.drawable.portal_ring_inner_holo;
-                break;
-        }
-        icon.mPreviewBackground.setImageResource(folderIcon);
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(launcher);
@@ -225,6 +193,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         public static Drawable sSharedInnerRingDrawable = null;
         public static int sPreviewSize = -1;
         public static int sPreviewPadding = -1;
+        public static int sPreviewPaddingTop = -1;
 
         private ValueAnimator mAcceptAnimator;
         private ValueAnimator mNeutralAnimator;
@@ -232,14 +201,33 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         public FolderRingAnimator(Launcher launcher, FolderIcon folderIcon) {
             mFolderIcon = folderIcon;
             Resources res = launcher.getResources();
-            mOuterRingDrawable = res.getDrawable(R.drawable.portal_ring_outer_holo);
-            mInnerRingDrawable = res.getDrawable(R.drawable.portal_ring_inner_holo);
+
+            int folderIconStyle = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconStyle();
+            int topPaddingResource;
+            switch (folderIconStyle) {
+                case FolderIcon.STYLE_STACKED:
+                    topPaddingResource = R.dimen.folder_preview_padding_top_stacked;
+                    break;
+                case FolderIcon.STYLE_FAN:
+                    topPaddingResource = R.dimen.folder_preview_padding_top_fan;
+                    break;
+                case FolderIcon.STYLE_CAROUSEL:
+                    topPaddingResource = R.dimen.folder_preview_padding_top_carousel;
+                    break;
+                case FolderIcon.STYLE_GRID:
+                case FolderIcon.STYLE_IOS:
+                default:
+                    topPaddingResource = R.dimen.folder_preview_padding_top;
+                    break;
+            }
+
 
             // We need to reload the static values when configuration changes in case they are
             // different in another configuration
             if (sStaticValuesDirty) {
                 sPreviewSize = res.getDimensionPixelSize(R.dimen.folder_preview_size);
                 sPreviewPadding = res.getDimensionPixelSize(R.dimen.folder_preview_padding);
+                sPreviewPaddingTop = res.getDimensionPixelSize(topPaddingResource);
                 sSharedOuterRingDrawable = res.getDrawable(R.drawable.portal_ring_outer_holo);
                 sSharedInnerRingDrawable = res.getDrawable(R.drawable.portal_ring_inner_holo);
                 sSharedFolderLeaveBehind = res.getDrawable(R.drawable.portal_ring_rest);
@@ -486,6 +474,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
             final int previewSize = FolderRingAnimator.sPreviewSize;
             final int previewPadding = FolderRingAnimator.sPreviewPadding;
+            final int previewPaddingTop = FolderRingAnimator.sPreviewPaddingTop;
 
             mAvailableSpaceInPreview = (previewSize - 2 * previewPadding);
             // cos(45) = 0.707  + ~= 0.1) = 0.8f
@@ -498,13 +487,12 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             mMaxPerspectiveShift = mBaselineIconSize * PERSPECTIVE_SHIFT_FACTOR;
 
             mPreviewOffsetX = (mTotalWidth - mAvailableSpaceInPreview) / 2;
-            mPreviewOffsetY = previewPadding;
+            mPreviewOffsetY = previewPaddingTop + previewPadding;
         }
     }
 
     private void computePreviewDrawingParams(Drawable d) {
-        Rect bounds = d.getBounds();
-        computePreviewDrawingParams(bounds.right - bounds.left, getMeasuredWidth());
+        computePreviewDrawingParams(d.getIntrinsicWidth(), getMeasuredWidth());
     }
 
     class PreviewItemDrawingParams {
@@ -582,7 +570,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private PreviewItemDrawingParams computePreviewItemDrawingParamsGrid(int index,
             PreviewItemDrawingParams params) {
         //index = mNumItemsInPreview - index - 1;
-        float iconScale = 0.45f;
+        float iconScale = 0.40f;
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
@@ -611,7 +599,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private PreviewItemDrawingParams computePreviewItemDrawingParamsIos(int index,
             PreviewItemDrawingParams params) {
         //index = mNumItemsInPreview - index - 1;
-        float iconScale = 0.30f;
+        float iconScale = 0.25f;
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
@@ -652,7 +640,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - scaledSize;
             alpha = 80;
         } else {
-            yOffset = mMaxPerspectiveShift + scaledSize/3;
+            yOffset = scaledSize/2;
             xOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
             alpha = 0;
         }
@@ -687,11 +675,11 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         int alpha;
         float scaledSize = scale * mBaselineIconSize;
         if (index > 0 ) {
-            yOffset = scaledSize/2;
+            yOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
             xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - scaledSize;
             alpha = 80;
         } else {
-            yOffset = scaledSize/3;
+            yOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
             xOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
             alpha = 0;
         }

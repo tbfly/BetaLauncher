@@ -72,10 +72,10 @@ public class AddAdapter extends BaseAdapter {
         Resources res = launcher.getResources();
 
         mItems.add(new ListItem(res, R.string.group_actions,
-                R.drawable.ic_launcher_home, ITEM_ACTION));
+                R.mipmap.ic_launcher_home, ITEM_ACTION));
 
         mItems.add(new ListItem(res, R.string.group_applications,
-                R.drawable.ic_launcher_application, ITEM_APPLICATION));
+                R.mipmap.ic_launcher_application, ITEM_APPLICATION));
 
         mItems.add(new ListItem(res, R.string.group_shortcuts,
                 R.drawable.ic_launcher_shortcut, ITEM_SHORTCUT));
@@ -84,7 +84,7 @@ public class AddAdapter extends BaseAdapter {
                 R.drawable.ic_launcher_appwidget, ITEM_APPWIDGET));
 
         mItems.add(new ListItem(res, R.string.group_wallpapers,
-                R.drawable.ic_launcher_wallpaper, ITEM_WALLPAPER));
+                R.mipmap.ic_launcher_wallpaper, ITEM_WALLPAPER));
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {

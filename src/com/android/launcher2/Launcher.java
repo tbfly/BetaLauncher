@@ -32,6 +32,7 @@ import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
+import android.app.WallpaperManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -90,6 +91,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -172,10 +174,7 @@ public final class Launcher extends Activity
     static final int DIALOG_CREATE_ACTION = 2;
 
     private static final String PREFERENCES = "launcher.preferences";
-    // To turn on these properties, type
-    // adb shell setprop log.tag.PROPERTY_NAME [VERBOSE | SUPPRESS]
-    static final String FORCE_ENABLE_ROTATION_PROPERTY = "launcher_force_rotate";
-    static final String DUMP_STATE_PROPERTY = "launcher_dump_state";
+    static final String DUMP_STATE_PROPERTY = "debug.dumpstate";
 
     // The Intent extra that defines whether to ignore the launch animation
     static final String INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION =
@@ -183,6 +182,8 @@ public final class Launcher extends Activity
 
     // Type: int
     private static final String RUNTIME_STATE_CURRENT_SCREEN = "launcher.current_screen";
+    // Type: int
+    private static final String RUNTIME_STATE_CURRENT_HOTSEAT_SCREEN = "launcher.hotseat.current_screen";
     // Type: int
     private static final String RUNTIME_STATE = "launcher.state";
     // Type: int
@@ -321,15 +322,17 @@ public final class Launcher extends Activity
     // Preferences
     private boolean mShowSearchBar;
     private boolean mShowHotseat;
+    private boolean mHotseatAsOverlay;
     private boolean mShowDockDivider;
     private boolean mHideIconLabels;
+    private boolean mHideDockIconLabels;
     private boolean mAutoRotate;
     private boolean mLockWorkspace;
     private boolean mFullscreenMode;
+    private boolean mFadeOut;
+    private String mDoubleTapAction;
 
     private boolean mWallpaperVisible;
-
-    private float mIconScale = 1.0f;
 
     // Previews
     private PreviewLayout mPreviewLayout;
@@ -354,8 +357,18 @@ public final class Launcher extends Activity
         int cellY;
     }
 
-    private static boolean isPropertyEnabled(String propertyName) {
-        return Log.isLoggable(propertyName, Log.VERBOSE);
+
+    private boolean doesFileExist(String filename) {
+        FileInputStream fis;
+        try {
+            fis = openFileInput(filename);
+            fis.close();
+            return true;
+        } catch (java.io.FileNotFoundException e) {
+            return false;
+        } catch (java.io.IOException e) {
+            return true;
+        }
     }
 
     @Override
@@ -394,12 +407,10 @@ public final class Launcher extends Activity
         mIconCache = app.getIconCache();
         mDragController = new DragController(this);
         mInflater = getLayoutInflater();
+        final Resources res = getResources();
 
         // Load all preferences
         PreferencesProvider.load(this);
-
-        mIconScale = (float) PreferencesProvider.Interface.Homescreen.getIconScale(
-                getResources().getInteger(R.integer.app_icon_scale_percentage)) / 100f;
 
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
@@ -412,11 +423,19 @@ public final class Launcher extends Activity
         // Preferences
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar();
         mShowHotseat = PreferencesProvider.Interface.Dock.getShowDock();
+        mHotseatAsOverlay = PreferencesProvider.Interface.Dock.getDockAsOverlay();
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider() && mShowHotseat;
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
-        mAutoRotate = PreferencesProvider.Interface.General.getAutoRotate(getResources().getBoolean(R.bool.allow_rotation));
-        mLockWorkspace = PreferencesProvider.Interface.General.getLockWorkspace();
+        boolean verticalHotseat =
+                res.getBoolean(R.bool.hotseat_transpose_layout_with_orientation) &&
+                res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        mHideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels() ||
+                (!mShowHotseat || (verticalHotseat && !LauncherApplication.isScreenLarge()));
+        mAutoRotate = PreferencesProvider.Interface.General.getAutoRotate(res.getBoolean(R.bool.allow_rotation));
+        mLockWorkspace = PreferencesProvider.Interface.General.getLockWorkspace(res.getBoolean(R.bool.lock_workspace));
         mFullscreenMode = PreferencesProvider.Interface.General.getFullscreenMode();
+        mFadeOut = PreferencesProvider.Interface.Drawer.getFadeOut();
+        mDoubleTapAction = PreferencesProvider.Interface.Gestures.getDoubleTapGestureAction();
 
         if (PROFILE_STARTUP) {
             android.os.Debug.startMethodTracing(
@@ -786,6 +805,10 @@ public final class Launcher extends Activity
 
     @Override
     protected void onPause() {
+        // NOTE: We want all transitions from launcher to act as if the wallpaper were enabled
+        // to be consistent.  So re-enable the flag here, and we will re-disable it as necessary
+        // when Launcher resumes and we are still in AllApps.
+
         super.onPause();
         mPaused = true;
         mDragController.cancelDrag();
@@ -880,6 +903,10 @@ public final class Launcher extends Activity
         if (currentScreen > -1) {
             mWorkspace.setCurrentPage(currentScreen);
         }
+        int currentHotseatScreen = savedState.getInt(RUNTIME_STATE_CURRENT_HOTSEAT_SCREEN, -1);
+        if (currentHotseatScreen > -1) {
+            mHotseat.setCurrentPage(mHotseat.getScreenFromOrder(currentHotseatScreen));
+        }
 
         final long pendingAddContainer = savedState.getLong(RUNTIME_STATE_PENDING_ADD_CONTAINER, -1);
         final int pendingAddScreen = savedState.getInt(RUNTIME_STATE_PENDING_ADD_SCREEN, -1);
@@ -948,6 +975,13 @@ public final class Launcher extends Activity
         mWorkspace.setOnLongClickListener(this);
         mWorkspace.setup(dragController);
         dragController.addDragListener(mWorkspace);
+        if (!mDoubleTapAction.equals("nothing")) {
+            mWorkspace.setOnDoubleTapCallback(new Runnable() {
+                public void run() {
+                    mWorkspace.performGestureAction(mDoubleTapAction);
+                }
+            });
+        }
 
         // Get the search/delete bar
         mSearchDropTargetBar = (SearchDropTargetBar) mDragLayer.findViewById(R.id.qsb_bar);
@@ -965,13 +999,22 @@ public final class Launcher extends Activity
             mDockDivider.setVisibility(View.GONE);
         }
 
+        // Redim the hotseat and statusbar to let some extra size for the item text
+        //if (mShowHotseat && !mHideDockIconLabels && !mHotseat.hasVerticalHotseat()) {
+        if (mShowHotseat && !mHotseat.hasVerticalHotseat() && !mHotseatAsOverlay) {
+            mWorkspace.setPadding(
+                mWorkspace.getPaddingLeft(),
+                mWorkspace.getPaddingTop(),
+                mWorkspace.getPaddingRight(),
+                getResources().getDimensionPixelSize(R.dimen.workspace_bottom_padding_port));
+        }
+
         // Setup AppsCustomize
-        mAppsCustomizeTabHost = (AppsCustomizeTabHost)
-                findViewById(R.id.apps_customize_pane);
+        mAppsCustomizeTabHost = (AppsCustomizeTabHost) findViewById(R.id.apps_customize_pane);
         mAppsCustomizeContent = (AppsCustomizePagedView)
                 mAppsCustomizeTabHost.findViewById(R.id.apps_customize_pane_content);
         mAppsCustomizeContent.setup(this, dragController);
-        
+
         // Setup the drag controller (drop targets have to be added in reverse order in priority)
         dragController.setDragScoller(mWorkspace);
         dragController.setScrollView(mDragLayer);
@@ -1031,9 +1074,7 @@ public final class Launcher extends Activity
     View createShortcut(int layoutResId, ViewGroup parent, ShortcutInfo info) {
         BubbleTextView favorite = (BubbleTextView) mInflater.inflate(layoutResId, parent, false);
         favorite.applyFromShortcutInfo(info, mIconCache);
-        if (mHideIconLabels) {
-            favorite.setTextVisible(false);
-        }
+        favorite.setTextVisible(!mHideIconLabels);
         favorite.setOnClickListener(this);
         favorite.setOnTouchListener(this);
         return favorite;
@@ -1591,7 +1632,7 @@ public final class Launcher extends Activity
 
                     // If we are already on home, then we animate to the default homescreen,
                     // if we are not on it, otherwise we show the previews
-                    if (alreadyOnHome) {
+                    if (alreadyOnHome && !preferencesVisited()) {
                         if (mState == State.WORKSPACE) {
                             if (mWorkspace.getCurrentPage() == mWorkspace.getDefaultHomescreen())
                                 showPreviewLayout(true);
@@ -1664,7 +1705,6 @@ public final class Launcher extends Activity
                     break;
                 //case ToggleDock:
                 //    toggleHotseat();
-                //    mWorkspace.requestLayout();
                 //    break;
                 case QuickSettings:
                     mWorkspace.expandStatusBar(true);
@@ -1725,6 +1765,7 @@ public final class Launcher extends Activity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(RUNTIME_STATE_CURRENT_SCREEN, mWorkspace.getNextPage());
+        outState.putInt(RUNTIME_STATE_CURRENT_HOTSEAT_SCREEN, mHotseat.getScreenFromOrder(mHotseat.getCurrentPage()));
         super.onSaveInstanceState(outState);
 
         outState.putInt(RUNTIME_STATE, mState.ordinal());
@@ -1881,7 +1922,7 @@ public final class Launcher extends Activity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (isWorkspaceLocked()) {
+        if (!isAllAppsVisible() && isWorkspaceLocked()) {
             return false;
         }
 
@@ -1973,6 +2014,7 @@ public final class Launcher extends Activity
             PreferencesProvider.Interface.General.setLockWorkspace(this, mLockWorkspace);
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -2165,11 +2207,24 @@ public final class Launcher extends Activity
         // Create the view
         FolderIcon newFolder =
             FolderIcon.fromXml(R.layout.folder_icon, this, layout, folderInfo);
-        if (mHideIconLabels) {
-            newFolder.setTextVisible(false);
+        int x = cellX, y = cellY;
+        if (container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
+            newFolder.setTextVisible(!mHideDockIconLabels);
+        } else {
+            newFolder.setTextVisible(!mHideIconLabels);
         }
-        mWorkspace.addInScreen(newFolder, container, screen, cellX, cellY, 1, 1,
-                isWorkspaceLocked());
+
+        if (container == LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
+            getHotseat().hasVerticalHotseat()) {
+            // Note: If the destination of the new folder is the hotseat and
+            // the hotseat is in vertical mode, then we need to invert the xy position,
+            // so the addInScreen method will use the correct values to draw the new folder
+            // in the correct position
+            // We use the y in both case to determine the new position
+            x = getHotseat().getInverterCellXFromOrder(y);
+            y = getHotseat().getInverterCellYFromOrder(y);
+        }
+        mWorkspace.addInScreen(newFolder, container, screen, x, y, 1, 1, isWorkspaceLocked());
         return newFolder;
     }
 
@@ -2202,7 +2257,7 @@ public final class Launcher extends Activity
                 case KeyEvent.KEYCODE_HOME:
                     return true;
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    if (isPropertyEnabled(DUMP_STATE_PROPERTY)) {
+                    if (doesFileExist(DUMP_STATE_PROPERTY)) {
                         dumpState();
                         return true;
                     }
@@ -2295,7 +2350,6 @@ public final class Launcher extends Activity
                     break;
                 //case ToggleDock:
                 //    toggleHotseat();
-                //    mWorkspace.requestLayout();
                 //    break;
                 case QuickSettings:
                     mWorkspace.expandStatusBar(true);
@@ -3026,12 +3080,17 @@ public final class Launcher extends Activity
                     dispatchOnLauncherTransitionStep(toView, t);
                 }
             });
+            final ObjectAnimator alphaAnimOut = ObjectAnimator
+                .ofFloat(fromView, "alpha", 1f, 0f)
+                .setDuration(fadeDuration);
+            alphaAnimOut.setInterpolator(new DecelerateInterpolator(1.5f));
 
             // toView should appear right at the end of the workspace shrink
             // animation
             mStateAnimation = LauncherAnimUtils.createAnimatorSet();
             mStateAnimation.play(scaleAnim).after(startDelay);
             mStateAnimation.play(alphaAnim).after(startDelay);
+            if (mFadeOut) mStateAnimation.play(alphaAnimOut);
 
             mStateAnimation.addListener(new AnimatorListenerAdapter() {
                 boolean animationCancelled = false;
@@ -3052,7 +3111,7 @@ public final class Launcher extends Activity
                     if (mWorkspace != null && !springLoaded && !LauncherApplication.isScreenLarge()) {
                         // Hide the workspace scrollbar
                         mWorkspace.hideScrollingIndicator(true);
-                        hideDockDivider();
+                        hideDockDivider(true);
                     }
 
                     // Hide the search bar
@@ -3132,19 +3191,20 @@ public final class Launcher extends Activity
             }
             mDockDivider.animate().alpha(0f).setDuration(duration);
             fromView.animate().alpha(0f).setDuration(duration);
-            hideHotseat(true);
+            hideHotseat(true, false);
         } else {
             toView.setTranslationX(0.0f);
             toView.setTranslationY(0.0f);
             toView.setScaleX(1.0f);
             toView.setScaleY(1.0f);
+            if (mFadeOut) toView.setAlpha(1f);
             toView.setVisibility(View.VISIBLE);
             toView.bringToFront();
 
             if (!springLoaded && !LauncherApplication.isScreenLarge()) {
                 // Hide the workspace scrollbar
                 mWorkspace.hideScrollingIndicator(true);
-                hideDockDivider();
+                hideDockDivider(false);
 
                 // Hide the search bar
                 if (mSearchDropTargetBar != null) {
@@ -3165,7 +3225,7 @@ public final class Launcher extends Activity
             }
             mDockDivider.setAlpha(0f);
             fromView.setAlpha(0f);
-            hideHotseat(false);
+            hideHotseat(false, false);
         }
     }
 
@@ -3202,7 +3262,7 @@ public final class Launcher extends Activity
         }
 
         setPivotsForZoom(fromView);
-        showHotseat(animated);
+        showHotseat(animated, false);
         if (animated) {
             final LauncherViewPropertyAnimator scaleAnim =
                     new LauncherViewPropertyAnimator(fromView);
@@ -3224,7 +3284,16 @@ public final class Launcher extends Activity
                 }
             });
 
+            final ObjectAnimator alphaAnimOut = ObjectAnimator
+                .ofFloat(toView, "alpha", 0f, 1f)
+                .setDuration(fadeOutDuration);
+            alphaAnimOut.setInterpolator(new AccelerateDecelerateInterpolator());
+
             mStateAnimation = LauncherAnimUtils.createAnimatorSet();
+
+            if (mFadeOut && !(toState == State.WORKSPACE && mState == State.APPS_CUSTOMIZE_SPRING_LOADED)) {
+                mStateAnimation.play(alphaAnimOut);
+            }
 
             dispatchOnLauncherTransitionPrepare(fromView, animated, true);
             dispatchOnLauncherTransitionPrepare(toView, animated, true);
@@ -3332,6 +3401,7 @@ public final class Launcher extends Activity
         }
 
         mWorkspace.flashScrollingIndicator(animated);
+        if (mFadeOut) mWorkspace.setAlpha(1f);
 
         // Change the state *after* we've called all the transition code
         mState = State.WORKSPACE;
@@ -3367,7 +3437,7 @@ public final class Launcher extends Activity
     void enterSpringLoadedDragMode() {
         if (isAllAppsVisible()) {
             hideAppsCustomizeHelper(State.APPS_CUSTOMIZE_SPRING_LOADED, true, null);
-            hideDockDivider();
+            hideDockDivider(true);
             mState = State.APPS_CUSTOMIZE_SPRING_LOADED;
         }
     }
@@ -3404,20 +3474,42 @@ public final class Launcher extends Activity
         // Otherwise, we are not in spring loaded mode, so don't do anything.
     }
 
-    void hideDockDivider() {
-        if (mQsbDivider != null && mDockDivider != null) {
-            if (mShowSearchBar) {
+    void hideDockDivider(boolean animated) {
+        if (mDockDivider != null) {
+            if (mShowSearchBar && mQsbDivider != null) {
                 mQsbDivider.setVisibility(View.INVISIBLE);
             }
             if (mShowDockDivider) {
                 mDockDivider.setVisibility(View.INVISIBLE);
             }
+            if (mDividerAnimator != null) {
+                mDividerAnimator.cancel();
+                if (mQsbDivider != null) mQsbDivider.setAlpha(0f);
+                mDockDivider.setAlpha(0f);
+                mDividerAnimator = null;
+            }
+            if (animated) {
+                mDividerAnimator = LauncherAnimUtils.createAnimatorSet();
+                if (mShowSearchBar && mShowDockDivider && mQsbDivider != null) {
+                    mDividerAnimator.playTogether(LauncherAnimUtils.ofFloat(mQsbDivider, "alpha", 0f),
+                            LauncherAnimUtils.ofFloat(mDockDivider, "alpha", 0f));
+                } else {
+                    mDividerAnimator.play(LauncherAnimUtils.ofFloat(mDockDivider, "alpha", 0f));
+                }
+                int duration = 0;
+                if (mSearchDropTargetBar != null) {
+                    duration = mSearchDropTargetBar.getTransitionInDuration();
+                }
+                mDividerAnimator.setDuration(duration);
+                mDividerAnimator.start();
+            }
         }
+
     }
 
     void showDockDivider(boolean animated) {
-        if (mQsbDivider != null && mDockDivider != null) {
-            if (mShowSearchBar) {
+        if (mDockDivider != null) {
+            if (mShowSearchBar && mQsbDivider != null) {
                 mQsbDivider.setVisibility(View.VISIBLE);
             }
             if (mShowDockDivider) {
@@ -3425,15 +3517,17 @@ public final class Launcher extends Activity
             }
             if (mDividerAnimator != null) {
                 mDividerAnimator.cancel();
-                mQsbDivider.setAlpha(1f);
+                if (mQsbDivider != null) mQsbDivider.setAlpha(1f);
                 mDockDivider.setAlpha(1f);
                 mDividerAnimator = null;
             }
             if (animated) {
                 mDividerAnimator = LauncherAnimUtils.createAnimatorSet();
-                if (mShowSearchBar && mShowDockDivider) {
+                if (mShowSearchBar && mShowDockDivider && mQsbDivider != null) {
                     mDividerAnimator.playTogether(LauncherAnimUtils.ofFloat(mQsbDivider, "alpha", 1f),
                             LauncherAnimUtils.ofFloat(mDockDivider, "alpha", 1f));
+                } else {
+                    mDividerAnimator.play(LauncherAnimUtils.ofFloat(mDockDivider, "alpha", 1f));
                 }
                 int duration = 0;
                 if (mSearchDropTargetBar != null) {
@@ -3456,8 +3550,8 @@ public final class Launcher extends Activity
     /**
      * Shows the hotseat area.
      */
-    void showHotseat(boolean animated) {
-        if (mShowHotseat) {
+    void showHotseat(boolean animated, boolean force) {
+        if (mShowHotseat || force) {
             if (animated) {
                 if (mHotseat.getAlpha() != 1f) {
                     int duration = 0;
@@ -3475,8 +3569,8 @@ public final class Launcher extends Activity
     /**
      * Hides the hotseat area.
      */
-    void hideHotseat(boolean animated) {
-        if (mShowHotseat) {
+    void hideHotseat(boolean animated, boolean force) {
+        if (mShowHotseat || force) {
             if (animated) {
                 if (mHotseat.getAlpha() != 0f) {
                     int duration = 0;
@@ -3498,14 +3592,22 @@ public final class Launcher extends Activity
         boolean newStatus = !mShowHotseat;
         mShowHotseat = newStatus;
         if (newStatus) {
-            mHotseat.setAlpha(0f);
             mHotseat.setVisibility(View.VISIBLE);
-            showHotseat(true);
+            showHotseat(true, true);
         } else {
-            hideHotseat(true);
+            hideHotseat(true, true);
             mHotseat.setVisibility(View.GONE);
         }
         PreferencesProvider.Interface.Dock.setShowDock(this, newStatus);
+        mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider() && mShowHotseat;
+        if (mShowHotseat && mShowDockDivider) {
+            mDockDivider.setVisibility(View.VISIBLE);
+        } else {
+            mDockDivider.setVisibility(View.GONE);
+        }
+        mWorkspace.toggleHotseat(mShowHotseat, mShowDockDivider);
+        mModel.resetLoadedState(true, true);
+        mModel.startLoader(true, mWorkspace.getCurrentPage());
     }
 
     public int getCurrentOrientation() {
@@ -4027,9 +4129,7 @@ public final class Launcher extends Activity
                     FolderIcon newFolder = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
                             (FolderInfo) item);
-                    if (!mHideIconLabels) {
-                        newFolder.setTextVisible(false);
-                    }
+                    newFolder.setTextVisible(!mHideIconLabels);
                     workspace.addInScreen(newFolder, item.container, item.screen, item.cellX,
                             item.cellY, 1, 1, false);
                     break;
@@ -4436,7 +4536,7 @@ public final class Launcher extends Activity
 
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    hideHotseat(animated);
+                    hideHotseat(animated, false);
                     // Prepare the position
                     toView.setTranslationX(0.0f);
                     toView.setTranslationY(0.0f);
@@ -4447,13 +4547,6 @@ public final class Launcher extends Activity
                 public void onAnimationEnd(Animator animation) {
                     dispatchOnLauncherTransitionEnd(fromView, animated, false);
                     dispatchOnLauncherTransitionEnd(toView, animated, false);
-
-                    // Hide the workspace scrollbar
-                    mWorkspace.hideScrollingIndicator(true);
-                    hideDockDivider();
-                    // Hide the search bar
-                    mSearchDropTargetBar.hideSearchBar(false);
-
                 }
 
                 @Override
@@ -4517,6 +4610,15 @@ public final class Launcher extends Activity
             } else {
                 startAnimRunnable.run();
             }
+            if (mSearchDropTargetBar != null) {
+                mSearchDropTargetBar.hideSearchBar(true);
+            }
+            if (mWorkspace != null) {
+                mWorkspace.hideScrollingIndicator(true);
+            }
+            mDockDivider.animate().alpha(0f).setDuration(duration);
+            fromView.animate().alpha(0f).setDuration(duration);
+            hideHotseat(true, false);
         } else {
             toView.setTranslationX(0.0f);
             toView.setTranslationY(0.0f);
@@ -4525,20 +4627,21 @@ public final class Launcher extends Activity
             toView.setVisibility(View.VISIBLE);
             toView.bringToFront();
 
-            if (!LauncherApplication.isScreenLarge()) {
-                // Hide the workspace scrollbar
-                mWorkspace.hideScrollingIndicator(true);
-                hideDockDivider();
-
-                // Hide the search bar
-                mSearchDropTargetBar.hideSearchBar(false);
-            }
             dispatchOnLauncherTransitionPrepare(fromView, animated, false);
             dispatchOnLauncherTransitionStart(fromView, animated, false);
             dispatchOnLauncherTransitionEnd(fromView, animated, false);
             dispatchOnLauncherTransitionPrepare(toView, animated, false);
             dispatchOnLauncherTransitionStart(toView, animated, false);
             dispatchOnLauncherTransitionEnd(toView, animated, false);
+            if (mSearchDropTargetBar != null) {
+                mSearchDropTargetBar.hideSearchBar(false);
+            }
+            if (mWorkspace != null) {
+                mWorkspace.hideScrollingIndicator(false);
+            }
+            mDockDivider.setAlpha(0f);
+            fromView.setAlpha(0f);
+            hideHotseat(false, false);
         }
     }
 
@@ -4563,7 +4666,6 @@ public final class Launcher extends Activity
                     Workspace.State.NORMAL, false);
 
             setPivotsForZoom(fromView);
-            showHotseat(animated);
             if (animated) {
                 final LauncherViewPropertyAnimator scaleAnim =
                         new LauncherViewPropertyAnimator(fromView);
@@ -4593,23 +4695,13 @@ public final class Launcher extends Activity
                 mStateAnimation.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        showHotseat(animated);
                         hidePreviewLayout();
                         dispatchOnLauncherTransitionEnd(fromView, animated, true);
                         dispatchOnLauncherTransitionEnd(toView, animated, true);
-                        if (mWorkspace != null) {
-                            mWorkspace.hideScrollingIndicator(false);
-                        }
                     }
                 });
 
                 mStateAnimation.playTogether(scaleAnim, alphaAnim);
-
-                final ObjectAnimator workspaceAlphaAnim = ObjectAnimator
-                        .ofFloat(toView, "alpha", 0f, 1f)
-                        .setDuration(fadeOutDuration);
-                alphaAnim.setInterpolator(new DecelerateInterpolator(1.0f));
-                mStateAnimation.play(workspaceAlphaAnim);
 
                 dispatchOnLauncherTransitionStart(fromView, animated, true);
                 dispatchOnLauncherTransitionStart(toView, animated, true);
@@ -4621,8 +4713,21 @@ public final class Launcher extends Activity
                         mStateAnimation.start();
                     }
                 });
+                if (mWorkspace != null) {
+                    mWorkspace.showScrollingIndicator(true);
+                }
+                mDockDivider.animate().alpha(1f).setDuration(duration);
+                toView.animate().alpha(1f).setDuration(duration);
+                showHotseat(animated, false);
             } else {
                 hidePreviewLayout();
+                mWorkspace.hideScrollingIndicator(false);
+                if (mWorkspace != null) {
+                    mWorkspace.showScrollingIndicator(false);
+                }
+                mDockDivider.setAlpha(1.0f);
+                toView.setAlpha(1.0f);
+                showHotseat(animated, false);
             }
         }
     }
@@ -4638,6 +4743,18 @@ public final class Launcher extends Activity
                     editor.commit();
         }
         return preferencesChanged;
+    }
+
+    public boolean preferencesVisited() {
+        SharedPreferences prefs =
+            getSharedPreferences(PreferencesProvider.PREFERENCES_KEY, Context.MODE_PRIVATE);
+        boolean preferencesVisited = prefs.getBoolean(PreferencesProvider.PREFERENCES_VISITED, false);
+        if (preferencesVisited) {
+            SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean(PreferencesProvider.PREFERENCES_VISITED, false);
+                    editor.commit();
+        }
+        return preferencesVisited;
     }
 
     void setWorkspaceDefaultScreen(int index) {

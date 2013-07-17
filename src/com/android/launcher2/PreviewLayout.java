@@ -58,7 +58,6 @@ public class PreviewLayout extends FrameLayout
      */
     private void addScreen(int index) {
         mWorkspace.addScreen(index);
-        mLauncher.hideDockDivider();
         mWorkspace.setOnLongClickListener(this.mLauncher);
         mWorkspace.invalidate();
         snapDrawingCacheToImageViews();
@@ -72,7 +71,6 @@ public class PreviewLayout extends FrameLayout
      */
     private void removeWorkspaceScreen(int index) {
         mWorkspace.removeScreen(index);
-        mLauncher.hideDockDivider();
         snapDrawingCacheToImageViews();
         mWorkspace.invalidate();
         PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(),

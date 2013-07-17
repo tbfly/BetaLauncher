@@ -3,8 +3,6 @@
     <bool name="is_large_screen">false</bool>
     <bool name="allow_rotation">false</bool>
     <bool name="lock_workspace">false</bool>
-    <bool name="auto_rotate">false</bool>
-    <bool name="run_in_fullscreen">false</bool>
 
 <!-- DragController -->
     <integer name="config_flingToDeleteMinVelocity">-1500</integer>
@@ -52,8 +50,9 @@
     <bool name="config_useDropTargetDownTransition">true</bool>
     <!-- Which default transition effect to use on the workspace -->
     <string name="config_workspaceDefaultTransitionEffect">CubeOut</string>
+    <string name="config_dockDefaultTransitionEffect">Standard</string>
     <!-- Whether or not to fade the side pages -->
-    <bool name="config_workspaceFadeAdjacentScreens">true</bool>
+    <bool name="config_workspaceDefualtFadeInAdjacentScreens">true</bool>
     <bool name="config_drawerFadeAdjacentScreens">true</bool>
     <!-- Whether to show outlines on the screens when scrolling -->
     <bool name="config_workspaceDefaultShowOutlines">false</bool>
@@ -93,63 +92,54 @@
     <integer name="folder_max_num_items">16</integer>
 
     <!-- Workspace grid size -->
+    <integer name="config_defaultWorkspaceRows">5</integer>
     <integer name="config_maxWorkspaceRows">10</integer>
     <integer name="config_minWorkspaceRows">3</integer>
+    <integer name="config_defaultWorkspaceColumns">4</integer>
     <integer name="config_maxWorkspaceColumns">10</integer>
     <integer name="config_minWorkspaceColumns">3</integer>
-
-    <!-- Allow tablets to set grid size in settings, false disables -->
-    <bool name="config_workspaceTabletGrid">false</bool>
+    <integer name="config_defaultWorkspaceRowsLand">4</integer>
+    <integer name="config_maxWorkspaceRowsLand">10</integer>
+    <integer name="config_minWorkspaceRowsLand">3</integer>
+    <integer name="config_defaultWorkspaceColumnsLand">5</integer>
+    <integer name="config_maxWorkspaceColumnsLand">10</integer>
+    <integer name="config_minWorkspaceColumnsLand">3</integer>
 
     <!-- App drawer grid size -->
-    <integer name="config_defaultAppRows">5</integer>
+    <integer name="config_defaultAppRows">6</integer>
     <integer name="config_maxAppRows">10</integer>
     <integer name="config_minAppRows">3</integer>
-    <integer name="config_defaultAppColumns">4</integer>
+    <integer name="config_defaultAppColumns">5</integer>
     <integer name="config_maxAppColumns">10</integer>
     <integer name="config_minAppColumns">3</integer>
+    <integer name="config_defaultAppRowsLand">4</integer>
+    <integer name="config_maxAppRowsLand">10</integer>
+    <integer name="config_minAppRowsLand">3</integer>
+    <integer name="config_defaultAppColumnsLand">7</integer>
+    <integer name="config_maxAppColumnsLand">10</integer>
+    <integer name="config_minAppColumnsLand">3</integer>
 
     <!-- App drawer widget list grid size -->
     <integer name="config_defaultWidgetRows">3</integer>
-    <integer name="config_maxWidgetRows">7</integer>
+    <integer name="config_maxWidgetRows">8</integer>
     <integer name="config_minWidgetRows">1</integer>
     <integer name="config_defaultWidgetColumns">2</integer>
-    <integer name="config_maxWidgetColumns">7</integer>
+    <integer name="config_maxWidgetColumns">5</integer>
     <integer name="config_minWidgetColumns">1</integer>
-
-    <!-- Homescreen defaults-->
-    <bool name="config_hideHomescreenIconLabels">false</bool>
-
-    <!-- More lennox bools -->
-    <bool name="config_showDock">true</bool>
-    <bool name="config_dockAsOverlay">false</bool>
-    <bool name="config_drawerShowIndicator">true</bool>
-    <bool name="config_drawerFadeIndicator">true</bool>
-    <bool name="config_homescreenShowIndicator">true</bool>
-    <bool name="config_homescreenFadeIndicator">true</bool>
-    <bool name="config_stretchScreens">true</bool>
-    <bool name="config_stretchDrawerScreens">false</bool>
-    <bool name="config_showSearchBar">true</bool>
-    <bool name="config_widgetsListActions">false</bool>
-    <bool name="config_drawerJoinTabs">true</bool>
-    <bool name="config_showDockDivider">true</bool>
-    <bool name="config_hideDockIconLabels">true</bool>
+    <integer name="config_defaultWidgetRowsLand">2</integer>
+    <integer name="config_maxWidgetRowsLand">5</integer>
+    <integer name="config_minWidgetRowsLand">1</integer>
+    <integer name="config_defaultWidgetColumnsLand">3</integer>
+    <integer name="config_maxWidgetColumnsLand">8</integer>
+    <integer name="config_minWidgetColumnsLand">1</integer>
 
     <!-- More lennox ints -->
-    <integer name="config_drawerIndicatorPosition">0</integer>
-    <integer name="config_homescreenIndicatorPosition">0</integer>
-    <integer name="config_defaultFolderStyle">0</integer>
+    <integer name="config_dockDefaultPages">5</integer>
     <integer name="config_dockMaxPages">5</integer>
+    <integer name="config_dockMinPages">1</integer>
 
-    <!-- More lennox strings -->
-    <string name="config_defaultDrawerOrientation">horizontal</string>
-
-    <!-- Actual cell count -->
-    <integer name="target_cell_count_x">@integer/default_cell_count_x</integer>
-    <integer name="target_cell_count_y">@integer/default_cell_count_y</integer>
-    <!-- Default cell count that scales properly (will be used as a reference for scaling when different counts are used) -->
-    <integer name="default_cell_count_x">4</integer>
-    <integer name="default_cell_count_y">4</integer>
+    <integer name="cell_count_x">4</integer>
+    <integer name="cell_count_y">4</integer>
 
     <!-- Cell layout types -->
     <integer name="cell_layout_workspace">0</integer>
@@ -157,27 +147,19 @@
     <integer name="cell_layout_folder">2</integer>
     <integer name="cell_layout_preview">3</integer>
 
-    <!-- Whether or not to use the wallpaper hack by default -->
-    <bool name="config_workspaceDefaultWallpaperHack">false</bool>
-
 <!-- Hotseat -->
     <bool name="hotseat_transpose_layout_with_orientation">true</bool>
-    <integer name="hotseat_default_cell_count">5</integer>
+    <integer name="hotseat_cell_count">5</integer>
     <integer name="hotseat_max_cell_count">7</integer>
     <integer name="hotseat_min_cell_count">3</integer>
     <integer name="hotseat_all_apps_index">2</integer>
     <!-- must be between 0 and 100 -->
-    <integer name="hotseat_item_scale_percentage_default">100</integer>
+    <integer name="hotseat_item_scale_percentage">100</integer>
     <integer name="hotseat_item_scale_percentage_max">150</integer>
     <integer name="hotseat_item_scale_percentage_min">50</integer>
 
     <!-- Wallpaper size -->
     <integer name="config_appDrawerTransparencyDefault">50</integer>
-
-    <!-- Wallpaper size -->
-    <integer name="default_wallpaper_size">2</integer>
-    <integer name="max_wallpaper_size">5</integer>
-    <integer name="min_wallpaper_size">2</integer>
 
     <!-- must be between 0 and 100 -->
     <integer name="app_icon_scale_percentage_default">100</integer>

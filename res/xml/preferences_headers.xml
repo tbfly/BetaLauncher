@@ -16,6 +16,10 @@
 
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <header android:id="@+id/preferences_general_section"
+            android:fragment="com.android.launcher2.preference.Preferences$GeneralFragment"
+            android:title="@string/preferences_interface_general_title" />
+
     <header android:id="@+id/preferences_homescreen_section"
             android:fragment="com.android.launcher2.preference.Preferences$HomescreenFragment"
             android:title="@string/preferences_interface_homescreen_title"
@@ -33,10 +37,6 @@
     <header android:id="@+id/preferences_gestures_section"
             android:fragment="com.android.launcher2.preference.Preferences$GesturesFragment"
             android:title="@string/preferences_interface_gestures_title" />
-
-    <header android:id="@+id/preferences_general_section"
-            android:fragment="com.android.launcher2.preference.Preferences$GeneralFragment"
-            android:title="@string/preferences_interface_general_title" />
 
     <header android:id="@+id/preferences_application_section"
             android:title="@string/preferences_application_title" />

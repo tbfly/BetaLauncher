@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.TextView;
@@ -100,35 +99,6 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
         setText(info.title);
         setTag(info);
         info.setListener(this);
-    }
-
-    public void applyFromShortcutInfo(ShortcutInfo info, IconCache iconCache, float scale) {
-        Bitmap b = info.getIcon(iconCache);
-
-        int width = (int)((float)b.getWidth() * scale);
-        int height = (int)((float)b.getHeight() * scale);
-        FastBitmapDrawable d = new FastBitmapDrawable(b);
-        d.setBounds(new Rect(0, 0, width, height));
-
-        setCompoundDrawables(null,
-                d, null, null);
-        setCompoundDrawablePadding(0);
-        setText(info.title);
-        setTag(info);
-        info.setListener(this);
-    }
-
-    public void setIconScale(float scale) {
-        Drawable d = getCompoundDrawables()[1];
-        if ( d instanceof StateListDrawable ) {
-            return;
-        }
-        Bitmap b = ((FastBitmapDrawable)d).getBitmap();
-        int width = (int)((float)b.getWidth() * scale);
-        int height = (int)((float)b.getHeight() * scale);
-        d.setBounds(new Rect(0, 0, width, height));
-        setCompoundDrawables(null,
-                d, null, null);
     }
 
     @Override
@@ -381,6 +351,10 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
         super.cancelLongPress();
 
         mLongPressHelper.cancelLongPress();
+    }
+
+    public boolean getTextVisible() {
+        return mTextVisible;
     }
 
     public void setTextVisible(boolean visible) {

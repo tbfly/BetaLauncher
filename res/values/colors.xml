@@ -31,4 +31,6 @@
     <color name="workspace_all_apps_and_delete_zone_text_color">#CCFFFFFF</color>
     <color name="workspace_all_apps_and_delete_zone_text_shadow_color">#A0000000</color>
     <color name="workspace_icon_text_color">#FFF</color>
+    <drawable name="drop_target_background">#00000000</drawable>
+    <drawable name="hotseat_background">#00000000</drawable>
 </resources>

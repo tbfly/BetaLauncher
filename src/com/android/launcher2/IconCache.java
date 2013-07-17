@@ -194,39 +194,6 @@ public class IconCache {
         return null;
     }
 
-    /*private Drawable createIconDrawable(Drawable background, Drawable icon) {
-
-        int backgroundHeight = background.getIntrinsicHeight();
-        int backgroundWidth = background.getIntrinsicWidth();
-        int iconHeight = icon.getIntrinsicHeight();
-        int iconWidth = icon.getIntrinsicWidth();
-
-        float iconScale = 1.0f - ((float) backgroundHeight / (float) iconHeight);
-
-        ScaleDrawable scaledIcon = new ScaleDrawable(icon, Gravity.CENTER, iconScale, iconScale);
-
-        if ( iconFrontList != null && iconFrontList.size() > 0) {
-            ScaleDrawable sd = new ScaleDrawable(scaledIcon, Gravity.CENTER, scaleFactor, scaleFactor);
-            sd.setLevel(8000);
-            Drawable[] layers = new Drawable[2 + iconFrontList.size()];
-            layers[0] = background;
-            layers[1] = (Drawable) sd;
-            for (int i = 0; i < iconFrontList.size(); i++) {
-                layers[2+i] = ThemeUtils.getDrawable(mContext, iconFrontList.get(i));
-            }
-            LayerDrawable layerDrawable = new LayerDrawable(layers);
-            return layerDrawable;
-        } else {
-            ScaleDrawable sd = new ScaleDrawable(scaledIcon, Gravity.CENTER, scaleFactor, scaleFactor);
-            sd.setLevel(8000);
-            Drawable[] layers = new Drawable[2];
-            layers[0] = background;
-            layers[1] = (Drawable) sd;
-            LayerDrawable layerDrawable = new LayerDrawable(layers);
-            return layerDrawable;
-        }
-    }*/
-
     private Drawable createIconDrawable(Drawable background, Drawable icon) {
 
         int iconScaleLevel = (int) ((float) scaleFactor * 10000);

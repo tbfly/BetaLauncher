@@ -42,4 +42,10 @@
         android:entries="@array/gesture_target_names"
         android:entryValues="@array/gesture_target_values"
         android:defaultValue="open_app_drawer" />
+    <ListPreference android:key="ui_homescreen_double_tap_gesture"
+        android:title="@string/preferences_interface_gestures_double_tap_gesture_title"
+        android:summary=""
+        android:entries="@array/gesture_target_names"
+        android:entryValues="@array/gesture_target_values"
+        android:defaultValue="nothing" />
 </PreferenceScreen>

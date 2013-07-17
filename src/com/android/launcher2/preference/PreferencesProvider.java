@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import com.android.launcher2.LauncherApplication;
 import com.android.launcher2.Workspace;
 import com.android.launcher2.AppsCustomizePagedView;
+import com.android.launcher2.Hotseat;
 
 import java.util.Map;
 
@@ -33,6 +34,8 @@ public final class PreferencesProvider {
     public static final String PREFERENCES_KEY = "com.android.launcher_preferences";
 
     public static final String PREFERENCES_CHANGED = "preferences_changed";
+
+    public static final String PREFERENCES_VISITED = "preferences_visited";
 
     private static Map<String, Object> sKeyValues;
 
@@ -85,18 +88,18 @@ public final class PreferencesProvider {
                 editor.putInt("ui_homescreen_default_screen", def);
                 editor.commit();
             }
-            public static int getCellCountX(int def) {
-                String[] values = getString("ui_homescreen_grid", "0|" + def).split("\\|");
+            public static int getCellCountX(int def, boolean landscape) {
+                String[] values = getString("ui_homescreen_grid", "0|" + def + "|0|" + def).split("\\|");
                 try {
-                    return Integer.parseInt(values[1]);
+                    return Integer.parseInt(values[landscape ? 3 : 1]);
                 } catch (NumberFormatException e) {
                     return def;
                 }
             }
-            public static int getCellCountY(int def) {
-                String[] values = getString("ui_homescreen_grid", def + "|0").split("\\|");
+            public static int getCellCountY(int def, boolean landscape) {
+                String[] values = getString("ui_homescreen_grid", def + "|0|" + def + "|0").split("\\|");
                 try {
-                    return Integer.parseInt(values[0]);
+                    return Integer.parseInt(values[landscape ? 2 : 0]);
                 } catch (NumberFormatException e) {
                     return def;
                 }
@@ -104,14 +107,28 @@ public final class PreferencesProvider {
             public static boolean getStretchScreens() {
                 return getBoolean("ui_homescreen_stretch_screens", true);
             }
+            public static boolean getFitToCells() {
+                return getBoolean("ui_homescreen_fit_to_cells", false);
+            }
+            public static int getIconScale(boolean landscape) {
+                String[] values = getString("ui_homescreen_icon_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
+                }
+            }
             public static boolean getShowSearchBar() {
                 return getBoolean("ui_homescreen_general_search", true);
             }
-            public static int getIconScale(int def) {
-                return getInt("ui_homescreen_icon_scale", def);
+            public static boolean getResizeAnyWidget() {
+                return getBoolean("ui_homescreen_general_resize_any_widget", true);
             }
             public static boolean getHideIconLabels() {
                 return getBoolean("ui_homescreen_general_hide_icon_labels", false);
+            }
+            public static boolean getAllowShortcuts() {
+                return getBoolean("ui_homescreen_auto_install_shortcuts", false);
             }
             public static class Scrolling {
                 public static Workspace.TransitionEffect getTransitionEffect(String def) {
@@ -133,11 +150,16 @@ public final class PreferencesProvider {
                 public static boolean getScrollWallpaper() {
                     return getBoolean("ui_homescreen_scrolling_scroll_wallpaper", true);
                 }
-                public static boolean getWallpaperHack(boolean def) {
-                    return getBoolean("ui_homescreen_scrolling_wallpaper_hack", def);
+                public static boolean getWallpaperHack() {
+                    return getBoolean("ui_homescreen_scrolling_wallpaper_hack", false);
                 }
-                public static int getWallpaperSize() {
-                    return getInt("ui_homescreen_scrolling_wallpaper_size", 2);
+                public static int getWallpaperSize(boolean landscape) {
+                    String[] values = getString("ui_homescreen_scrolling_wallpaper_size", "2|2").split("\\|");
+                    try {
+                        return Integer.parseInt(values[landscape ? 1 : 0]);
+                    } catch (NumberFormatException e) {
+                        return 2;
+                    }
                 }
                 public static boolean getFadeInAdjacentScreens(boolean def) {
                     return getBoolean("ui_homescreen_scrolling_fade_adjacent_screens", def);
@@ -162,66 +184,60 @@ public final class PreferencesProvider {
                 public static int getFolderIconStyle() {
                     return Integer.parseInt(getString("ui_homescreen_folder_style", "0"));
                 }
-            }
-
-            public static class Gestures {
-                public static String getUpGestureAction() {
-                    return getString("ui_homescreen_up_gesture", "toggle_status_bar");
-                }
-                public static String getDownGestureAction() {
-                    return getString("ui_homescreen_down_gesture", "expand_status_bar");
-                }
-                public static String getPinchGestureAction() {
-                    return getString("ui_homescreen_pinch_gesture", "show_previews");
-                }
-                public static String getSpreadGestureAction() {
-                    return getString("ui_homescreen_spread_gesture", "open_app_drawer");
+                public static int getIconScale(boolean landscape) {
+                    String[] values = getString("ui_homescreen_folder_icon_scale", "100|100").split("\\|");
+                    try {
+                        return Integer.parseInt(values[landscape ? 1 : 0]);
+                    } catch (NumberFormatException e) {
+                        return 100;
+                    }
                 }
             }
         }
 
         public static class Drawer {
-            public static int getCellCountX() {
-                int def = 4;
-                String[] values = getString("ui_drawer_grid", "0|" + def).split("\\|");
+            public static int getCellCountX(int def, boolean landscape) {
+                String[] values = getString("ui_drawer_grid", "0|" + def + "|0|" + def).split("\\|");
                 try {
-                    return Integer.parseInt(values[1]);
+                    return Integer.parseInt(values[landscape ? 3 : 1]);
                 } catch (NumberFormatException e) {
                     return def;
                 }
             }
-            public static int getCellCountY() {
-                int def = 5;
-                String[] values = getString("ui_drawer_grid", def + "|0").split("\\|");
+            public static int getCellCountY(int def, boolean landscape) {
+                String[] values = getString("ui_drawer_grid", def + "|0|" + def + "|0").split("\\|");
                 try {
-                    return Integer.parseInt(values[0]);
+                    return Integer.parseInt(values[landscape ? 2 : 0]);
                 } catch (NumberFormatException e) {
                     return def;
                 }
             }
-            public static int getWidgetCountX() {
-                int def = 2;
-                String[] values = getString("ui_drawer_widget_grid", "0|" + def).split("\\|");
+            public static int getWidgetCountX(int def, boolean landscape) {
+                String[] values = getString("ui_drawer_widget_grid", "0|" + def + "|0|" + def).split("\\|");
                 try {
-                    return Integer.parseInt(values[1]);
+                    return Integer.parseInt(values[landscape ? 3 : 1]);
                 } catch (NumberFormatException e) {
                     return def;
                 }
             }
-            public static int getWidgetCountY() {
-                int def = 3;
-                String[] values = getString("ui_drawer_widget_grid", def + "|0").split("\\|");
+            public static int getWidgetCountY(int def, boolean landscape) {
+                String[] values = getString("ui_drawer_widget_grid", def + "|0|" + def + "|0").split("\\|");
                 try {
-                    return Integer.parseInt(values[0]);
+                    return Integer.parseInt(values[landscape ? 2 : 0]);
                 } catch (NumberFormatException e) {
                     return def;
                 }
-            }
-            public static int getDrawerTransparency() {
-                return getInt("ui_drawer_transparency", 50);
             }
             public static boolean getStretchScreens() {
-                return getBoolean("ui_drawer_stretch_screens", false);
+                return getBoolean("ui_drawer_stretch_screens", true);
+            }
+            public static int getDrawerTransparency(boolean landscape) {
+                String[] values = getString("ui_drawer_transparency", "50|50").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 50;
+                }
             }
             public static boolean getVertical() {
                 return getString("ui_drawer_orientation", "horizontal").equals("vertical");
@@ -241,11 +257,27 @@ public final class PreferencesProvider {
             public static boolean getListActions() {
                 return getBoolean("ui_drawer_widgets_list_actions", false);
             }
-            public static int getIconScale(int def) {
-                return getInt("ui_drawer_icon_scale", def);
+            public static int getIconScale(boolean landscape) {
+                String[] values = getString("ui_drawer_icon_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
+                }
             }
-            public static int getWidgetScale(int def) {
-                return getInt("ui_drawer_widgets_scale", def);
+            public static int getWidgetScale(boolean landscape) {
+                String[] values = getString("ui_drawer_widgets_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
+                }
+            }
+            public static boolean getDismissDrawerOnTap() {
+                return getBoolean("ui_drawer_dismiss_on_tap", false);
+            }
+            public static boolean getFadeOut() {
+                return getBoolean("ui_drawer_fade", false);
             }
             public static class Scrolling {
                 public static AppsCustomizePagedView.TransitionEffect getTransitionEffect(String def) {
@@ -265,7 +297,7 @@ public final class PreferencesProvider {
                     return AppsCustomizePagedView.TransitionEffect.Standard;
                 }
                 public static boolean getFadeInAdjacentScreens() {
-                    return getBoolean("ui_drawer_scrolling_fade_adjacent_screens", false);
+                    return getBoolean("ui_drawer_scrolling_fade_adjacent_screens", true);
                 }
             }
             public static class Indicator {
@@ -291,28 +323,90 @@ public final class PreferencesProvider {
             public static boolean getDockAsOverlay() {
                 return getBoolean("ui_dock_as_overlay", false);
             }
-            public static int getNumberPages() {
-                return getInt("ui_dock_pages", 1);
+            public static int getNumberPages(boolean landscape) {
+                String[] values = getString("ui_dock_pages", "1|1").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 1;
+                }
             }
-            public static int getDefaultPage(int def) {
-                return getInt("ui_dock_default_page", def + 1) - 1;
+            public static int getDefaultPage(int def, boolean landscape) {
+                String[] values = getString("ui_dock_default_page", def + "|" + def).split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
             }
-            public static int getNumberIcons(int def) {
-                return getInt("ui_dock_icons", def);
+            public static int getNumberIcons(int def, boolean landscape) {
+                String[] values = getString("ui_dock_icons", def + "|" + def).split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return def;
+                }
             }
             public static boolean getHideIconLabels() {
                 return getBoolean("ui_dock_hide_icon_labels", true);
             }
-            public static int getIconScale(int def) {
-                return getInt("ui_dock_icon_scale", def);
+            public static int getIconScale(boolean landscape) {
+                String[] values = getString("ui_dock_icon_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
+                }
             }
             public static boolean getShowDivider() {
                 return getBoolean("ui_dock_divider", true);
             }
+            public static boolean getFadeInAdjacentScreens() {
+                return getBoolean("ui_dock_scrolling_fade_adjacent_screens", true);
+            }
+            public static boolean getLandscapeDockOnBottom() {
+                return getBoolean("ui_land_dock_bottom", false);
+            }
+            public static class Scrolling {
+                public static Hotseat.TransitionEffect getTransitionEffect(String def) {
+                    try {
+                        return Hotseat.TransitionEffect.valueOf(
+                                getString("ui_dock_scrolling_transition_effect", def));
+                    } catch (IllegalArgumentException iae) {
+                        // Continue
+                    }
+                    try {
+                        return Hotseat.TransitionEffect.valueOf(def);
+                    } catch (IllegalArgumentException iae) {
+                        // Continue
+                    }
+                    return Hotseat.TransitionEffect.Standard;
+                }
+                public static boolean getFadeInAdjacentScreens() {
+                    return getBoolean("ui_drawer_scrolling_fade_adjacent_screens", true);
+                }
+            }
         }
 
         public static class Icons {
+        }
 
+        public static class Gestures {
+            public static String getUpGestureAction() {
+                return getString("ui_homescreen_up_gesture", "toggle_status_bar");
+            }
+            public static String getDownGestureAction() {
+                return getString("ui_homescreen_down_gesture", "expand_status_bar");
+            }
+            public static String getPinchGestureAction() {
+                return getString("ui_homescreen_pinch_gesture", "show_previews");
+            }
+            public static String getSpreadGestureAction() {
+                return getString("ui_homescreen_spread_gesture", "open_app_drawer");
+            }
+            public static String getDoubleTapGestureAction() {
+                return getString("ui_homescreen_double_tap_gesture", "nothing");
+            }
         }
 
         public static class General {
