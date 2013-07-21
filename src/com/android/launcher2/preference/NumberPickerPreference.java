@@ -90,8 +90,14 @@ public class NumberPickerPreference extends DialogPreference {
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
+        super.onDialogClosed(positiveResult);
+
+        final int value = mNumberPicker.getValue();
+
         if (positiveResult) {
-            persistInt(mNumberPicker.getValue());
+            if (callChangeListener(value)) {
+                saveValue(value);
+            }
         }
     }
 
@@ -103,6 +109,20 @@ public class NumberPickerPreference extends DialogPreference {
     }
     public void setDefault(int def) {
         mDefault = def;
+    }
+
+    public int getMin() {
+        return mMin;
+    }
+    public int getMax() {
+        return mMax;
+    }
+    public int getDefault() {
+        return mDefault;
+    }
+
+    private boolean saveValue(int val) {
+        return persistInt(val);
     }
 
 }

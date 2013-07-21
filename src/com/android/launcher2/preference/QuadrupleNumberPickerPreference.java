@@ -219,9 +219,17 @@ public class QuadrupleNumberPickerPreference extends DialogPreference {
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
+        super.onDialogClosed(positiveResult);
+
+        final int value1 = mNumberPicker1.getValue();
+        final int value2 = mNumberPicker2.getValue();
+        final int value3 = mNumberPicker3.getValue();
+        final int value4 = mNumberPicker4.getValue();
+
         if (positiveResult) {
-            persistString(mNumberPicker1.getValue() + "|" + mNumberPicker2.getValue()
-                        + "|" + mNumberPicker3.getValue() + "|" + mNumberPicker4.getValue());
+            if (callChangeListener(value1 + "|" + value2 + "|" + value3 + "|" + value4)) {
+                saveValue(value1 + "|" + value2 + "|" + value3 + "|" + value4);
+            }
         }
     }
 
@@ -260,6 +268,47 @@ public class QuadrupleNumberPickerPreference extends DialogPreference {
     }
     public void setDefault4(int def) {
         mDefault4 = def;
+    }
+
+    public int getMin1() {
+        return mMin1;
+    }
+    public int getMax1() {
+        return mMax1;
+    }
+    public int getMin2() {
+        return mMin2;
+    }
+    public int getMax2() {
+        return mMax2;
+    }
+    public int getMin3() {
+        return mMin3;
+    }
+    public int getMax3() {
+        return mMax3;
+    }
+    public int getMin4() {
+        return mMin4;
+    }
+    public int getMax4() {
+        return mMax4;
+    }
+    public int getDefault1() {
+        return mDefault1;
+    }
+    public int getDefault2() {
+        return mDefault2;
+    }
+    public int getDefault3() {
+        return mDefault3;
+    }
+    public int getDefault4() {
+        return mDefault4;
+    }
+
+    private boolean saveValue(String newValue) {
+        return persistString(newValue);
     }
 
 }

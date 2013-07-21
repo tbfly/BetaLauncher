@@ -148,8 +148,15 @@ public class DoubleNumberPickerPreference extends DialogPreference {
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
+        super.onDialogClosed(positiveResult);
+
+        final int value1 = mNumberPicker1.getValue();
+        final int value2 = mNumberPicker2.getValue();
+
         if (positiveResult) {
-            persistString(mNumberPicker1.getValue() + "|" + mNumberPicker2.getValue());
+            if (callChangeListener(value1 + "|" + value2)) {
+                saveValue(value1 + "|" + value2);
+            }
         }
     }
 
@@ -170,6 +177,41 @@ public class DoubleNumberPickerPreference extends DialogPreference {
     }
     public void setDefault2(int def) {
         mDefault2 = def;
+    }
+    public void setValue1(int val) {
+        mNumberPicker1.setValue(val);
+    }
+    public void setValue2(int val) {
+        mNumberPicker2.setValue(val);
+    }
+
+    public int getMin1() {
+        return mMin1;
+    }
+    public int getMax1() {
+        return mMax1;
+    }
+    public int getMin2() {
+        return mMin2;
+    }
+    public int getMax2() {
+        return mMax2;
+    }
+    public int getDefault1() {
+        return mDefault1;
+    }
+    public int getDefault2() {
+        return mDefault2;
+    }
+    public int getValue1() {
+        return mNumberPicker1.getValue();
+    }
+    public int getValue2() {
+        return mNumberPicker2.getValue();
+    }
+
+    private boolean saveValue(String newValue) {
+        return persistString(newValue);
     }
 
 }
