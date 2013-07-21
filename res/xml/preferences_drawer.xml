@@ -63,6 +63,10 @@
             android:defaultValue="true"
             android:title="@string/preferences_interface_drawer_stretch_screens_title"
             android:summary="@string/preferences_interface_drawer_stretch_screens_summary" />
+        <CheckBoxPreference android:key="ui_drawer_fit_to_cells"
+            android:defaultValue="false"
+            android:title="@string/preferences_interface_drawer_fit_to_cells_title"
+            android:summary="@string/preferences_interface_drawer_fit_to_cells_summary" />
         <com.android.launcher2.preference.DoubleSeekBarDialogPreference
             android:key="ui_drawer_icon_scale"
             android:title="@string/preferences_interface_drawer_icon_scale_title"
@@ -78,10 +82,6 @@
     <CheckBoxPreference android:key="ui_drawer_dismiss_on_tap"
         android:title="@string/preferences_interface_drawer_dismiss_on_tap_title"
         android:summary="@string/preferences_interface_drawer_dismiss_on_tap_summary"
-        android:defaultValue="false" />
-    <CheckBoxPreference android:key="ui_drawer_fade"
-        android:title="@string/preferences_interface_drawer_fade_title"
-        android:summary="@string/preferences_interface_drawer_fade_summary"
         android:defaultValue="false" />
     <com.android.launcher2.preference.DoubleSeekBarDialogPreference
         android:key="ui_drawer_transparency"
@@ -148,6 +148,10 @@
             android:title="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_title"
             android:summary="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_summary"
             android:defaultValue="true" />
+        <CheckBoxPreference android:key="ui_drawer_scrolling_infinite"
+            android:title="@string/preferences_interface_drawer_scrolling_infinite_title"
+            android:summary="@string/preferences_interface_drawer_scrolling_infinite_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_drawer_indicator_category">
         <CheckBoxPreference android:key="ui_drawer_indicator_enable"

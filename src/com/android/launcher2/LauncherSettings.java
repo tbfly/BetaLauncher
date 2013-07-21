@@ -139,6 +139,8 @@ class LauncherSettings {
          */
         static final int CONTAINER_DESKTOP = -100;
         static final int CONTAINER_HOTSEAT = -101;
+        static final int CONTAINER_DESKTOP_LANDSCAPE = -102;
+        static final int CONTAINER_HOTSEAT_LANDSCAPE = -103;
 
         static final String LAUNCH_COUNT = "launchCount";
 
@@ -169,7 +171,7 @@ class LauncherSettings {
          */
         static final String CELLY = "cellY";
 
-        /**
+        /**2
          * The X span of the cell holding the favorite
          * <P>Type: INTEGER</P>
          */

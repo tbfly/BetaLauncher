@@ -202,6 +202,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     protected static final int sScrollIndicatorFadeOutShortDuration = 150;
     protected static final int sScrollIndicatorFlashDuration = 650;
     private boolean mScrollingPaused = false;
+    boolean mInfiniteScrolling;
 
     // If set, will defer loading associated pages until the scrolling settles
     private boolean mDeferLoadAssociatedPagesUntilScrollCompletes;
@@ -361,8 +362,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         if (getChildCount() == 0) {
             return;
         }
-
-
+        if (mInfiniteScrolling) {
+            if (currentPage > getPageCount() - 1) currentPage = 0;
+            if (currentPage < 0) currentPage = getPageCount() - 1;
+        }
         mCurrentPage = Math.max(0, Math.min(currentPage, getPageCount() - 1));
         updateCurrentPageScroll();
         updateScrollingIndicator();
@@ -473,6 +476,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             invalidate();
             return true;
         } else if (mNextPage != INVALID_PAGE) {
+            if (mInfiniteScrolling) {
+                if (mNextPage > getPageCount() - 1) mNextPage = 0;
+                if (mNextPage < 0) mNextPage = getPageCount() - 1;
+            }
             mCurrentPage = Math.max(0, Math.min(mNextPage, getPageCount() - 1));
             mNextPage = INVALID_PAGE;
             notifyPageSwitchListener();
@@ -995,9 +1002,17 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             if (getCurrentPage() > 0) {
                 snapToPage(getCurrentPage() - 1);
                 return true;
+            } else if (mInfiniteScrolling) {
+                //scrollToNewPageWithoutMovingPages(getPageCount() - 1);
+                snapToPage(getCurrentPage() - 1);
+                return true;
             }
         } else if (direction == View.FOCUS_RIGHT) {
             if (getCurrentPage() < getPageCount() - 1) {
+                snapToPage(getCurrentPage() + 1);
+                return true;
+            } else if (mInfiniteScrolling) {
+                //scrollToNewPageWithoutMovingPages(0);
                 snapToPage(getCurrentPage() + 1);
                 return true;
             }
@@ -1011,11 +1026,11 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             getPageAt(mCurrentPage).addFocusables(views, direction, focusableMode);
         }
         if (direction == View.FOCUS_LEFT) {
-            if (mCurrentPage > 0) {
+            if (mCurrentPage > 0 || mInfiniteScrolling) {
                 getPageAt(mCurrentPage - 1).addFocusables(views, direction, focusableMode);
             }
         } else if (direction == View.FOCUS_RIGHT){
-            if (mCurrentPage < getPageCount() - 1) {
+            if (mCurrentPage < getPageCount() - 1 || mInfiniteScrolling) {
                 getPageAt(mCurrentPage + 1).addFocusables(views, direction, focusableMode);
             }
         }
@@ -1480,27 +1495,55 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 // move to the left and fling to the right will register as a fling to the right.
                 if (!mVertical) {
                     if (((isSignificantMove && deltaX > 0 && !isFling) ||
-                            (isFling && velocityX > 0)) && mCurrentPage > 0) {
-                        finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage - 1;
-                        snapToPageWithVelocity(finalPage, velocityX);
+                            (isFling && velocityX > 0)) && (mCurrentPage > 0 || mInfiniteScrolling)) {
+                        if (mInfiniteScrolling) {
+                            //int page = mCurrentPage > 0 ? 0 : getChildCount() - 1;
+                            //scrollToNewPageWithoutMovingPages(page);
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage - 1;
+                            snapToPageWithVelocity(finalPage, velocityX);
+                        } else {
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage - 1;
+                            snapToPageWithVelocity(finalPage, velocityX);
+                        }
                     } else if (((isSignificantMove && deltaX < 0 && !isFling) ||
                             (isFling && velocityX < 0)) &&
-                            mCurrentPage < getChildCount() - 1) {
-                        finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage + 1;
-                        snapToPageWithVelocity(finalPage, velocityX);
+                            (mCurrentPage < getChildCount() - 1 || mInfiniteScrolling)) {
+                        if (mInfiniteScrolling) {
+                            //int page = mCurrentPage > 0 ? 0 : getChildCount() - 1;
+                            //scrollToNewPageWithoutMovingPages(page);
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage + 1;
+                            snapToPageWithVelocity(finalPage, velocityX);
+                        } else {
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage + 1;
+                            snapToPageWithVelocity(finalPage, velocityX);
+                        }
                     } else {
                         snapToDestination();
                     }
                 } else {
                     if (((isSignificantMove && deltaY > 0 && !isFling) ||
-                            (isFling && velocityY > 0)) && mCurrentPage > 0) {
-                        finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage - 1;
-                        snapToPageWithVelocity(finalPage, velocityY);
+                            (isFling && velocityY > 0)) && (mCurrentPage > 0 || mInfiniteScrolling)) {
+                        if (mInfiniteScrolling) {
+                            //int page = mCurrentPage > 0 ? 0 : getChildCount() - 1;
+                            //scrollToNewPageWithoutMovingPages(page);
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage - 1;
+                            snapToPageWithVelocity(finalPage, velocityY);
+                        } else {
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage - 1;
+                            snapToPageWithVelocity(finalPage, velocityY);
+                        }
                     } else if (((isSignificantMove && deltaY < 0 && !isFling) ||
                             (isFling && velocityY < 0)) &&
-                            mCurrentPage < getChildCount() - 1) {
-                        finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage + 1;
-                        snapToPageWithVelocity(finalPage, velocityY);
+                            (mCurrentPage < getChildCount() - 1 || mInfiniteScrolling)) {
+                        if (mInfiniteScrolling) {
+                            //int page = mCurrentPage > 0 ? 0 : getChildCount() - 1;
+                            //scrollToNewPageWithoutMovingPages(page);
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage + 1;
+                            snapToPageWithVelocity(finalPage, velocityY);
+                        } else {
+                            finalPage = returnToOriginalPage ? mCurrentPage : mCurrentPage + 1;
+                            snapToPageWithVelocity(finalPage, velocityY);
+                        }
                     } else {
                         snapToDestination();
                     }
@@ -1740,6 +1783,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void snapToPageWithVelocity(int whichPage, int velocity) {
+        if (mInfiniteScrolling) {
+            if (whichPage > getPageCount() - 1) whichPage = 0;
+            if (whichPage < 0) whichPage = getPageCount() - 1;
+        }
         whichPage = Math.max(0, Math.min(whichPage, getChildCount() - 1));
         int halfScreenSize = (!mVertical ? getMeasuredWidth() : getMeasuredHeight()) / 2;
 
@@ -1795,6 +1842,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     protected void snapToPage(int whichPage, int delta, int duration) {
         mNextPage = whichPage;
+        if (mInfiniteScrolling) {
+            if (mNextPage > getPageCount() - 1) mNextPage = 0;
+            if (mNextPage < 0) mNextPage = getPageCount() - 1;
+        }
 
         View focusedChild = getFocusedChild();
         if (focusedChild != null && whichPage != mCurrentPage &&

@@ -34,6 +34,7 @@ import android.graphics.drawable.ScaleDrawable;
 import android.view.Gravity;
 
 import com.android.launcher.R;
+import com.android.launcher2.preference.PreferencesProvider;
 import com.lennox.utils.ThemeUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -107,11 +108,11 @@ public class IconCache {
         iconBackList = new ArrayList<String>();
         iconFrontList = new ArrayList<String>();
         if (xrp == null) {
-            xrp = ThemeUtils.getXml(mContext,"appfilter");
+            xrp = mContext.mThemeUtils.getXml("appfilter");
         }
         if ( xrp == null ) {
             try {
-                Context otherContext = mContext.createPackageContext(ThemeUtils.getThemePackageName(mContext, mContext.getPackageName()), 0);
+                Context otherContext = mContext.createPackageContext(PreferencesProvider.Interface.General.getThemePackageName(), 0);
                 AssetManager am = otherContext.getAssets();
                 InputStream istr = am.open("appfilter.xml");
                 XmlPullParserFactory factory = XmlPullParserFactory.newInstance(); 
@@ -175,48 +176,25 @@ public class IconCache {
     private Drawable getThemedIcon(Resources resources, int iconId, String packageName, String componentName) {
         String hashkey = "ComponentInfo{" + packageName + "/" + componentName + "}";
         Drawable themedIcon;
-        if (iconThemeMap.containsKey(hashkey)) {
+        if (iconThemeMap != null && iconThemeMap.containsKey(hashkey)) {
             String drawableName = iconThemeMap.get(hashkey);
-            themedIcon = ThemeUtils.getDrawable(mContext, drawableName);
+            themedIcon = mContext.mThemeUtils.getDrawable(drawableName);
             if (themedIcon != null) {
-                return themedIcon;
+                return mContext.mThemeUtils.generateIconDrawable(packageName + "_" + componentName + ".png",
+                                                       themedIcon, null, scaleFactor);
             }
         }
         if (iconBackList != null && iconBackList.size() > 0) {
             Random r = new Random();
             int iconBackListIndex = r.nextInt(iconBackList.size());
-            Drawable image = ThemeUtils.getDrawable(mContext,iconBackList.get(iconBackListIndex));
+            Drawable image = mContext.mThemeUtils.getDrawable(iconBackList.get(iconBackListIndex));
             Drawable icon = getFullResIcon(resources, iconId);
             if (image != null && icon != null) {
-                return createIconDrawable(image, icon);
+                return mContext.mThemeUtils.generateIconDrawable(packageName + "_" + componentName + ".png",
+                                                       icon, image, scaleFactor);
             }
         }
         return null;
-    }
-
-    private Drawable createIconDrawable(Drawable background, Drawable icon) {
-
-        int iconScaleLevel = (int) ((float) scaleFactor * 10000);
-        if ( iconFrontList != null && iconFrontList.size() > 0) {
-            ScaleDrawable sd = new ScaleDrawable(icon, Gravity.CENTER, scaleFactor, scaleFactor);
-            sd.setLevel(iconScaleLevel);
-            Drawable[] layers = new Drawable[2 + iconFrontList.size()];
-            layers[0] = background;
-            layers[1] = (Drawable) sd;
-            for (int i = 0; i < iconFrontList.size(); i++) {
-                layers[2+i] = ThemeUtils.getDrawable(mContext, iconFrontList.get(i));
-            }
-            LayerDrawable layerDrawable = new LayerDrawable(layers);
-            return layerDrawable;
-        } else {
-            ScaleDrawable sd = new ScaleDrawable(icon, Gravity.CENTER, scaleFactor, scaleFactor);
-            sd.setLevel(iconScaleLevel);
-            Drawable[] layers = new Drawable[2];
-            layers[0] = background;
-            layers[1] = (Drawable) sd;
-            LayerDrawable layerDrawable = new LayerDrawable(layers);
-            return layerDrawable;
-        }
     }
 
     public Drawable getFullResIcon(String packageName, int iconId) {
@@ -228,6 +206,33 @@ public class IconCache {
         }
         if (info != null) {
             return getFullResIcon(info, packageName, iconId);
+        }
+        return getFullResDefaultActivityIcon();
+    }
+
+    public Drawable getFullResActionIcon(String packageName, int iconId, String actionName) {
+        android.content.pm.ApplicationInfo info = null;
+
+        try{
+            info = mPackageManager.getApplicationInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            info = null;
+        }
+        if (info != null) {
+            Resources resources;
+            try {
+                resources = mPackageManager.getResourcesForApplication(info);
+            } catch (PackageManager.NameNotFoundException e) {
+                resources = null;
+            }
+            if (resources != null) {
+                if (iconId != 0) {
+                    Drawable dr = getThemedIcon(resources, iconId, packageName, actionName);
+                    if (dr == null)
+                        dr = getFullResIcon(resources, iconId);
+                    return dr;
+                }
+            }
         }
         return getFullResDefaultActivityIcon();
     }

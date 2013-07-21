@@ -34,7 +34,7 @@
     <dimen name="workspace_divider_padding_bottom">0dp</dimen>
     <dimen name="hotseat_cell_width">64dp</dimen>
     <dimen name="hotseat_cell_height">64dp</dimen>
-    <dimen name="hotseat_cell_top_padding">10dp</dimen>
+    <dimen name="hotseat_cell_top_padding">-5dp</dimen>
     <dimen name="hotseat_width_gap">-1dp</dimen>
     <dimen name="hotseat_height_gap">-1dp</dimen>
     <dimen name="workspace_overscroll_drawable_padding">0dp</dimen>

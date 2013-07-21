@@ -37,6 +37,11 @@ public final class PreferencesProvider {
 
     public static final String PREFERENCES_VISITED = "preferences_visited";
 
+    // SharedPreferences
+    public final static String DEFAULT = "Default";
+    public final static String DEFAULT_PACKAGE = "com.android.launcher";
+    public final static String THEME_PACKAGE_NAME = "icon_theme";
+
     private static Map<String, Object> sKeyValues;
 
     @SuppressWarnings("unchecked")
@@ -70,22 +75,45 @@ public final class PreferencesProvider {
 
     public static class Interface {
         public static class Homescreen {
-            public static int getNumberHomescreens() {
-                return getInt("ui_homescreen_screens", 7);
+            public static boolean getIndependentHomescreens() {
+                return getBoolean("ui_homescreen_independent_homescreens", false);
             }
-            public static void setNumberHomescreens(Context context, int count) {
+            public static int getNumberHomescreens(boolean landscape) {
+                String[] values = getString("ui_homescreen_screens", "7|7").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 7;
+                }
+            }
+            public static void setNumberHomescreens(Context context, int count, boolean landscape) {
                 final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
                 Editor editor = preferences.edit();
-                editor.putInt("ui_homescreen_screens", count);
+                String[] values = getString("ui_homescreen_screens", "7|7").split("\\|");
+                if (landscape) {
+                    editor.putString("ui_homescreen_screens", values[0] + "|" + count);
+                } else {
+                    editor.putString("ui_homescreen_screens", count + "|" + values[1]);
+                }
                 editor.commit();
             }
-            public static int getDefaultHomescreen(int def) {
-                return getInt("ui_homescreen_default_screen", def + 1) - 1;
+            public static int getDefaultHomescreen(int def, boolean landscape) {
+                String[] values = getString("ui_homescreen_default_screen", (def+1) + "|" + (def+1)).split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]) - 1;
+                } catch (NumberFormatException e) {
+                    return def;
+                }
             }
-            public static void setDefaultHomescreen(Context context, int def) {
+            public static void setDefaultHomescreen(Context context, int def, boolean landscape) {
                 final SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_KEY, 0);
                 Editor editor = preferences.edit();
-                editor.putInt("ui_homescreen_default_screen", def);
+                String[] values = getString("ui_homescreen_default_screen", "4|4").split("\\|");
+                if (landscape) {
+                    editor.putString("ui_homescreen_default_screen", values[0] + "|" + def);
+                } else {
+                    editor.putString("ui_homescreen_default_screen", def + "|" + values[1]);
+                }
                 editor.commit();
             }
             public static int getCellCountX(int def, boolean landscape) {
@@ -167,6 +195,9 @@ public final class PreferencesProvider {
                 public static boolean getShowOutlines(boolean def) {
                     return getBoolean("ui_homescreen_scrolling_show_outlines", def);
                 }
+                public static boolean getInfiniteScrolling() {
+                    return getBoolean("ui_homescreen_scrolling_infinite", false);
+                }
             }
             public static class Indicator {
                 public static boolean getShowScrollingIndicator() {
@@ -231,6 +262,9 @@ public final class PreferencesProvider {
             public static boolean getStretchScreens() {
                 return getBoolean("ui_drawer_stretch_screens", true);
             }
+            public static boolean getFitToCells() {
+                return getBoolean("ui_drawer_fit_to_cells", false);
+            }
             public static int getDrawerTransparency(boolean landscape) {
                 String[] values = getString("ui_drawer_transparency", "50|50").split("\\|");
                 try {
@@ -276,9 +310,6 @@ public final class PreferencesProvider {
             public static boolean getDismissDrawerOnTap() {
                 return getBoolean("ui_drawer_dismiss_on_tap", false);
             }
-            public static boolean getFadeOut() {
-                return getBoolean("ui_drawer_fade", false);
-            }
             public static class Scrolling {
                 public static AppsCustomizePagedView.TransitionEffect getTransitionEffect(String def) {
                     try {
@@ -298,6 +329,9 @@ public final class PreferencesProvider {
                 }
                 public static boolean getFadeInAdjacentScreens() {
                     return getBoolean("ui_drawer_scrolling_fade_adjacent_screens", true);
+                }
+                public static boolean getInfiniteScrolling() {
+                    return getBoolean("ui_drawer_scrolling_infinite", false);
                 }
             }
             public static class Indicator {
@@ -332,9 +366,9 @@ public final class PreferencesProvider {
                 }
             }
             public static int getDefaultPage(int def, boolean landscape) {
-                String[] values = getString("ui_dock_default_page", def + "|" + def).split("\\|");
+                String[] values = getString("ui_dock_default_page", (def+1) + "|" + (def+1)).split("\\|");
                 try {
-                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                    return Integer.parseInt(values[landscape ? 1 : 0]) - 1;
                 } catch (NumberFormatException e) {
                     return def;
                 }
@@ -346,6 +380,12 @@ public final class PreferencesProvider {
                 } catch (NumberFormatException e) {
                     return def;
                 }
+            }
+            public static boolean getStretchScreens() {
+                return getBoolean("ui_dock_stretch_screens", true);
+            }
+            public static boolean getFitToCells() {
+                return getBoolean("ui_dock_fit_to_cells", true);
             }
             public static boolean getHideIconLabels() {
                 return getBoolean("ui_dock_hide_icon_labels", true);
@@ -364,9 +404,6 @@ public final class PreferencesProvider {
             public static boolean getFadeInAdjacentScreens() {
                 return getBoolean("ui_dock_scrolling_fade_adjacent_screens", true);
             }
-            public static boolean getLandscapeDockOnBottom() {
-                return getBoolean("ui_land_dock_bottom", false);
-            }
             public static class Scrolling {
                 public static Hotseat.TransitionEffect getTransitionEffect(String def) {
                     try {
@@ -384,6 +421,9 @@ public final class PreferencesProvider {
                 }
                 public static boolean getFadeInAdjacentScreens() {
                     return getBoolean("ui_drawer_scrolling_fade_adjacent_screens", true);
+                }
+                public static boolean getInfiniteScrolling() {
+                    return getBoolean("ui_dock_scrolling_infinite", false);
                 }
             }
         }
@@ -410,8 +450,14 @@ public final class PreferencesProvider {
         }
 
         public static class General {
-            public static boolean getAutoRotate(boolean def) {
-                return getBoolean("ui_general_orientation", def);
+            public static String getThemePackageName() {
+                return getString("icon_theme", DEFAULT_PACKAGE);
+            }
+            public static String getThemeName() {
+                return getString("icon_theme_name", DEFAULT);
+            }
+            public static int getOrientationMode() {
+                return Integer.parseInt(getString("ui_general_orientation", "5"));
             }
             public static boolean getLockWorkspace(boolean def) {
                 return getBoolean("ui_general_lock_workspace", def);
@@ -429,6 +475,9 @@ public final class PreferencesProvider {
             }
             public static void setFullscreenMode(Context ctx, boolean value) {
                 setBoolean(ctx, "ui_general_fullscreen", value);
+            }
+            public static boolean getPersistent() {
+                return getBoolean("ui_general_persist", false);
             }
         }
     }

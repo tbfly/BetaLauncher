@@ -167,7 +167,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         super.onFinishInflate();
         mContent = (CellLayout) findViewById(R.id.folder_content);
         mContent.setGridSize(0, 0);
-        mContent.setStretchCells(true);
+        mContent.setStretchCells(true, true);
         mContent.setChildrenScale(mIconScale);
         mContent.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
         mFolderFooter = (LinearLayout) findViewById(R.id.folder_footer);
@@ -981,7 +981,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
             list = getItemsInReadingOrder();
         }
 
-        Map<String, View> order = new TreeMap<String, View>();
+        Map<String, View> order = new TreeMap<String, View>(String.CASE_INSENSITIVE_ORDER);
         for (int i = 0; i < list.size(); i++) {
             View v = list.get(i);
             ShortcutInfo info = (ShortcutInfo) v.getTag();
@@ -1002,7 +1002,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
             list = getItemsInReadingOrder();
         }
 
-        Map<String, View> order = new TreeMap<String, View>();
+        Map<String, View> order = new TreeMap<String, View>(String.CASE_INSENSITIVE_ORDER);
         for (int i = 0; i < list.size(); i++) {
             View v = list.get(i);
             ShortcutInfo info = (ShortcutInfo) v.getTag();

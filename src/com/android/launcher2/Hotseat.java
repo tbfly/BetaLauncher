@@ -29,7 +29,6 @@ import android.view.View;
 
 import com.android.launcher.R;
 import com.android.launcher2.preference.PreferencesProvider;
-import com.lennox.utils.ThemeUtils;
 
 import java.util.Arrays;
 
@@ -44,6 +43,11 @@ public class Hotseat extends PagedView {
     private boolean mScrollTransformsDirty = false;
     private boolean mOverscrollTransformsDirty = false;
     private int mCameraDistance;
+
+    private boolean mStretchCells;
+    private boolean mFitToCells;
+
+    boolean mIsDragOccuring = false;
 
     private float[] mTempCellLayoutCenterCoordinates = new float[2];
     private Matrix mTempInverseMatrix = new Matrix();
@@ -106,6 +110,10 @@ public class Hotseat extends PagedView {
 
         mVertical = hasVerticalHotseat();
 
+        mStretchCells = PreferencesProvider.Interface.Dock.getStretchScreens();
+        mFitToCells = PreferencesProvider.Interface.Dock.getFitToCells();
+        mInfiniteScrolling = PreferencesProvider.Interface.Dock.Scrolling.getInfiniteScrolling();
+
         boolean hideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels() ||
                 (mVertical && !LauncherApplication.isScreenLarge());
         int cellHeight = (int)res.getDimension(R.dimen.hotseat_cell_height);
@@ -118,14 +126,7 @@ public class Hotseat extends PagedView {
             CellLayout cl = (CellLayout) inflater.inflate(R.layout.hotseat_page, null);
             cl.setChildrenScale(childrenScale);
             cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1), mVertical);
-            cl.setCellDimensions(cl.getCellWidth(), cellHeight, cl.getWidthGap(), cl.getHeightGap());
-            int topPadding = (int)res.getDimension(R.dimen.hotseat_cell_top_padding);
-            if (hideDockIconLabels) {
-                cl.setPadding(0, topPadding, 0, 0);
-            } else {
-                cl.setPadding(0, 0, 0, 0);
-            }
-            cl.setCellGaps(-1, -1);
+            cl.setStretchCells(mStretchCells, mFitToCells, hideDockIconLabels, mVertical);
 
             addView(cl);
         }
@@ -134,6 +135,10 @@ public class Hotseat extends PagedView {
         setDataIsReady();
 
         setOnKeyListener(new HotseatIconKeyEventListener());
+    }
+
+    public void setDragOccuring(boolean isOccuring) {
+        mIsDragOccuring = isOccuring;
     }
 
     public boolean hasPage(View view) {
@@ -169,6 +174,7 @@ public class Hotseat extends PagedView {
     int getScreenFromOrder(int screen) {
         return hasVerticalHotseat() ? (getChildCount() - screen - 1) : screen;
     }
+
     int[] getDatabaseCellsFromLayout(int[] lpCells) {
         if (!hasVerticalHotseat()) {
             return lpCells;
@@ -257,8 +263,7 @@ public class Hotseat extends PagedView {
 
                 // Calculate the distance between the center of the CellLayout
                 // and the touch point
-                float dist = Workspace.squaredDistance(
-                                    touchXy, cellLayoutCenter, hasVerticalHotseat());
+                float dist = Workspace.squaredDistance(touchXy, cellLayoutCenter);
 
                 if (dist < smallestDistSoFar) {
                     smallestDistSoFar = dist;
@@ -274,6 +279,14 @@ public class Hotseat extends PagedView {
             CellLayout cl = (CellLayout) getChildAt(i);
             cl.setBackgroundAlpha(alpha);
         }
+    }
+
+    /**
+     * Return the current {@link CellLayout}, correctly picking the destination
+     * screen while a scroll is in progress.
+     */
+    public CellLayout getCurrentDropLayout() {
+        return (CellLayout) getChildAt(getNextPage());
     }
 
     @Override
@@ -292,12 +305,12 @@ public class Hotseat extends PagedView {
         if (isInOverscroll && !mOverscrollTransformsDirty) {
             mScrollTransformsDirty = true;
         }
-        if (!isInOverscroll || mScrollTransformsDirty) {
+        if (!isInOverscroll || mScrollTransformsDirty || mInfiniteScrolling) {
             // Limit the "normal" effects to mScrollX/Y
             int scroll = !mVertical ? getScrollX() : getScrollY();
 
             // Reset transforms when we aren't in overscroll
-            if (mOverscrollTransformsDirty) {
+            if (mOverscrollTransformsDirty && !mInfiniteScrolling) {
                 mOverscrollTransformsDirty = false;
                 View v0 = getPageAt(0);
                 View v1 = getPageAt(getChildCount() - 1);
@@ -320,6 +333,12 @@ public class Hotseat extends PagedView {
                 v1.setPivotY(v1.getMeasuredHeight() / 2);
             }
 
+            if (mIsDragOccuring) {
+                screenScrolledStandard(scroll);
+                mScrollTransformsDirty = false;
+                return;
+            }
+
             switch (mTransitionEffect) {
                 case Standard:
                     screenScrolledStandard(scroll);
@@ -337,13 +356,13 @@ public class Hotseat extends PagedView {
                     screenScrolledCarousel(scroll, false);
                     break;
                 case Shutter:
-                    screenScrolledShutter(scroll, false, false);
+                    screenScrolledShutter(scroll, mVertical, false);
                     break;
             }
             mScrollTransformsDirty = false;
         }
 
-        if (isInOverscroll) {
+        if (isInOverscroll && !mInfiniteScrolling) {
             int index = (!mVertical ? mOverScrollX : mOverScrollY) < 0 ? 0 : getChildCount() - 1;
             View v = getPageAt(index);
             if (v != null) {
@@ -377,6 +396,7 @@ public class Hotseat extends PagedView {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = 90.0f * scrollProgress;
 
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
                 v.setCameraDistance(mDensity * mCameraDistance);
                 if (!mVertical) {
                     v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
@@ -389,11 +409,17 @@ public class Hotseat extends PagedView {
                     v.setPivotY(left ? 0f : v.getMeasuredHeight());
                     v.setRotationX(rotation);
                 }
-
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        v.setAlpha(alpha);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
                 }
+                invalidate();
             }
         }
     }
@@ -425,6 +451,7 @@ public class Hotseat extends PagedView {
                 } else {
                     v.setVisibility(INVISIBLE);
                 }
+                invalidate();
             }
         }
     }
@@ -436,18 +463,25 @@ public class Hotseat extends PagedView {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f - Math.abs(scrollProgress);
 
-                if (!mVertical) {
-                    v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
-                    v.setScaleX(scale);
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!mVertical) {
+                        v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                        v.setScaleX(scale);
+                    } else {
+                        v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                        v.setScaleY(scale);
+                    }
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        v.setAlpha(alpha);
+                    }
                 } else {
-                    v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
-                    v.setScaleY(scale);
+                    v.setVisibility(INVISIBLE);
                 }
-
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
-                }
+                invalidate();
             }
         }
     }
@@ -461,37 +495,116 @@ public class Hotseat extends PagedView {
                     float alpha = 1 - Math.abs(scrollProgress);
                     v.setAlpha(alpha);
                 }
+                invalidate();
             }
         }
     }
 
-    private void screenScrolledShutter(int screenScroll, boolean horizontal, boolean reverse) {
+    private void screenScrolledShutter(int screenScroll, boolean vertical, boolean reverse) {
         for (int i = 0; i < getChildCount(); i++) {
-            CellLayout cl = (CellLayout) getPageAt(i);
-            if (cl != null) {
+            View view = getPageAt(i);
+            if (view == null) return;
+            if (view instanceof PagedViewCellLayout) {
+                PagedViewCellLayout cl = (PagedViewCellLayout) view;
                 float scrollProgress = getScrollProgress(screenScroll, cl, i);
                 float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
-                ShortcutAndWidgetContainer widgets = cl.getShortcutsAndWidgets();
                 if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
-                    cl.setVisibility(VISIBLE);
-                    cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
-                    for (int j = 0; j < widgets.getChildCount(); j++) {
-                        View v = widgets.getChildAt(j);
-                        v.setTranslationX(0);
+                    if (!vertical) {
+                        cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    } else {
+                        cl.setTranslationY(cl.getMeasuredHeight() * scrollProgress);
+                    }
+                    PagedViewCellLayoutChildren children = cl.getChildrenLayout();
+                    for (int j = 0; j < children.getChildCount(); j++) {
+                        View v = children.getChildAt(j);
                         v.setPivotX(v.getMeasuredWidth() * 0.5f);
                         v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                        if (horizontal) {
-                            v.setRotationX(rotation);
-                        } else {
+                        if (!vertical) {
+                            v.setTranslationX(0);
                             v.setRotationY(rotation);
+                        } else {
+                            v.setTranslationY(0);
+                            v.setRotationX(rotation);
                         }
+                    }
+                    if (cl.getVisibility() != VISIBLE) {
+                        cl.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        cl.setAlpha(alpha);
                     }
                 } else {
                     cl.setVisibility(INVISIBLE);
                 }
+            } else if (view instanceof PagedViewGridLayout) {
+                PagedViewGridLayout cl = (PagedViewGridLayout) view;
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    if (!vertical) {
+                        cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    } else {
+                        cl.setTranslationY(cl.getMeasuredHeight() * scrollProgress);
+                    }
+                    for (int j = 0; j < cl.getChildCount(); j++) {
+                        View v = cl.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (!vertical) {
+                            v.setTranslationX(0);
+                            v.setRotationY(rotation);
+                        } else {
+                            v.setTranslationY(0);
+                            v.setRotationX(rotation);
+                        }
+                    }
+                    if (cl.getVisibility() != VISIBLE) {
+                        cl.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        cl.setAlpha(alpha);
+                    }
+                } else {
+                    cl.setVisibility(INVISIBLE);
+                }
+            } else if (view instanceof CellLayout) {
+                CellLayout cl = (CellLayout) view;
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    if (!vertical) {
+                        cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    } else {
+                        cl.setTranslationY(cl.getMeasuredHeight() * scrollProgress);
+                    }
+                    ShortcutAndWidgetContainer children = cl.getShortcutsAndWidgets();
+                    for (int j = 0; j < children.getChildCount(); j++) {
+                        View v = children.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (!vertical) {
+                            v.setTranslationX(0);
+                            v.setRotationY(rotation);
+                        } else {
+                            v.setTranslationY(0);
+                            v.setRotationX(rotation);
+                        }
+                    }
+                    if (cl.getVisibility() != VISIBLE) {
+                        cl.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        cl.setAlpha(alpha);
+                    }
+                } else {
+                    cl.setVisibility(INVISIBLE);
+                }
+                invalidate();
             }
         }
-        invalidate();
     }
 
     void resetLayout() {
@@ -509,6 +622,10 @@ public class Hotseat extends PagedView {
             setCurrentPage(page);
         }
         getChildAt(page).requestFocus();
+    }
+
+    CellLayout getLayout() {
+        return (CellLayout) getPageAt(mCurrentPage);
     }
 
     @Override

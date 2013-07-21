@@ -81,9 +81,19 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         addView(mChildren);
     }
 
-    void setStretchCells() {
-        setCellGaps(-1, -1);
-        setPadding(0, 0, 0, 0);
+    void setStretchCells(boolean stretch, boolean fit) {
+        if (stretch) {
+            setCellGaps(-1, -1);
+            int iconPaddingTop = getResources().getDimensionPixelSize(R.dimen.app_icon_padding_top);
+            int padding = (int) (10f * (float) getChildrenScale());
+            setPadding(padding, padding, padding, padding);
+        }
+        if (fit) {
+            mCellWidth = getMaxCellWidth();
+            mCellHeight = getMaxCellHeight();
+            mChildren.setCellDimensions(mCellWidth, mCellHeight);
+            mChildren.setGap(mWidthGap, mHeightGap);
+        }
     }
 
     void setCellGaps(int widthGap, int heightGap) {
@@ -267,6 +277,23 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
             return mCellCountY * mCellHeight + (mCellCountY - 1) * Math.max(0, mHeightGap);
         }
         return 0;
+    }
+
+    private int getMaxCellWidth() {
+        if ( mCellCountX == 0 ) return mCellWidth;
+        boolean landscape = LauncherApplication.isScreenLandscape(getContext());
+        int width = (int) (getResources().getConfiguration().screenWidthDp *
+                LauncherApplication.getScreenDensity());
+        return (width - getPaddingRight() - getPaddingLeft()) / mCellCountX;
+    }
+
+    private int getMaxCellHeight() {
+        if ( mCellCountY == 0 ) return mCellHeight;
+        boolean landscape = LauncherApplication.isScreenLandscape(getContext());
+        int statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+        int height = (int) (getResources().getConfiguration().screenHeightDp *
+                LauncherApplication.getScreenDensity()) - statusBarHeight;
+        return (height - getPaddingTop() - getPaddingBottom()) / mCellCountY;
     }
 
     int getWidthBeforeFirstLayout() {

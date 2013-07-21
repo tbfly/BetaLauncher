@@ -48,6 +48,7 @@ import android.util.Xml;
 
 import com.android.launcher.R;
 import com.android.launcher2.LauncherSettings.Favorites;
+import com.android.launcher2.preference.PreferencesProvider;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -61,7 +62,8 @@ public class LauncherProvider extends ContentProvider {
     private static final String TAG = "Launcher.LauncherProvider";
     private static final boolean LOGD = false;
 
-    private static final String DATABASE_NAME = "launcher.db";
+    public static final String DATABASE_NAME = "launcher.db";
+    public static final String DATABASE_LANDSCAPE_NAME = "launcher_landscape.db";
 
     private static final int DATABASE_VERSION = 16;
 
@@ -241,7 +243,7 @@ public class LauncherProvider extends ContentProvider {
         private long mMaxId = -1;
 
         DatabaseHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            super(context, getTrueDatabaseName(context), null, DATABASE_VERSION);
             mContext = context;
             mAppWidgetHost = new AppWidgetHost(context, Launcher.APPWIDGET_HOST_ID);
 
@@ -250,6 +252,14 @@ public class LauncherProvider extends ContentProvider {
             if (mMaxId == -1) {
                 mMaxId = initializeMaxId(getWritableDatabase());
             }
+        }
+
+        private static String getTrueDatabaseName(Context context) {
+            SharedPreferences prefs =
+                context.getSharedPreferences(PreferencesProvider.PREFERENCES_KEY, Context.MODE_PRIVATE);
+            boolean independent = prefs.getBoolean("ui_homescreen_independent_homescreens", false);
+            String database = (LauncherApplication.isScreenLandscape(context) && independent) ? DATABASE_LANDSCAPE_NAME : DATABASE_NAME;
+            return database;
         }
 
         /**

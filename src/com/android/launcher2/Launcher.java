@@ -165,8 +165,8 @@ public final class Launcher extends Activity
 
     static final String ACTION_LAUNCHER = "com.lennox.launcher.LAUNCHER_ACTION";
 
-    static final int MAX_WORKSPACE_SCREEN_COUNT = 7;
-    static final int MAX_HOTSEAT_SCREEN_COUNT = 3;
+    static final int MAX_WORKSPACE_SCREEN_COUNT = 9;
+    static final int MAX_HOTSEAT_SCREEN_COUNT = 5;
     static final int MAX_SCREEN_COUNT = MAX_WORKSPACE_SCREEN_COUNT + MAX_HOTSEAT_SCREEN_COUNT;
     static final int DEFAULT_SCREEN = 2;
 
@@ -326,10 +326,10 @@ public final class Launcher extends Activity
     private boolean mShowDockDivider;
     private boolean mHideIconLabels;
     private boolean mHideDockIconLabels;
-    private boolean mAutoRotate;
+    private boolean mPersistent;
+    private int mOrientationMode;
     private boolean mLockWorkspace;
     private boolean mFullscreenMode;
-    private boolean mFadeOut;
     private String mDoubleTapAction;
 
     private boolean mWallpaperVisible;
@@ -409,8 +409,8 @@ public final class Launcher extends Activity
         mInflater = getLayoutInflater();
         final Resources res = getResources();
 
-        // Load all preferences
-        PreferencesProvider.load(this);
+        mOrientationMode = PreferencesProvider.Interface.General.getOrientationMode();
+        setRequestedOrientation(mOrientationMode);
 
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
@@ -426,15 +426,14 @@ public final class Launcher extends Activity
         mHotseatAsOverlay = PreferencesProvider.Interface.Dock.getDockAsOverlay();
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider() && mShowHotseat;
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels();
+        mPersistent = PreferencesProvider.Interface.General.getPersistent();
         boolean verticalHotseat =
                 res.getBoolean(R.bool.hotseat_transpose_layout_with_orientation) &&
                 res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         mHideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels() ||
                 (!mShowHotseat || (verticalHotseat && !LauncherApplication.isScreenLarge()));
-        mAutoRotate = PreferencesProvider.Interface.General.getAutoRotate(res.getBoolean(R.bool.allow_rotation));
         mLockWorkspace = PreferencesProvider.Interface.General.getLockWorkspace(res.getBoolean(R.bool.lock_workspace));
         mFullscreenMode = PreferencesProvider.Interface.General.getFullscreenMode();
-        mFadeOut = PreferencesProvider.Interface.Drawer.getFadeOut();
         mDoubleTapAction = PreferencesProvider.Interface.Gestures.getDoubleTapGestureAction();
 
         if (PROFILE_STARTUP) {
@@ -442,6 +441,7 @@ public final class Launcher extends Activity
                     Environment.getExternalStorageDirectory() + "/launcher");
         }
 
+        //if (mPersistent) setPersistent(true);
         checkForLocaleChange();
         setContentView(R.layout.launcher);
         setupViews();
@@ -771,7 +771,7 @@ public final class Launcher extends Activity
         mPaused = false;
         sPausedFromUserAction = false;
         // Restart launcher when preferences are changed
-        if (preferencesChanged()) {
+        if (preferencesChanged() || ((LauncherApplication) getApplication()).getPerformedRestore()) {
             android.os.Process.killProcess(android.os.Process.myPid());
         }
         if (mRestoring || mOnResumeNeedsLoad) {
@@ -1389,8 +1389,9 @@ public final class Launcher extends Activity
         iconResource.resourceName = r.getResourceName(action.getDrawable());
         info.iconResource = iconResource;
 
-        Bitmap icon = Utilities.createIconBitmap(mIconCache.getFullResIcon(
-                                 iconResource.packageName, action.getDrawable()), this);
+        Bitmap icon = Utilities.createIconBitmap(mIconCache.getFullResActionIcon(
+                                 iconResource.packageName, action.getDrawable(),
+                                  action.name()), this);
         info.setIcon(icon);
 
         final View view = createShortcut(info);
@@ -1411,6 +1412,7 @@ public final class Launcher extends Activity
             }
             DragObject dragObject = new DragObject();
             dragObject.dragInfo = info;
+            android.util.Log.d("LX", "cellx " + cellX + " celly " + cellY);
             if (mWorkspace.addToExistingFolderIfNecessary(layout, cellXY, 0, dragObject,
                     true)) {
                 return;
@@ -1803,6 +1805,7 @@ public final class Launcher extends Activity
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //if (mPersistent) setPersistent(false);
 
         // Remove all pending runnables
         mHandler.removeMessages(ADVANCE_MSG);
@@ -2896,6 +2899,14 @@ public final class Launcher extends Activity
         showDialog(DIALOG_CREATE_SHORTCUT);
     }
 
+    void pickActivity() {
+        Intent mainIntent = new Intent();
+        Intent pickIntent = new Intent("com.android.launcher2.PICK_ACTIVITY");
+        pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
+        pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_application));
+        startActivityForResultSafely(pickIntent, REQUEST_PICK_APPLICATION);
+    }
+
     void pickApplication() {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -3080,17 +3091,12 @@ public final class Launcher extends Activity
                     dispatchOnLauncherTransitionStep(toView, t);
                 }
             });
-            final ObjectAnimator alphaAnimOut = ObjectAnimator
-                .ofFloat(fromView, "alpha", 1f, 0f)
-                .setDuration(fadeDuration);
-            alphaAnimOut.setInterpolator(new DecelerateInterpolator(1.5f));
 
             // toView should appear right at the end of the workspace shrink
             // animation
             mStateAnimation = LauncherAnimUtils.createAnimatorSet();
             mStateAnimation.play(scaleAnim).after(startDelay);
             mStateAnimation.play(alphaAnim).after(startDelay);
-            if (mFadeOut) mStateAnimation.play(alphaAnimOut);
 
             mStateAnimation.addListener(new AnimatorListenerAdapter() {
                 boolean animationCancelled = false;
@@ -3197,7 +3203,6 @@ public final class Launcher extends Activity
             toView.setTranslationY(0.0f);
             toView.setScaleX(1.0f);
             toView.setScaleY(1.0f);
-            if (mFadeOut) toView.setAlpha(1f);
             toView.setVisibility(View.VISIBLE);
             toView.bringToFront();
 
@@ -3284,16 +3289,7 @@ public final class Launcher extends Activity
                 }
             });
 
-            final ObjectAnimator alphaAnimOut = ObjectAnimator
-                .ofFloat(toView, "alpha", 0f, 1f)
-                .setDuration(fadeOutDuration);
-            alphaAnimOut.setInterpolator(new AccelerateDecelerateInterpolator());
-
             mStateAnimation = LauncherAnimUtils.createAnimatorSet();
-
-            if (mFadeOut && !(toState == State.WORKSPACE && mState == State.APPS_CUSTOMIZE_SPRING_LOADED)) {
-                mStateAnimation.play(alphaAnimOut);
-            }
 
             dispatchOnLauncherTransitionPrepare(fromView, animated, true);
             dispatchOnLauncherTransitionPrepare(toView, animated, true);
@@ -3401,7 +3397,6 @@ public final class Launcher extends Activity
         }
 
         mWorkspace.flashScrollingIndicator(animated);
-        if (mFadeOut) mWorkspace.setAlpha(1f);
 
         // Change the state *after* we've called all the transition code
         mState = State.WORKSPACE;
@@ -4447,24 +4442,18 @@ public final class Launcher extends Activity
     }
 
     public void lockScreenOrientation() {
-        if (mAutoRotate) {
-            setRequestedOrientation(mapConfigurationOriActivityInfoOri(getResources()
-                    .getConfiguration().orientation));
-        }
+        setRequestedOrientation(mapConfigurationOriActivityInfoOri(getResources()
+                .getConfiguration().orientation));
     }
     public void unlockScreenOrientation(boolean immediate) {
-        if (mAutoRotate) {
-            if (immediate) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            } else {
-                mHandler.postDelayed(new Runnable() {
-                    public void run() {
-                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                    }
-                }, RESTORE_SCREEN_ORIENTATION_DELAY);
-            }
+        if (immediate) {
+            setRequestedOrientation(mOrientationMode);
         } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+            mHandler.postDelayed(new Runnable() {
+                public void run() {
+                    setRequestedOrientation(mOrientationMode);
+                }
+            }, RESTORE_SCREEN_ORIENTATION_DELAY);
         }
     }
 
@@ -4731,7 +4720,6 @@ public final class Launcher extends Activity
             }
         }
     }
-
 
     public boolean preferencesChanged() {
         SharedPreferences prefs =

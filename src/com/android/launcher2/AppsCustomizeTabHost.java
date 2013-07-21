@@ -127,7 +127,7 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
             }
         };
 
-        mTabsContainer.setBackgroundResource(R.drawable.action_bar);
+        mTabsContainer.setBackgroundResource(R.drawable.tab_unselected_holo);
         // Create the tabs
         TextView tabView;
         String label;

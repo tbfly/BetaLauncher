@@ -21,6 +21,10 @@
     <PreferenceCategory
         android:key="ui_homescreen_general"
         android:title="@string/preferences_interface_homescreen_general_category">
+        <!--<CheckBoxPreference android:key="ui_homescreen_independent_homescreens"
+            android:title="@string/preferences_interface_homescreen_general_independent_title"
+            android:summary="@string/preferences_interface_homescreen_general_independent_summary"
+            android:defaultValue="false" />-->
         <com.android.launcher2.preference.QuadrupleNumberPickerPreference android:key="ui_homescreen_grid"
             android:title="@string/preferences_interface_homescreen_general_grid_title"
             android:summary="@string/preferences_interface_homescreen_general_grid_summary"
@@ -133,6 +137,10 @@
             android:title="@string/preferences_interface_homescreen_scrolling_show_outlines_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_show_outlines_summary"
             android:defaultValue="@bool/config_workspaceDefaultShowOutlines" />
+        <CheckBoxPreference android:key="ui_homescreen_scrolling_infinite"
+            android:title="@string/preferences_interface_homescreen_scrolling_infinite_title"
+            android:summary="@string/preferences_interface_homescreen_scrolling_infinite_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_indicator_category">
         <CheckBoxPreference android:key="ui_homescreen_indicator_enable"

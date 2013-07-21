@@ -314,7 +314,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         CylinderIn,
         CylinderOut,
         CarouselLeft,
-        CarouselRight
+        CarouselRight,
+        Shutter
     }
     private TransitionEffect mTransitionEffect = TransitionEffect.Standard;
 
@@ -357,6 +358,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     // Preferences
     private boolean mStretchScreens;
+    private boolean mFitToCells;
     private boolean mJoinWidgetsApps;
     private boolean mFadeScrollingIndicator;
     private boolean mListActions;
@@ -395,6 +397,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         mFadeScrollingIndicator = PreferencesProvider.Interface.Drawer.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Drawer.Indicator.getScrollingIndicatorPosition();
         mStretchScreens = PreferencesProvider.Interface.Drawer.getStretchScreens();
+        mFitToCells = PreferencesProvider.Interface.Drawer.getFitToCells();
+        mInfiniteScrolling = PreferencesProvider.Interface.Drawer.Scrolling.getInfiniteScrolling();
 
         String[] flattened = PreferencesProvider.Interface.Drawer.getHiddenApps().split("\\|");
         for (String flat : flattened) {
@@ -1211,7 +1215,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         layout.setMinimumWidth(getPageContentWidth());
         layout.measure(widthSpec, heightSpec);
         layout.setChildrenScale(mIconScale);
-        if (mStretchScreens) layout.setStretchCells();
+        layout.setStretchCells(mStretchScreens, mFitToCells);
         setVisibilityOnChildren(layout, View.VISIBLE);
     }
     public void syncAppsPages() {
@@ -1821,7 +1825,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     }
 
 
-    private void screenScrolledStandard(int screenScroll) {
+    private void screenScrolledStandard(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -1834,7 +1838,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledTablet(int screenScroll) {
+    private void screenScrolledTablet(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -1842,7 +1846,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation = TRANSITION_SCREEN_ROTATION * scrollProgress;
                 float translation = mLauncher.getWorkspace().getOffsetXForRotation(rotation, v.getWidth(), v.getHeight());
 
-                if (!mVertical) {
+                if (!vertical) {
                     v.setTranslationX(translation);
                     v.setRotationY(rotation);
                 } else {
@@ -1857,7 +1861,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledZoom(int screenScroll, boolean in) {
+    private void screenScrolledZoom(int screenScroll, boolean vertical, boolean in) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -1866,7 +1870,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
                 // Extra translation to account for the increase in size
                 if (!in) {
-                    if (!mVertical) {
+                    if (!vertical) {
                         float translationX = v.getMeasuredWidth() * 0.1f * -scrollProgress;
                         v.setTranslationX(translationX);
                     } else {
@@ -1885,7 +1889,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledRotate(int screenScroll, boolean up) {
+    private void screenScrolledRotate(int screenScroll, boolean vertical, boolean up) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -1893,7 +1897,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation =
                         (up ? TRANSITION_SCREEN_ROTATION : -TRANSITION_SCREEN_ROTATION) * scrollProgress;
 
-                if (!mVertical) {
+                if (!vertical) {
                     float translationX = v.getMeasuredWidth() * scrollProgress;
 
                     float rotatePoint =
@@ -1932,7 +1936,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledCube(int screenScroll, boolean in) {
+    private void screenScrolledCube(int screenScroll, boolean vertical, boolean in) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -1941,36 +1945,36 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
                 float scale = 1.0f - Math.abs(scrollProgress) * 0.2f;
 
-                if (in) {
-                    v.setCameraDistance(mDensity * mCameraDistance);
-                }
-                v.setScaleX(scale);
-                v.setScaleY(scale);
-                if (!mVertical) {
-                    if (in) v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
-                    v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
-                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    v.setRotationY(rotation);
+                if (scrollProgress >= -0.95f && scrollProgress <= 0.95f) {
+                    if (in) {
+                        v.setCameraDistance(mDensity * mCameraDistance);
+                    }
+                    v.setScaleX(scale);
+                    v.setScaleY(scale);
+                    if (!vertical) {
+                        if (in) v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                        v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setRotationY(rotation);
+                    } else {
+                        if (in) v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                        v.setPivotY((scrollProgress + 1) * v.getMeasuredHeight() * 0.5f);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setRotationX(-rotation);
+                    }
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    float alpha = (1 - Math.abs(scrollProgress));
+                    v.setAlpha(alpha);
                 } else {
-                    if (in) v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
-                    v.setPivotY((scrollProgress + 1) * v.getMeasuredHeight() * 0.5f);
-                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
-                    v.setRotationX(-rotation);
-                }
-
-                float alpha = 1 - Math.abs(scrollProgress);
-                v.setAlpha(alpha);
-
-                // If the view has 0 alpha, we set it to be invisible so as to prevent
-                // it from accepting touches
-                if (alpha <= 0) {
                     v.setVisibility(INVISIBLE);
                 }
             }
         }
     }
 
-    private void screenScrolledCubeBouncy(int screenScroll, boolean in) {
+    private void screenScrolledCubeBouncy(int screenScroll, boolean vertical, boolean in) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -1981,7 +1985,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     v.setCameraDistance(mDensity * mCameraDistance);
                 }
 
-                if (!mVertical) {
+                if (!vertical) {
                     v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
                     v.setPivotY(v.getMeasuredHeight() * 0.5f);
                     v.setRotationY(rotation);
@@ -1998,7 +2002,113 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledStack(int screenScroll) {
+    private void screenScrolledShutter(int screenScroll, boolean vertical, boolean reverse) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getPageAt(i);
+            if (view == null) return;
+            if (view instanceof PagedViewCellLayout) {
+                PagedViewCellLayout cl = (PagedViewCellLayout) view;
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    if (!vertical) {
+                        cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    } else {
+                        cl.setTranslationY(cl.getMeasuredHeight() * scrollProgress);
+                    }
+                    PagedViewCellLayoutChildren children = cl.getChildrenLayout();
+                    for (int j = 0; j < children.getChildCount(); j++) {
+                        View v = children.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (!vertical) {
+                            v.setTranslationX(0);
+                            v.setRotationY(rotation);
+                        } else {
+                            v.setTranslationY(0);
+                            v.setRotationX(rotation);
+                        }
+                    }
+                    if (cl.getVisibility() != VISIBLE) {
+                        cl.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        cl.setAlpha(alpha);
+                    }
+                } else {
+                    cl.setVisibility(INVISIBLE);
+                }
+            } else if (view instanceof PagedViewGridLayout) {
+                PagedViewGridLayout cl = (PagedViewGridLayout) view;
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    if (!vertical) {
+                        cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    } else {
+                        cl.setTranslationY(cl.getMeasuredHeight() * scrollProgress);
+                    }
+                    for (int j = 0; j < cl.getChildCount(); j++) {
+                        View v = cl.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (!vertical) {
+                            v.setTranslationX(0);
+                            v.setRotationY(rotation);
+                        } else {
+                            v.setTranslationY(0);
+                            v.setRotationX(rotation);
+                        }
+                    }
+                    if (cl.getVisibility() != VISIBLE) {
+                        cl.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        cl.setAlpha(alpha);
+                    }
+                } else {
+                    cl.setVisibility(INVISIBLE);
+                }
+            } else if (view instanceof CellLayout) {
+                CellLayout cl = (CellLayout) view;
+                float scrollProgress = getScrollProgress(screenScroll, cl, i);
+                float rotation = (reverse ? 180.0f : -180.0f) * scrollProgress;
+                if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    if (!vertical) {
+                        cl.setTranslationX(cl.getMeasuredWidth() * scrollProgress);
+                    } else {
+                        cl.setTranslationY(cl.getMeasuredHeight() * scrollProgress);
+                    }
+                    ShortcutAndWidgetContainer children = cl.getShortcutsAndWidgets();
+                    for (int j = 0; j < children.getChildCount(); j++) {
+                        View v = children.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (!vertical) {
+                            v.setTranslationX(0);
+                            v.setRotationY(rotation);
+                        } else {
+                            v.setTranslationY(0);
+                            v.setRotationX(rotation);
+                        }
+                    }
+                    if (cl.getVisibility() != VISIBLE) {
+                        cl.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        float alpha = 1 - Math.abs(scrollProgress);
+                        cl.setAlpha(alpha);
+                    }
+                } else {
+                    cl.setVisibility(INVISIBLE);
+                }
+            }
+        }
+    }
+
+    private void screenScrolledStack(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -2007,7 +2117,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         mZInterpolator.getInterpolation(Math.abs(Math.min(scrollProgress, 0)));
                 float scale = (1 - interpolatedProgress) + interpolatedProgress * 0.76f;
                 float translation = Math.min(0, scrollProgress) *
-                        (!mVertical ? v.getMeasuredWidth() : v.getMeasuredHeight());
+                        (!vertical ? v.getMeasuredWidth() : v.getMeasuredHeight());
                 float alpha;
 
                 if (!LauncherApplication.isScreenLarge() || scrollProgress < 0) {
@@ -2018,7 +2128,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
                 }
 
-                if (!mVertical) {
+                if (!vertical) {
                     v.setTranslationX(translation);
                 } else {
                     v.setTranslationY(translation);
@@ -2039,14 +2149,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     }
 
 
-    private void screenScrolledAccordion(int screenScroll) {
+    private void screenScrolledAccordion(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f - Math.abs(scrollProgress);
 
-                if (!mVertical) {
+                if (!vertical) {
                     v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
                     v.setScaleX(scale);
                 } else {
@@ -2062,7 +2172,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledSpin(int screenScroll) {
+    private void screenScrolledSpin(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -2085,7 +2195,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledFlip(int screenScroll) {
+    private void screenScrolledFlip(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -2095,7 +2205,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
                     v.setPivotX(v.getMeasuredWidth() * 0.5f);
                     v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    if (!mVertical) {
+                    if (!vertical) {
                         v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
                         v.setRotationY(rotation);
                     } else {
@@ -2117,14 +2227,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledCylinder(int screenScroll, boolean in) {
+    private void screenScrolledCylinder(int screenScroll, boolean vertical, boolean in) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? TRANSITION_SCREEN_ROTATION : -TRANSITION_SCREEN_ROTATION) * scrollProgress;
 
-                if (!mVertical) {
+                if (!vertical) {
                     v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
                     v.setPivotY(v.getMeasuredHeight() * 0.5f);
                     v.setRotationY(rotation);
@@ -2142,7 +2252,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         }
     }
 
-    private void screenScrolledCarousel(int screenScroll, boolean left) {
+    private void screenScrolledCarousel(int screenScroll, boolean vertical, boolean left) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getPageAt(i);
             if (v != null) {
@@ -2150,7 +2260,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation = 90.0f * scrollProgress;
 
                 v.setCameraDistance(mDensity * mCameraDistance);
-                if (!mVertical) {
+                if (!vertical) {
                     v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
                     v.setPivotX(left ? 0f : v.getMeasuredWidth());
                     v.setPivotY(v.getMeasuredHeight() / 2);
@@ -2180,12 +2290,12 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         if (isInOverscroll && !mOverscrollTransformsDirty) {
             mScrollTransformsDirty = true;
         }
-        if (!isInOverscroll || mScrollTransformsDirty) {
+        if (!isInOverscroll || mScrollTransformsDirty || mInfiniteScrolling) {
             // Limit the "normal" effects to mScrollX/Y
             int scroll = !mVertical ? getScrollX() : getScrollY();
 
             // Reset transforms when we aren't in overscroll
-            if (mOverscrollTransformsDirty) {
+            if (mOverscrollTransformsDirty && !mInfiniteScrolling) {
                 mOverscrollTransformsDirty = false;
                 View v0 = getPageAt(0);
                 View v1 = getPageAt(getChildCount() - 1);
@@ -2210,64 +2320,67 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
             switch (mTransitionEffect) {
                 case Standard:
-                    screenScrolledStandard(scroll);
+                    screenScrolledStandard(scroll, mVertical);
                     break;
                 case Tablet:
-                    screenScrolledTablet(scroll);
+                    screenScrolledTablet(scroll, mVertical);
                     break;
                 case ZoomIn:
-                    screenScrolledZoom(scroll, true);
+                    screenScrolledZoom(scroll, mVertical, true);
                     break;
                 case ZoomOut:
-                    screenScrolledZoom(scroll, false);
+                    screenScrolledZoom(scroll, mVertical, false);
                     break;
                 case RotateUp:
-                    screenScrolledRotate(scroll, true);
+                    screenScrolledRotate(scroll, mVertical, true);
                     break;
                 case RotateDown:
-                    screenScrolledRotate(scroll, false);
+                    screenScrolledRotate(scroll, mVertical, false);
                     break;
                 case Spin:
-                    screenScrolledSpin(scroll);
+                    screenScrolledSpin(scroll, mVertical);
                     break;
                 case Flip:
-                    screenScrolledFlip(scroll);
+                    screenScrolledFlip(scroll, mVertical);
                     break;
                 case CubeIn:
-                    screenScrolledCube(scroll, true);
+                    screenScrolledCube(scroll, mVertical, true);
                     break;
                 case CubeOut:
-                    screenScrolledCube(scroll, false);
+                    screenScrolledCube(scroll, mVertical, false);
                     break;
                 case CubeBouncyIn:
-                    screenScrolledCubeBouncy(scroll, true);
+                    screenScrolledCubeBouncy(scroll, mVertical, true);
                     break;
                 case CubeBouncyOut:
-                    screenScrolledCubeBouncy(scroll, false);
+                    screenScrolledCubeBouncy(scroll, mVertical, false);
                     break;
                 case Stack:
-                    screenScrolledStack(scroll);
+                    screenScrolledStack(scroll, mVertical);
                     break;
                 case Accordion:
-                    screenScrolledAccordion(scroll);
+                    screenScrolledAccordion(scroll, mVertical);
                     break;
                 case CylinderIn:
-                    screenScrolledCylinder(scroll, true);
+                    screenScrolledCylinder(scroll, mVertical, true);
                     break;
                 case CylinderOut:
-                    screenScrolledCylinder(scroll, false);
+                    screenScrolledCylinder(scroll, mVertical, false);
                     break;
                 case CarouselLeft:
-                    screenScrolledCarousel(scroll, true);
+                    screenScrolledCarousel(scroll, mVertical, true);
                     break;
                 case CarouselRight:
-                    screenScrolledCarousel(scroll, false);
+                    screenScrolledCarousel(scroll, mVertical, false);
+                    break;
+                case Shutter:
+                    screenScrolledShutter(scroll, mVertical, false);
                     break;
             }
             mScrollTransformsDirty = false;
         }
 
-        if (isInOverscroll) {
+        if (isInOverscroll && !mInfiniteScrolling) {
             int index = (!mVertical ? mOverScrollX : mOverScrollY) < 0 ? 0 : getChildCount() - 1;
             View v = getPageAt(index);
             if (v != null) {

@@ -103,6 +103,8 @@
     <string name="preferences_interface_homescreen_title">Homescreen</string>
     <string name="preferences_interface_homescreen_summary">Screens and wallpaper</string>
     <string name="preferences_interface_homescreen_general_category">General</string>
+    <string name="preferences_interface_homescreen_general_independent_title">Independent homescreens</string>
+    <string name="preferences_interface_homescreen_general_independent_summary">Independent homescreen setups for portrait and landscape orientation</string>
     <string name="preferences_interface_homescreen_general_screens_title">Homescreens</string>
     <string name="preferences_interface_homescreen_general_screens_summary">Number of screens on the homescreen</string>
     <string name="preferences_interface_homescreen_general_default_screen_title">Default screen</string>
@@ -138,6 +140,8 @@
     <string name="preferences_interface_homescreen_scrolling_fade_adjacent_screens_summary">Fade the side screens when scrolling homescreens</string>
     <string name="preferences_interface_homescreen_scrolling_show_outlines_title">Show outlines</string>
     <string name="preferences_interface_homescreen_scrolling_show_outlines_summary">Show screen outlines when scrolling homescreens</string>
+    <string name="preferences_interface_homescreen_scrolling_infinite_title">Infinite scrolling</string>
+    <string name="preferences_interface_homescreen_scrolling_infinite_summary">Scroll between the first and last homescreens</string>
     <string name="preferences_interface_homescreen_indicator_category">Indicator</string>
     <string name="preferences_interface_homescreen_indicator_enable_title">Show page indicator</string>
     <string name="preferences_interface_homescreen_indicator_enable_summary">Show current page indicator on the screen</string>
@@ -172,6 +176,8 @@
     <string name="preferences_interface_drawer_widget_grid_summary">Choose the number of rows/columns for widgets in drawer</string>
     <string name="preferences_interface_drawer_stretch_screens_title">Stretch screens</string>
     <string name="preferences_interface_drawer_stretch_screens_summary">Expand app pages to fill the size of display</string>
+    <string name="preferences_interface_drawer_fit_to_cells_title">Fit icons to cells</string>
+    <string name="preferences_interface_drawer_fit_to_cells_summary">Resize cells to fit screen and force icon to stay within the cell</string>
     <!--<string name="preferences_interface_drawer_widget_icon_style_title">Icon style widgets</string>
     <string name="preferences_interface_drawer_widget_icon_style_summary">Make widgets use icon style in drawer rather than preview</string>-->
     <string name="preferences_interface_drawer_widgets_join_apps_title">Join with apps</string>
@@ -187,6 +193,8 @@
     <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>
     <string name="preferences_interface_drawer_scrolling_fade_adjacent_screens_title">Fade side pages</string>
     <string name="preferences_interface_drawer_scrolling_fade_adjacent_screens_summary">Fade the side pages when scrolling screens</string>
+    <string name="preferences_interface_drawer_scrolling_infinite_title">Infinite scrolling</string>
+    <string name="preferences_interface_drawer_scrolling_infinite_summary">Scroll between the first and last pages</string>
     <string name="preferences_interface_drawer_indicator_category">Indicator</string>
     <string name="preferences_interface_drawer_indicator_enable_title">Show page indicator</string>
     <string name="preferences_interface_drawer_indicator_enable_summary">Show current page indicator at the bottom of the screen</string>
@@ -201,12 +209,10 @@
     <string name="preferences_interface_drawer_dismiss_on_tap_summary">Tap empty space to dismiss drawer</string>
     <string name="preferences_interface_drawer_transparency_title">Transparency</string>
     <string name="preferences_interface_drawer_transparency_summary">Set transparency of app drawer background (0 being transparent, 100 being opaque)</string>
-    <string name="preferences_interface_drawer_fade_title">Fade out</string>
-    <string name="preferences_interface_drawer_fade_summary">Animate fading out of background</string>
 
     <!-- Dock -->
     <string name="preferences_interface_dock_title">Dock</string>
-    <string name="preferences_interface_dock_summary">Application dock on homescreen</string>
+    <string name="preferences_interface_dock_summary">Customise the application dock</string>
     <string name="preferences_interface_dock_category_title">General</string>
     <string name="preferences_interface_dock_style_title">Style</string>
     <string name="preferences_interface_dock_enabled_title">Show dock</string>
@@ -221,16 +227,18 @@
     <string name="preferences_interface_dock_icons_summary">Number of icons/columns in the dock</string>
     <string name="preferences_interface_dock_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_dock_scrolling_transition_effect_summary">Scrolling effect when scrolling pages</string>
+    <string name="preferences_interface_dock_scrolling_infinite_title">Infinite scrolling</string>
+    <string name="preferences_interface_dock_scrolling_infinite_summary">Scroll between the first and last hotseat pages</string>
     <string name="preferences_interface_dock_stretch_screens_title">Stretch pages</string>
     <string name="preferences_interface_dock_stretch_screens_summary">Expand dock pages to fill the size of the dock</string>
+    <string name="preferences_interface_dock_fit_to_cells_title">Fit icons to cells</string>
+    <string name="preferences_interface_dock_fit_to_cells_summary">Resize cells to fit screen and force icon to stay within the cell</string>
     <string name="preferences_interface_dock_hide_icon_labels_title">Hide icon labels</string>
     <string name="preferences_interface_dock_hide_icon_labels_summary">Hide dock icon labels</string>
     <string name="preferences_interface_dock_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_dock_icon_scale_summary">Scale of icons in the dock</string>
     <string name="preferences_interface_dock_divider_title">Show dock divider</string>
     <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
-    <string name="preferences_interface_dock_bottom_title">Dock on bottom</string>
-    <string name="preferences_interface_dock_bottom_summary">Show dock on the bottom of the screen in landscape</string>
     <string name="preferences_interface_dock_scrolling_fade_adjacent_screens_title">Fade side pages</string>
     <string name="preferences_interface_dock_scrolling_fade_adjacent_screens_summary">Fade the side pages when scrolling</string>
 
@@ -248,12 +256,24 @@
 
     <!-- General -->
     <string name="preferences_interface_general_title">General</string>
-    <string name="preferences_interface_general_summary">Gestures and overall behaviour</string>
-    <string name="preferences_interface_general_orientation_title">Auto-rotate screen</string>
+    <string name="preferences_interface_general_summary">Orientation, lock workspace, fullscreen</string>
+    <string name="preferences_interface_general_orientation_title">Orientation</string>
+    <string name="preferences_interface_general_orientation_summary">Decide how you would prefer the launcher to rotate</string>
     <string name="preferences_interface_general_lock_workspace_title">Lock homescreen</string>
     <string name="preferences_interface_general_lock_workspace_summary">Lock shortcuts and folders positions in the homescreen, dock and apps and widgets drawer</string>
     <string name="preferences_interface_general_fullscreen_title">Fullscreen mode</string>
     <string name="preferences_interface_general_fullscreen_summary">Hide the status bar to extend the homescreen</string>
+    <string name="preferences_interface_general_persist_title">Keep in memory</string>
+    <string name="preferences_interface_general_persist_summary">Lock launcher in memory to reduce redraws</string>
+
+    <string name="preferences_backup_title">Backup \u0026 Restore</string>
+    <string name="preferences_backup_summary">Backup and restore your homescreens</string>
+    <string name="preferences_backup_workspace_title">Backup</string>
+    <string name="preferences_backup_workspace_complete">Settings have been backed up to %s</string>
+    <string name="preferences_restore_workspace_title">Restore</string>
+    <string name="preferences_restore_workspace_dialog_title">Restore %s</string>
+    <string name="preferences_restore_workspace_confirm_dialog">Are you sure you want to restore your backup? Doing so will remove all current settings and homescreens.</string>
+    <string name="preferences_restore_workspace_complete">Settings have been restored</string>
 
     <!-- Folder sort types -->
     <string name="menu_folder_sort_none">None</string>
@@ -280,11 +300,17 @@
     <string name="drawer_orientation_vertical">Vertical</string>
 
     <!-- Launcher orientation     -->
-    <string name="orientation_portrait">Portrait</string>
     <string name="orientation_portrait_prefix">"Portrait: "</string>
-    <string name="orientation_landscape">Landscape</string>
     <string name="orientation_landscape_prefix">"Landscape: "</string>
-    <string name="orientation_auto">Auto-Rotate</string>
+
+    <string name="orientation_nosensor">Default</string>
+    <string name="orientation_user">Auto-Rotate</string>
+    <string name="orientation_portrait">Portrait</string>
+    <string name="orientation_landscape">Landscape</string>
+    <string name="orientation_sensor">Force Auto-Rotate</string>
+    <string name="orientation_reverseportrait">Reverse Portrait</string>
+    <string name="orientation_reverselandscape">Reverse Landscape</string>
+    <string name="orientation_fullsensor">Full Auto-Rotate</string>
 
     <!-- Effects -->
     <string name="effects_standard">Standard</string>

@@ -16,11 +16,17 @@
 
 package com.android.launcher2.preference;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -34,14 +40,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.launcher2.LauncherProvider;
 import com.android.launcher2.LauncherApplication;
 import com.android.launcher.R;
 import com.lennox.utils.ThemeUtils;
 
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Preferences extends PreferenceActivity
@@ -50,15 +64,13 @@ public class Preferences extends PreferenceActivity
     private static final String TAG = "Launcher.Preferences";
 
     private SharedPreferences mPreferences;
-    private static Context mContext;
-    private List<Header> mHeaders;
+    private static List<Header> mHeaders = new ArrayList<Header>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPreferences = getSharedPreferences(PreferencesProvider.PREFERENCES_KEY,
                 Context.MODE_PRIVATE);
-        mContext = getApplicationContext();
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -87,8 +99,7 @@ public class Preferences extends PreferenceActivity
     @Override
     protected void onPause() {
         super.onPause();
-        mPreferences.unregisterOnSharedPreferenceChangeListener(this); 
-        mContext = null;
+        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -117,7 +128,7 @@ public class Preferences extends PreferenceActivity
 
     @Override
     public void setListAdapter(ListAdapter adapter) {
-        if (adapter == null || mHeaders == null) {
+        if (adapter == null) {
             super.setListAdapter(null);
         } else {
             super.setListAdapter(new HeaderAdapter(this, mHeaders));
@@ -126,9 +137,11 @@ public class Preferences extends PreferenceActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean(PreferencesProvider.PREFERENCES_CHANGED, true);
-        editor.commit();
+        if (!key.equals("restore_workspace") && !key.equals("backup_workspace")) {
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putBoolean(PreferencesProvider.PREFERENCES_CHANGED, true);
+            editor.commit();
+        }
     }
 
     public static class HomescreenFragment extends PreferenceFragment {
@@ -137,6 +150,7 @@ public class Preferences extends PreferenceActivity
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.preferences_homescreen);
+
         }
     }
 
@@ -148,90 +162,311 @@ public class Preferences extends PreferenceActivity
         }
     }
 
-    public static class DockFragment extends PreferenceFragment {
+    public static class DockFragment extends PreferenceFragment
+            implements Preference.OnPreferenceChangeListener {
+        private static DoubleNumberPickerPreference mDefaultPages;
+        private static DoubleNumberPickerPreference mNumberPages;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.preferences_dock);
+
+            PreferenceScreen prefSet = getPreferenceScreen();
+
+            mDefaultPages = (DoubleNumberPickerPreference)prefSet.findPreference("ui_dock_default_page");
+            mNumberPages = (DoubleNumberPickerPreference)prefSet.findPreference("ui_dock_pages");
+            mNumberPages.setOnPreferenceChangeListener(this);
+            mDefaultPages.setMax1(PreferencesProvider.Interface.Dock.getNumberPages(false));
+            mDefaultPages.setMax2(PreferencesProvider.Interface.Dock.getNumberPages(true));
         }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            if ( preference instanceof DoubleNumberPickerPreference && preference.getKey().equals("ui_dock_pages") ) {
+                int portMax, landMax;
+                String[] values = ((String) newValue).split("\\|");
+                try {
+                    portMax = Integer.parseInt(values[0]);
+                    landMax = Integer.parseInt(values[1]);
+                } catch (NumberFormatException e) {
+                    portMax = 1;
+                    landMax = 1;
+                }
+                mDefaultPages.setMax1(portMax);
+                mDefaultPages.setMax2(landMax);
+                return true;
+            }
+            return false;
+        }
+
     }
 
     public static class GeneralFragment extends PreferenceFragment
             implements Preference.OnPreferenceChangeListener {
+        private ListPreference mIconTheme;
+        private LauncherApplication context;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.preferences_general);
+
+            PreferenceScreen prefSet = getPreferenceScreen();
+
+            mIconTheme = (ListPreference) prefSet.findPreference("icon_theme");
+            mIconTheme.setOnPreferenceChangeListener(this);
+
+            context = (LauncherApplication) (getActivity().getApplicationContext());
+
+            if (context != null) {
+                String[] packageList = context.mThemeUtils.createThemePackageList();
+                mIconTheme.setEntryValues(packageList);
+                mIconTheme.setEntries(context.mThemeUtils.createThemeNameList(packageList));
+                String currentPackage = PreferencesProvider.Interface.General.getThemePackageName();
+                String currentThemeName = context.mThemeUtils.getThemeName(currentPackage);
+                mIconTheme.setSummary(currentThemeName);
+            }
         }
 
         @Override
-        public void onResume() {
-            super.onResume();
-            String[] packageList = ThemeUtils.createThemePackageList(mContext);
-            ListPreference pref = (ListPreference)getPreferenceScreen().findPreference("icon_theme");
-            pref.setEntryValues(packageList);
-            pref.setEntries(ThemeUtils.createThemeNameList(mContext, packageList));
-            String currentPackage = ThemeUtils.getThemePackageName(mContext, ThemeUtils.DEFAULT); 
-            String currentThemeName = ThemeUtils.getThemeName(mContext, currentPackage); 
-            pref.setSummary(currentThemeName);
-        }
-
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object o) {
-            String key = preference.getKey();
-            if (key.equals("icon_theme")) {
-                ListPreference pref = (ListPreference)preference;
-                ThemeUtils.setThemePackageName(mContext, pref.getValue());
-                pref.setSummary(pref.getEntry());
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            if ( preference instanceof ListPreference && preference.getKey().equals("icon_theme")) {
+                mIconTheme.setSummary(mIconTheme.getEntries()[mIconTheme.findIndexOfValue((String) newValue)]);
+                context.mThemeUtils.clearCache();
                 return true;
             }
             return false;
+        }
+
+    }
+
+    public static class BackupFragment extends PreferenceFragment
+            implements Preference.OnPreferenceChangeListener{
+        private Preference mBackup;
+        private ListPreference mRestore;
+        private LauncherApplication context;
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            addPreferencesFromResource(R.xml.preferences_backup);
+
+            context = (LauncherApplication) (getActivity().getApplicationContext());
+
+            PreferenceScreen prefSet = getPreferenceScreen();
+
+            mBackup = prefSet.findPreference("backup_workspace");
+            mBackup.setOnPreferenceChangeListener(this);
+            mRestore = (ListPreference) prefSet.findPreference("restore_workspace");
+            mRestore.setOnPreferenceChangeListener(this);
+
+            getBackupList();
+        }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            String key = preference.getKey();
+            if (key.equals("restore_workspace")) {
+                final String restoreDir = (String) newValue;
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(R.string.preferences_restore_workspace_confirm_dialog)
+                .setTitle(String.format(context.getString(R.string.preferences_restore_workspace_dialog_title),restoreDir))
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        backupDatabase(true, false, restoreDir);
+                        backupDatabase(true, true, restoreDir);
+                        backupPreference(true, restoreDir);
+                        Toast.makeText(context, context.getString(R.string.preferences_restore_workspace_complete), Toast.LENGTH_LONG).show();
+                        context.mThemeUtils.clearCache();
+                        context.setPerformedRestore(true);
+                        startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+                builder.show();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onPreferenceTreeClick(PreferenceScreen preferences, Preference preference) {
+            if (preference == mBackup) {
+                final String backupDir = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date());
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(R.layout.backup_confirm, null);
+                final EditText backupName = (EditText) layout.findViewById(R.id.backup_title);
+                backupName.setText(backupDir);
+                builder.setView(layout)
+                .setTitle(R.string.preferences_backup_workspace_title)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String chosenBackupDir = backupName.getText().toString();
+                        backupDatabase(false, false, chosenBackupDir);
+                        backupDatabase(false, true, chosenBackupDir);
+                        backupPreference(false, chosenBackupDir);
+                        Toast.makeText(context, String.format(context.getString(R.string.preferences_backup_workspace_complete),getBackupDatabaseFile(chosenBackupDir, false).getParent()), Toast.LENGTH_LONG).show();
+                        getBackupList();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+                builder.show();
+            }
+            return true;
+        }
+
+        public void getBackupList() {
+            File file = new File( Environment.getExternalStorageDirectory().getAbsolutePath()
+                          + "/LennoxLauncher" );
+            File[] list = null;
+            if (file.exists()) {
+                list = file.listFiles();
+            }
+            if (list != null && list.length > 0) {
+                String[] preferenceList = new String[list.length];   
+                for( int i=0; i< list.length; i++) {
+                    preferenceList[i] = list[i].getName();
+                }
+                mRestore.setEntryValues(preferenceList);
+                mRestore.setEntries(preferenceList);
+                mRestore.setEnabled(true);
+            } else {
+                mRestore.setEnabled(false);
+            }
+
+        }
+
+        public File getCurrentDatabaseFile(boolean landscape) {
+            return new File(Environment.getDataDirectory() + "/data/" + context.getPackageName() + "/databases/", landscape ? LauncherProvider.DATABASE_LANDSCAPE_NAME : LauncherProvider.DATABASE_NAME);
+        }
+
+        public File getCurrentPreferenceFile() {
+            return new File(Environment.getDataDirectory() + "/data/" + context.getPackageName() + "/shared_prefs/", PreferencesProvider.PREFERENCES_KEY + ".xml");
+        }
+
+        public File getBackupDatabaseFile(String dirname, boolean landscape) {
+            String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+            File dir = new File(baseDir + "/LennoxLauncher/" + dirname);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            return new File(dir, landscape ? LauncherProvider.DATABASE_LANDSCAPE_NAME : LauncherProvider.DATABASE_NAME);
+        }
+
+        public File getBackupPreferenceFile(String dirname) {
+            String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+            File dir = new File(baseDir + "/LennoxLauncher/" + dirname);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            return new File(dir, PreferencesProvider.PREFERENCES_KEY + ".xml");
+        }
+
+        public final boolean backupDatabase(boolean restore, boolean landscape, String dirname) {
+            File from = restore ? getBackupDatabaseFile(dirname, landscape) : getCurrentDatabaseFile(landscape);
+            File to = restore ? getCurrentDatabaseFile(landscape) : getBackupDatabaseFile(dirname, landscape);
+            try {
+                copyFile(from, to);
+                return true;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+               Log.e(TAG, "Error backuping up database: " + e.getMessage(), e);
+            }
+            return false;
+        }
+
+        public final boolean backupPreference(boolean restore, String dirname) {
+            File from = restore ? getBackupPreferenceFile(dirname) : getCurrentPreferenceFile();
+            File to = restore ? getCurrentPreferenceFile() : getBackupPreferenceFile(dirname);
+            try {
+                copyFile(from, to);
+                return true;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+               Log.e(TAG, "Error backuping up database: " + e.getMessage(), e);
+            }
+            return false;
+        }
+
+        public static void copyFile(File src, File dst) throws IOException {
+            FileInputStream in = new FileInputStream(src);
+            FileOutputStream out = new FileOutputStream(dst);
+            FileChannel fromChannel = null, toChannel = null;
+            try {
+                fromChannel = in.getChannel();
+                toChannel = out.getChannel();
+                fromChannel.transferTo(0, fromChannel.size(), toChannel); 
+            } finally {
+                if (fromChannel != null) 
+                    fromChannel.close();
+                if (toChannel != null) 
+                    toChannel.close();
+            }
         }
 
     }
 
     public static class GesturesFragment extends PreferenceFragment
             implements Preference.OnPreferenceChangeListener {
+        private ListPreference mHomescreenDoubleTap;
+        private ListPreference mHomescreenSwipeUp;
+        private ListPreference mHomescreenSwipeDown;
+        private ListPreference mHomescreenPinch;
+        private ListPreference mHomescreenSpread;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.preferences_gestures);
 
-            initGesturePreference("ui_homescreen_up_gesture",
-                PreferencesProvider.Interface.Gestures.getUpGestureAction());
-            initGesturePreference("ui_homescreen_down_gesture",
-                PreferencesProvider.Interface.Gestures.getDownGestureAction());
-            initGesturePreference("ui_homescreen_pinch_gesture",
-                PreferencesProvider.Interface.Gestures.getPinchGestureAction());
-            initGesturePreference("ui_homescreen_spread_gesture",
-                PreferencesProvider.Interface.Gestures.getSpreadGestureAction());
-            initGesturePreference("ui_homescreen_double_tap_gesture",
-                PreferencesProvider.Interface.Gestures.getDoubleTapGestureAction());
+            PreferenceScreen prefSet = getPreferenceScreen();
+
+            mHomescreenDoubleTap = (ListPreference) prefSet.findPreference("ui_homescreen_double_tap_gesture");
+            mHomescreenDoubleTap.setOnPreferenceChangeListener(this);
+            initGesturePreference(mHomescreenDoubleTap);
+            mHomescreenDoubleTap.setSummary(mHomescreenDoubleTap.getEntry());
+            mHomescreenSwipeDown = (ListPreference) prefSet.findPreference("ui_homescreen_down_gesture");
+            mHomescreenSwipeDown.setOnPreferenceChangeListener(this);
+            initGesturePreference(mHomescreenSwipeDown);
+            mHomescreenSwipeDown.setSummary(mHomescreenSwipeDown.getEntry());
+            mHomescreenSwipeUp = (ListPreference) prefSet.findPreference("ui_homescreen_up_gesture");
+            mHomescreenSwipeUp.setOnPreferenceChangeListener(this);
+            initGesturePreference(mHomescreenSwipeUp);
+            mHomescreenSwipeUp.setSummary(mHomescreenSwipeUp.getEntry());
+            mHomescreenSpread = (ListPreference) prefSet.findPreference("ui_homescreen_spread_gesture");
+            mHomescreenSpread.setOnPreferenceChangeListener(this);
+            initGesturePreference(mHomescreenSpread);
+            mHomescreenSpread.setSummary(mHomescreenSpread.getEntry());
+            mHomescreenPinch = (ListPreference) prefSet.findPreference("ui_homescreen_pinch_gesture");
+            mHomescreenPinch.setOnPreferenceChangeListener(this);
+            initGesturePreference(mHomescreenPinch);
+            mHomescreenPinch.setSummary(mHomescreenPinch.getEntry());
         }
 
         @Override
-        public boolean onPreferenceChange(Preference preference, Object o) {
-            String key = preference.getKey();
-            if (key.equals("ui_homescreen_up_gesture") || key.equals("ui_homescreen_down_gesture") ||
-                    key.equals("ui_homescreen_pinch_gesture") || key.equals("ui_homescreen_spread_gesture") || key.equals("ui_homescreen_double_tap_gesture")) {
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            if ( preference instanceof ListPreference ) {
                 ListPreference gesturePref = (ListPreference)preference;
-                gesturePref.setSummary(gesturePref.getEntries()[gesturePref.findIndexOfValue((String)o)]);
+                gesturePref.setSummary(gesturePref.getEntries()[gesturePref.findIndexOfValue((String) newValue)]);
                 return true;
             }
             return false;
         }
 
-        private void initGesturePreference(String key, String action) {
-            ListPreference pref;
-            pref = (ListPreference)getPreferenceScreen().findPreference(key);
+        private void initGesturePreference(ListPreference preference) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                pref.setEntries(getResources().getStringArray(R.array.gesture_target_names_pre42));
-                pref.setEntryValues(getResources().getStringArray(R.array.gesture_target_values_pre42));
+                preference.setEntries(getResources().getStringArray(R.array.gesture_target_names_pre42));
+                preference.setEntryValues(getResources().getStringArray(R.array.gesture_target_values_pre42));
             }
-            pref.setSummary(pref.getEntries()[pref.findIndexOfValue(action)]);
         }
     }
 

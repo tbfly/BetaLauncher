@@ -62,7 +62,7 @@ public class PreviewLayout extends FrameLayout
         mWorkspace.invalidate();
         snapDrawingCacheToImageViews();
         PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(),
-                mWorkspace.getPageCount());
+                mWorkspace.getPageCount(), LauncherApplication.isScreenLandscape(getContext()));
     }
 
     /**
@@ -74,7 +74,7 @@ public class PreviewLayout extends FrameLayout
         snapDrawingCacheToImageViews();
         mWorkspace.invalidate();
         PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(),
-                mWorkspace.getChildCount());
+                mWorkspace.getPageCount(), LauncherApplication.isScreenLandscape(getContext()));
     }
 
     /**
@@ -85,7 +85,7 @@ public class PreviewLayout extends FrameLayout
         mWorkspace.setDefaultScreenTo(index);
         invalidate();
         PreferencesProvider.Interface.Homescreen.setDefaultHomescreen(getContext(),
-                index + 1);
+                index + 1, LauncherApplication.isScreenLandscape(getContext()));
     }
 
     /**
@@ -234,29 +234,31 @@ public class PreviewLayout extends FrameLayout
         else
             view = v;
         ItemInfo i = (ItemInfo)view.getTag();
-        switch (v.getId()) {
-            case R.id.home_button:
-                updatePreviews((int)i.id);
-                setWorkspaceDefaultScreen((int)i.id);
-                break;
-            case R.id.delete_button:
-                removeWorkspaceScreen((int)i.id);
-                break;
-            case R.id.preview_screen:
-                int j = mWorkspace.getPageCount();
-                if (j < MAX_SCREEN && (int)i.id == j) {
-                    Log.v(TAG, "add new screen");
-                    addScreen((int)i.id);
-                } else
-                    snapToScreen((int)i.id);
-                break;
-            default:
-                j = mLauncher.getWorkspace().getPageCount();
-                if ((j < MAX_SCREEN) && ((int)i.id == j)) {
-                    Log.v(TAG, "add new screen");
-                    addScreen((int)i.id);
-                }
-                break;
+        if (i != null) {
+            switch (v.getId()) {
+                case R.id.home_button:
+                    updatePreviews((int)i.id);
+                    setWorkspaceDefaultScreen((int)i.id);
+                    break;
+                case R.id.delete_button:
+                    removeWorkspaceScreen((int)i.id);
+                    break;
+                case R.id.preview_screen:
+                    int j = mWorkspace.getPageCount();
+                    if (j < MAX_SCREEN && (int)i.id == j) {
+                        Log.v(TAG, "add new screen");
+                        addScreen((int)i.id);
+                    } else
+                        snapToScreen((int)i.id);
+                    break;
+                default:
+                    j = mLauncher.getWorkspace().getPageCount();
+                    if ((j < MAX_SCREEN) && ((int)i.id == j)) {
+                        Log.v(TAG, "add new screen");
+                        addScreen((int)i.id);
+                    }
+                    break;
+            }
         }
     }
 

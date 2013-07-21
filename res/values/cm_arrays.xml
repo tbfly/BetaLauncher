@@ -89,6 +89,7 @@
         <item>@string/effects_accordion</item>
         <item>@string/effects_carousel_left</item>
         <item>@string/effects_carousel_right</item>
+        <item>@string/effects_shutter</item>
     </string-array>
     <string-array name="preferences_interface_drawer_scrolling_transition_effect_values" translatable="false">
         <item>Standard</item>
@@ -109,6 +110,7 @@
         <item>Accordion</item>
         <item>CarouselLeft</item>
         <item>CarouselRight</item>
+        <item>Shutter</item>
     </string-array>
     <string-array name="preferences_interface_dock_scrolling_transition_effect_entries" translatable="false">
         <item>@string/effects_standard</item>
@@ -201,9 +203,9 @@
         <item>@string/action_default_screen</item>
         <item>@string/action_show_preview</item>
         <item>@string/action_lock_unlock</item>
-        <item>@string/action_toggle_dock</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
+        <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values_pre42" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -215,8 +217,29 @@
         <item>default_homescreen</item>
         <item>show_previews</item>
         <item>lock_unlock</item>
-        <item>toggle_dock</item>
         <item>show_settings</item>
+    </string-array>
+        <!--<item>toggle_dock</item>-->
+
+    <string-array name="orientation_modes">
+        <item>@string/orientation_nosensor</item>
+        <item>@string/orientation_user</item>
+        <item>@string/orientation_portrait</item>
+        <item>@string/orientation_landscape</item>
+        <item>@string/orientation_sensor</item>
+        <item>@string/orientation_reverseportrait</item>
+        <item>@string/orientation_reverselandscape</item>
+        <item>@string/orientation_fullsensor</item>
+    </string-array>
+    <string-array name="orientation_modes_values" translatable="false" >
+        <item>5</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>4</item>
+        <item>9</item>
+        <item>8</item>
+        <item>10</item>
     </string-array>
 
 </resources>

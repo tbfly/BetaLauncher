@@ -2385,7 +2385,8 @@ public class LauncherModel extends BroadcastReceiver {
                     if (resources != null) {
                         final int id = resources.getIdentifier(resourceName, null, null);
                         icon = Utilities.createIconBitmap(
-                                mIconCache.getFullResIcon(packageName, id), context);
+                                mIconCache.getFullResActionIcon(packageName, id,
+                                                    info.action.name()), context);
                     }
                 } catch (Exception e) {
                     // drop this.  we have other places to look for icons

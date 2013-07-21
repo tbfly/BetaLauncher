@@ -27,13 +27,18 @@ import android.database.ContentObserver;
 import android.os.Handler;
 
 import com.android.launcher.R;
+import com.android.launcher2.preference.*;
+
+import com.lennox.utils.ThemeUtils;
 
 import java.lang.ref.WeakReference;
 
 public class LauncherApplication extends Application {
     public LauncherModel mModel;
     public IconCache mIconCache;
+    public ThemeUtils mThemeUtils;
     private static boolean sIsScreenLarge;
+    private static boolean sPerformedRestore = false;
     private static float sScreenDensity;
     private static int sLongPressTimeout = 300;
     private static final String sSharedPreferencesKey = "com.android.launcher2.prefs";
@@ -47,6 +52,10 @@ public class LauncherApplication extends Application {
         sIsScreenLarge = getResources().getBoolean(R.bool.is_large_screen);
         sScreenDensity = getResources().getDisplayMetrics().density;
 
+        // Load all preferences
+        PreferencesProvider.load(this);
+
+        mThemeUtils = new ThemeUtils(this);
         mIconCache = new IconCache(this);
         mModel = new LauncherModel(this, mIconCache);
 
@@ -142,4 +151,13 @@ public class LauncherApplication extends Application {
     public static int getLongPressTimeout() {
         return sLongPressTimeout;
     }
+
+    public static void setPerformedRestore(boolean value) {
+        sPerformedRestore = value;
+    }
+
+    public static boolean getPerformedRestore() {
+        return sPerformedRestore;
+    }
+
 }

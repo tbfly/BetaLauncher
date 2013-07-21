@@ -20,8 +20,6 @@
     <dimen name="toolbar_button_horizontal_padding">0dip</dimen>
 
 <!-- Workspace -->
-    <dimen name="hotseat_cell_width">64dp</dimen>
-    <dimen name="hotseat_cell_height">58dp</dimen>
     <!-- We really want the page spacing to be the max of either the button bar
      height or the qsb bar height -->
     <dimen name="workspace_page_spacing">-1dp</dimen>
@@ -29,8 +27,6 @@
     <dimen name="workspace_divider_padding_right">0dp</dimen>
     <dimen name="workspace_divider_padding_top">12dp</dimen>
     <dimen name="workspace_divider_padding_bottom">12dp</dimen>
-
-    <dimen name="folder_icon_padding_top">4dp</dimen>
 
     <!-- Block spacing on each side of the screen.  And also padding
          for the portals to look right. -->
