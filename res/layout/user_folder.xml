@@ -14,16 +14,16 @@
      limitations under the License.
 -->
 
-<com.android.launcher2.Folder
+<com.lennox.launcher.Folder
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
+    xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_margin="5.0dip"
     android:background="@drawable/portal_container_holo">
 
-    <com.android.launcher2.CellLayout
+    <com.lennox.launcher.CellLayout
         android:id="@+id/folder_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal" >
 
-        <com.android.launcher2.FolderEditText
+        <com.lennox.launcher.FolderEditText
             android:id="@+id/folder_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,4 +76,4 @@
 
     </LinearLayout>
 
-</com.android.launcher2.Folder>
+</com.lennox.launcher.Folder>

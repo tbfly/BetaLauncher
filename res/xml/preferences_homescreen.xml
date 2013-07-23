@@ -15,17 +15,23 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-    android:key="ui_homescreen"
+    xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
+    android:key="lennox_homescreen"
     android:title="@string/preferences_interface_homescreen_title">
     <PreferenceCategory
-        android:key="ui_homescreen_general"
+        android:key="lennox_homescreen_general"
         android:title="@string/preferences_interface_homescreen_general_category">
-        <!--<CheckBoxPreference android:key="ui_homescreen_independent_homescreens"
+        <!--<CheckBoxPreference android:key="lennox_homescreen_independent_homescreens"
             android:title="@string/preferences_interface_homescreen_general_independent_title"
             android:summary="@string/preferences_interface_homescreen_general_independent_summary"
             android:defaultValue="false" />-->
-        <com.android.launcher2.preference.QuadrupleNumberPickerPreference android:key="ui_homescreen_grid"
+        <!--<ListPreference android:key="lennox_homescreen_orientation"
+            android:title="@string/preferences_interface_homescreen_orientation_title"
+            android:summary="@string/preferences_interface_homescreen_orientation_summary"
+            android:entries="@array/preferences_interface_drawer_orientation_entries"
+            android:entryValues="@array/preferences_interface_drawer_orientation_values"
+            android:defaultValue="horizontal" />-->
+        <com.lennox.launcher.preference.QuadrupleNumberPickerPreference android:key="lennox_homescreen_grid"
             android:title="@string/preferences_interface_homescreen_general_grid_title"
             android:summary="@string/preferences_interface_homescreen_general_grid_summary"
             launcher:pickerTitle1="@string/preferences_interface_homescreen_general_grid_rows_title"
@@ -44,16 +50,20 @@
             launcher:min3="@integer/config_minWorkspaceRowsLand"
             launcher:max4="@integer/config_maxWorkspaceColumnsLand"
             launcher:min4="@integer/config_minWorkspaceColumnsLand" />
-        <CheckBoxPreference android:key="ui_homescreen_stretch_screens"
-            android:defaultValue="true"
+        <ListPreference android:key="lennox_homescreen_stretch_screens"
+            android:defaultValue="@string/checkbox_list_always_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_general_stretch_screens_title"
             android:summary="@string/preferences_interface_homescreen_general_stretch_screens_summary" />
-        <CheckBoxPreference android:key="ui_homescreen_fit_to_cells"
-            android:defaultValue="false"
+        <ListPreference android:key="lennox_homescreen_fit_to_cells"
+            android:defaultValue="@string/checkbox_list_never_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_general_fit_to_cells_title"
             android:summary="@string/preferences_interface_homescreen_general_fit_to_cells_summary" />
-        <com.android.launcher2.preference.DoubleSeekBarDialogPreference
-            android:key="ui_homescreen_icon_scale"
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+            android:key="lennox_homescreen_icon_scale"
             android:title="@string/preferences_interface_homescreen_icon_scale_title"
             android:summary="@string/preferences_interface_homescreen_icon_scale_summary"
             launcher:prefix1="@string/orientation_portrait_prefix"
@@ -64,19 +74,34 @@
             launcher:max2="@integer/app_icon_scale_percentage_max"
             launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
             launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
-        <CheckBoxPreference android:key="ui_homescreen_general_hide_icon_labels"
+        <ListPreference android:key="lennox_homescreen_general_hide_icon_labels"
+            android:defaultValue="@string/checkbox_list_never_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_general_hide_icon_labels_title"
-            android:summary="@string/preferences_interface_homescreen_general_hide_icon_labels_summary"
-            android:defaultValue="false" />
-        <CheckBoxPreference android:key="ui_homescreen_general_search"
+            android:summary="@string/preferences_interface_homescreen_general_hide_icon_labels_summary" />
+        <ListPreference android:key="lennox_homescreen_general_search"
+            android:defaultValue="@string/checkbox_list_always_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_general_search_title"
-            android:summary="@string/preferences_interface_homescreen_general_search_summary"
-            android:defaultValue="true" />
-        <CheckBoxPreference android:key="ui_homescreen_general_resize_any_widget"
+            android:summary="@string/preferences_interface_homescreen_general_search_summary" />
+        <ListPreference
+            android:key="lennox_homescreen_search_bar_background"
+            android:title="@string/preferences_interface_homescreen_general_search_bar_background_title"
+            android:summary="@string/preferences_interface_homescreen_general_search_bar_background_summary"
+            android:entries="@array/search_bar_background_names"
+            android:entryValues="@array/search_bar_background_values"
+            android:defaultValue="0" />
+        <CheckBoxPreference android:key="lennox_homescreen_general_search_bar_dock"
+            android:title="@string/preferences_interface_homescreen_general_search_bar_dock_title"
+            android:summary="@string/preferences_interface_homescreen_general_search_bar_dock_summary"
+            android:defaultValue="false" />
+        <CheckBoxPreference android:key="lennox_homescreen_general_resize_any_widget"
             android:title="@string/preferences_interface_homescreen_general_resize_any_widget_title"
             android:summary="@string/preferences_interface_homescreen_general_resize_any_widget_summary"
             android:defaultValue="true" />
-        <CheckBoxPreference android:key="ui_homescreen_auto_install_shortcuts"
+        <CheckBoxPreference android:key="lennox_homescreen_auto_install_shortcuts"
             android:title="@string/preferences_interface_homescreen_general_auto_install_shortcuts_title"
             android:summary="@string/preferences_interface_homescreen_general_auto_install_shortcuts_summary"
             android:defaultValue="true" />
@@ -84,13 +109,13 @@
 
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_folder_style_category">
         <ListPreference
-            android:key="ui_homescreen_folder_style"
+            android:key="lennox_homescreen_folder_style"
             android:title="@string/preferences_interface_homescreen_folder_style_title"
             android:summary="@string/preferences_interface_homescreen_folder_style_summary"
             android:entries="@array/folder_icon_style_names"
             android:entryValues="@array/folder_icon_style_values"
             android:defaultValue="0" />
-        <com.android.launcher2.preference.DoubleSeekBarDialogPreference android:key="ui_homescreen_folder_icon_scale"
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference android:key="lennox_homescreen_folder_icon_scale"
             android:title="@string/preferences_interface_homescreen_folder_icon_scale_title"
             android:summary="@string/preferences_interface_homescreen_folder_icon_scale_summary"
             launcher:prefix1="@string/orientation_portrait_prefix"
@@ -104,21 +129,23 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_scrolling_category">
-        <ListPreference android:key="ui_homescreen_scrolling_transition_effect"
+        <ListPreference android:key="lennox_homescreen_scrolling_transition_effect"
             android:title="@string/preferences_interface_homescreen_scrolling_transition_effect_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_transition_effect_summary"
             android:entries="@array/preferences_interface_homescreen_scrolling_transition_effect_entries"
             android:entryValues="@array/preferences_interface_homescreen_scrolling_transition_effect_values"
             android:defaultValue="@string/config_workspaceDefaultTransitionEffect" />
-        <CheckBoxPreference android:key="ui_homescreen_scrolling_scroll_wallpaper"
+        <ListPreference android:key="lennox_homescreen_scrolling_scroll_wallpaper"
+            android:defaultValue="@string/checkbox_list_always_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_title"
-            android:summary="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_summary"
-            android:defaultValue="true" />
-        <CheckBoxPreference android:key="ui_homescreen_scrolling_wallpaper_hack"
+            android:summary="@string/preferences_interface_homescreen_scrolling_scroll_wallpaper_summary" />
+        <CheckBoxPreference android:key="lennox_homescreen_scrolling_wallpaper_hack"
             android:title="@string/preferences_interface_homescreen_scrolling_wallpaper_hack_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_wallpaper_hack_summary"
             android:defaultValue="false" />
-        <com.android.launcher2.preference.DoubleNumberPickerPreference android:key="ui_homescreen_scrolling_wallpaper_size"
+        <com.lennox.launcher.preference.DoubleNumberPickerPreference android:key="lennox_homescreen_scrolling_wallpaper_size"
             android:title="@string/preferences_interface_homescreen_scrolling_wallpaper_size_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_wallpaper_size_summary"
             launcher:pickerTitle1="@string/orientation_portrait"
@@ -129,35 +156,37 @@
             launcher:min1="2"
             launcher:max2="5"
             launcher:min2="2" />
-        <CheckBoxPreference android:key="ui_homescreen_scrolling_fade_adjacent_screens"
+        <CheckBoxPreference android:key="lennox_homescreen_scrolling_fade_adjacent_screens"
             android:title="@string/preferences_interface_homescreen_scrolling_fade_adjacent_screens_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_fade_adjacent_screens_summary"
             android:defaultValue="@bool/config_workspaceDefualtFadeInAdjacentScreens" />
-        <CheckBoxPreference android:key="ui_homescreen_scrolling_show_outlines"
+        <CheckBoxPreference android:key="lennox_homescreen_scrolling_show_outlines"
             android:title="@string/preferences_interface_homescreen_scrolling_show_outlines_title"
             android:summary="@string/preferences_interface_homescreen_scrolling_show_outlines_summary"
             android:defaultValue="@bool/config_workspaceDefaultShowOutlines" />
-        <CheckBoxPreference android:key="ui_homescreen_scrolling_infinite"
+        <ListPreference android:key="lennox_homescreen_scrolling_infinite"
+            android:defaultValue="@string/checkbox_list_always_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_scrolling_infinite_title"
-            android:summary="@string/preferences_interface_homescreen_scrolling_infinite_summary"
-            android:defaultValue="false" />
+            android:summary="@string/preferences_interface_homescreen_scrolling_infinite_summary" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_indicator_category">
-        <CheckBoxPreference android:key="ui_homescreen_indicator_enable"
+        <CheckBoxPreference android:key="lennox_homescreen_indicator_enable"
             android:title="@string/preferences_interface_homescreen_indicator_enable_title"
             android:summary="@string/preferences_interface_homescreen_indicator_enable_summary"
             android:defaultValue="true" />
-        <CheckBoxPreference android:key="ui_homescreen_indicator_fade"
+        <CheckBoxPreference android:key="lennox_homescreen_indicator_fade"
             android:title="@string/preferences_interface_homescreen_indicator_fade_title"
             android:summary="@string/preferences_interface_homescreen_indicator_fade_summary"
             android:defaultValue="true"
-            android:dependency="ui_homescreen_indicator_enable" />
-        <ListPreference android:key="ui_homescreen_indicator_position"
+            android:dependency="lennox_homescreen_indicator_enable" />
+        <ListPreference android:key="lennox_homescreen_indicator_position"
             android:title="@string/preferences_interface_homescreen_indicator_position_title"
             android:summary="@string/preferences_interface_homescreen_indicator_position_summary"
             android:entries="@array/preferences_interface_homescreen_indicator_position_entries"
             android:entryValues="@array/preferences_interface_homescreen_indicator_position_values"
             android:defaultValue="0"
-            android:dependency="ui_homescreen_indicator_enable" />
+            android:dependency="lennox_homescreen_indicator_enable" />
     </PreferenceCategory>
 </PreferenceScreen>

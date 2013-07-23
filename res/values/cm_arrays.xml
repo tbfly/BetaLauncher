@@ -145,6 +145,22 @@
         <item>vertical</item>
     </string-array>
 
+    <!-- Search bar background options -->
+    <string-array name="search_bar_background_names">
+        <item>@string/search_background_jellybean</item>
+        <item>@string/search_background_ics</item>
+        <item>@string/search_background_miui</item>
+        <item>@string/search_background_divider</item>
+        <item>@string/search_background_none</item>
+    </string-array>
+    <string-array name="search_bar_background_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
     <!-- Folder icon options -->
     <string-array name="folder_icon_style_names">
         <item>@string/folder_icon_style_grid</item>
@@ -173,9 +189,9 @@
         <item>@string/action_show_preview</item>
         <item>@string/action_lock_unlock</item>
         <item>@string/action_quick_settings</item>
+        <item>@string/action_toggle_dock</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
-        <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -188,9 +204,9 @@
         <item>show_previews</item>
         <item>lock_unlock</item>
         <item>quick_settings</item>
+        <item>toggle_dock</item>
         <item>show_settings</item>
     </string-array>
-        <!--<item>toggle_dock</item>-->
 
     <string-array name="gesture_target_names_pre42">
         <item>@string/action_nothing</item>
@@ -203,9 +219,9 @@
         <item>@string/action_default_screen</item>
         <item>@string/action_show_preview</item>
         <item>@string/action_lock_unlock</item>
+        <item>@string/action_toggle_dock</item>
         <item>@string/action_launcher_settings</item>
     </string-array>
-        <!--<item>@string/action_toggle_dock</item>-->
     <string-array name="gesture_target_values_pre42" translatable="false" >
         <item>nothing</item>
         <item>open_app_drawer</item>
@@ -217,9 +233,9 @@
         <item>default_homescreen</item>
         <item>show_previews</item>
         <item>lock_unlock</item>
+        <item>toggle_dock</item>
         <item>show_settings</item>
     </string-array>
-        <!--<item>toggle_dock</item>-->
 
     <string-array name="orientation_modes">
         <item>@string/orientation_nosensor</item>
@@ -240,6 +256,19 @@
         <item>9</item>
         <item>8</item>
         <item>10</item>
+    </string-array>
+
+    <string-array name="checkbox_list_preference_entries">
+        <item>@string/checkbox_list_never</item>
+        <item>@string/checkbox_list_portrait</item>
+        <item>@string/checkbox_list_landscape</item>
+        <item>@string/checkbox_list_always</item>
+    </string-array>
+    <string-array name="checkbox_list_preference_values" translatable="false" >
+        <item>@string/checkbox_list_never_value</item>
+        <item>@string/checkbox_list_portrait_value</item>
+        <item>@string/checkbox_list_landscape_value</item>
+        <item>@string/checkbox_list_always_value</item>
     </string-array>
 
 </resources>

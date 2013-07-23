@@ -19,11 +19,11 @@
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.launcher"
+    package="com.lennox.launcher"
     android:versionCode="3"
     android:versionName="@string/application_version">
 
-    <original-package android:name="com.android.launcher2" />
+    <original-package android:name="com.lennox.launcher" />
 
     <uses-sdk
         android:minSdkVersion="15"
@@ -51,13 +51,13 @@
         android:label="@string/permlab_uninstall_shortcut"
         android:description="@string/permdesc_uninstall_shortcut" />
     <permission
-        android:name="com.android.launcher.permission.READ_SETTINGS"
+        android:name="com.lennox.launcher.permission.READ_SETTINGS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="normal"
         android:label="@string/permlab_read_settings"
         android:description="@string/permdesc_read_settings" />
     <permission
-        android:name="com.android.launcher.permission.WRITE_SETTINGS"
+        android:name="com.lennox.launcher.permission.WRITE_SETTINGS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="normal"
         android:label="@string/permlab_write_settings"
@@ -74,17 +74,18 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.PERSISTENT_ACTIVITY" />
     <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
-    <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="com.lennox.launcher.permission.READ_SETTINGS" />
+    <uses-permission android:name="com.lennox.launcher.permission.WRITE_SETTINGS" />
 
     <application
-        android:name="com.android.launcher2.LauncherApplication"
+        android:name="com.lennox.launcher.LauncherApplication"
         android:label="@string/application_name"
         android:icon="@mipmap/ic_launcher_home"
         android:hardwareAccelerated="true"
         android:largeHeap="@bool/config_largeHeap"
         android:supportsRtl="true">
         <activity
-            android:name="com.android.launcher2.Launcher"
+            android:name="com.lennox.launcher.Launcher"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"
             android:stateNotNeeded="true"
@@ -92,7 +93,7 @@
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="com.android.launcher2.LAUNCHER_ACTION" />
+                <action android:name="com.lennox.launcher.LAUNCHER_ACTION" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.MONKEY" />
@@ -101,14 +102,14 @@
 
         <!-- Intent received used to prepopulate the default workspace. -->
         <receiver
-            android:name="com.android.launcher2.PreloadReceiver"
+            android:name="com.lennox.launcher.PreloadReceiver"
             android:permission="com.android.launcher.permission.PRELOAD_WORKSPACE">
             <intent-filter>
                 <action android:name="com.android.launcher.action.PRELOAD_WORKSPACE" />
             </intent-filter>
         </receiver>
 
-        <activity android:name="com.android.launcher2.preference.Preferences"
+        <activity android:name="com.lennox.launcher.preference.Preferences"
             android:label="@string/preferences_title"
             android:configChanges="keyboardHidden|orientation" >
             <intent-filter>
@@ -117,12 +118,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.android.launcher2.preference.HiddenAppsActivity"
+        <activity android:name="com.lennox.launcher.preference.HiddenAppsActivity"
             android:label="@string/hidden_apps_title" />
 
         <!-- Intent received used to install shortcuts from other applications -->
         <receiver
-            android:name="com.android.launcher2.InstallShortcutReceiver"
+            android:name="com.lennox.launcher.InstallShortcutReceiver"
             android:permission="com.android.launcher.permission.INSTALL_SHORTCUT">
             <intent-filter>
                 <action android:name="com.android.launcher.action.INSTALL_SHORTCUT" />
@@ -131,7 +132,7 @@
 
         <!-- Intent received used to uninstall shortcuts from other applications -->
         <receiver
-            android:name="com.android.launcher2.UninstallShortcutReceiver"
+            android:name="com.lennox.launcher.UninstallShortcutReceiver"
             android:permission="com.android.launcher.permission.UNINSTALL_SHORTCUT">
             <intent-filter>
                 <action android:name="com.android.launcher.action.UNINSTALL_SHORTCUT" />
@@ -139,19 +140,19 @@
         </receiver>
 
         <!-- Built in activity picker -->
-        <activity android:name="com.android.launcher2.ActivityPicker"
+        <activity android:name="com.lennox.launcher.ActivityPicker"
                 android:label="@string/menu_activity_picker_label"
                 android:theme="@android:style/Theme.Holo.Dialog"
                 android:finishOnCloseSystemDialogs="true">
             <intent-filter>
                 <action android:name="android.intent.action.PICK_ACTIVITY" />
-                <action android:name="com.android.launcher2.PICK_ACTIVITY" />
+                <action android:name="com.lennox.launcher.PICK_ACTIVITY" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <!-- Built in activity shortcut maker -->
-        <activity android:name="com.android.launcher2.ActivityShortcutPicker"
+        <activity android:name="com.lennox.launcher.ActivityShortcutPicker"
                 android:label="@string/menu_activity_picker_label"
                 android:theme="@android:style/Theme.Holo.Dialog" >
             <intent-filter>
@@ -161,7 +162,7 @@
         </activity>
 
         <!-- Built in widget picker -->
-        <activity android:name="com.android.launcher2.appwidgetpicker.AppWidgetPickerActivity"
+        <activity android:name="com.lennox.launcher.appwidgetpicker.AppWidgetPickerActivity"
                 android:label="@string/widget_picker"
                 android:theme="@android:style/Theme.Holo.Dialog" > 
             <intent-filter android:priority="999" >
@@ -172,8 +173,8 @@
 
         <!-- The settings provider contains Home's data, like the workspace favorites -->
         <provider
-            android:name="com.android.launcher2.LauncherProvider"
-            android:authorities="com.android.launcher2.settings"
+            android:name="com.lennox.launcher.LauncherProvider"
+            android:authorities="com.lennox.launcher.settings"
             android:writePermission="com.android.launcher.permission.WRITE_SETTINGS"
             android:exported="true"
             android:readPermission="com.android.launcher.permission.READ_SETTINGS" />

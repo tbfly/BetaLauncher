@@ -15,28 +15,28 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-    android:key="ui_general"
+    xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
+    android:key="lennox_general"
     android:title="@string/preferences_interface_general_title">
     <ListPreference
         android:key="icon_theme"
         android:title="@string/icon_theme" />
     <ListPreference
-        android:key="ui_general_orientation"
+        android:key="lennox_general_orientation"
         android:title="@string/preferences_interface_general_orientation_title"
         android:summary="@string/preferences_interface_general_orientation_summary"
         android:entries="@array/orientation_modes"
         android:entryValues="@array/orientation_modes_values"
         android:defaultValue="5" />
-    <CheckBoxPreference android:key="ui_general_lock_workspace"
+    <CheckBoxPreference android:key="lennox_general_lock_workspace"
         android:title="@string/preferences_interface_general_lock_workspace_title"
         android:summary="@string/preferences_interface_general_lock_workspace_summary"
         android:defaultValue="@bool/lock_workspace" />
-    <CheckBoxPreference android:key="ui_general_fullscreen"
+    <CheckBoxPreference android:key="lennox_general_fullscreen"
         android:title="@string/preferences_interface_general_fullscreen_title"
         android:summary="@string/preferences_interface_general_fullscreen_summary"
         android:defaultValue="false" />
-    <!--<CheckBoxPreference android:key="ui_general_persist"
+    <!--<CheckBoxPreference android:key="lennox_general_persist"
         android:title="@string/preferences_interface_general_persist_title"
         android:summary="@string/preferences_interface_general_persist_summary"
         android:defaultValue="false" />-->

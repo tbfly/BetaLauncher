@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
+    style="@style/SearchDropTargetBar"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/search_bar_height"
+    android:layout_gravity="center" >
+   <!-- Global search icon -->
+   <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/search_button"
+        android:id="@+id/search_button_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:onClick="onClickSearchButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="@string/accessibility_search_button">
+       <ImageView
+            android:id="@+id/search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_home_search_normal_holo"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+
+    <!-- Voice search icon -->
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/voice_button"
+        android:id="@+id/voice_button_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:onClick="onClickVoiceButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:layout_toRightOf="@id/search_button_container"
+        android:layout_centerVertical="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="@string/accessibility_voice_search_button">
+        <ImageView
+            android:id="@+id/voice_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_home_voice_search_holo"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+
+    <ImageView android:id="@+id/search_divider"
+        android:focusable="false"
+        android:clickable="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/divider_launcher_holo"
+        android:layout_toRightOf="@id/voice_button_container"
+        android:layout_centerVertical="true" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_toRightOf="@id/search_divider"
+        android:layout_toLeftOf="@+id/search_divider_right"
+        android:orientation="horizontal"
+        android:layout_centerVertical="true" >
+    <!-- Voice search icon -->
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/dial_button"
+        android:id="@+id/dial_button_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:onClick="onClickDialButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="Dial">
+        <ImageView
+            android:id="@+id/dial_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:src="@drawable/ic_home_dial"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+
+    <!-- Voice search icon -->
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/contacts_button"
+        android:id="@+id/contacts_button_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:onClick="onClickContactsButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="Contacts">
+        <ImageView
+            android:id="@+id/dial_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:src="@drawable/ic_home_contacts"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+
+    <!-- Voice search icon
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/camera_button"
+        android:id="@+id/camera_button_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:onClick="onClickCameraButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="Camera">
+        <ImageView
+            android:id="@+id/camera_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:src="@drawable/ic_home_camera"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout> -->
+
+    <!-- Messaging icon -->
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/message_button"
+        android:id="@+id/message_button_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:onClick="onClickMessageButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="Messages">
+        <ImageView
+            android:id="@+id/dial_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:src="@drawable/ic_home_message"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+
+    <!-- Browser icon -->
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/browser_button"
+        android:id="@+id/browser_button_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:onClick="onClickBrowserButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:contentDescription="Browser">
+        <ImageView
+            android:id="@+id/dial_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:src="@drawable/ic_home_browser"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+    </LinearLayout>
+
+    <ImageView android:id="@id/search_divider_right"
+        android:focusable="false"
+        android:clickable="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/divider_launcher_holo"
+        android:layout_toLeftOf="@+id/all_apps_button_container"
+        android:layout_centerVertical="true" />
+
+    <!-- All apps icon -->
+    <com.lennox.launcher.HolographicLinearLayout
+        style="@style/SearchButton"
+        launcher:sourceImageViewId="@+id/all_apps_button"
+        android:id="@id/all_apps_button_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:onClick="onClickAppsButton"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/accessibility_all_apps_button">
+        <ImageView
+            android:id="@+id/all_apps_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_home_all_apps_holo_dark"
+            android:adjustViewBounds="true" />
+    </com.lennox.launcher.HolographicLinearLayout>
+
+</RelativeLayout>

@@ -103,6 +103,8 @@
     <string name="preferences_interface_homescreen_title">Homescreen</string>
     <string name="preferences_interface_homescreen_summary">Screens and wallpaper</string>
     <string name="preferences_interface_homescreen_general_category">General</string>
+    <string name="preferences_interface_homescreen_orientation_title">Orientation</string>
+    <string name="preferences_interface_homescreen_orientation_summary">Choose which way your homescreens scroll</string>
     <string name="preferences_interface_homescreen_general_independent_title">Independent homescreens</string>
     <string name="preferences_interface_homescreen_general_independent_summary">Independent homescreen setups for portrait and landscape orientation</string>
     <string name="preferences_interface_homescreen_general_screens_title">Homescreens</string>
@@ -111,6 +113,10 @@
     <string name="preferences_interface_homescreen_general_default_screen_summary">Choose the default homescreen</string>
     <string name="preferences_interface_homescreen_general_search_title">Search bar</string>
     <string name="preferences_interface_homescreen_general_search_summary">Enable persistent search bar</string>
+    <string name="preferences_interface_homescreen_general_search_bar_background_title">Search bar background</string>
+    <string name="preferences_interface_homescreen_general_search_bar_background_summary">Choose the background for the persistent search bar</string>
+    <string name="preferences_interface_homescreen_general_search_bar_dock_title">Search bar dock</string>
+    <string name="preferences_interface_homescreen_general_search_bar_dock_summary">Turn the search bar into a pseudo-dock with extra buttons for dialer, contacts, messaging, browser and app drawer.</string>
     <string name="preferences_interface_homescreen_general_grid_title">Grid size</string>
     <string name="preferences_interface_homescreen_general_grid_summary">Choose the number of rows/columns on the homescreen</string>
     <string name="preferences_interface_homescreen_general_grid_rows_title">Rows</string>
@@ -299,6 +305,13 @@
     <string name="drawer_orientation_horizontal">Horizontal</string>
     <string name="drawer_orientation_vertical">Vertical</string>
 
+    <!-- Search bar backgrounds     -->
+    <string name="search_background_jellybean">Jellybean</string>
+    <string name="search_background_ics">Icecream Sandwich</string>
+    <string name="search_background_miui">MIUI</string>
+    <string name="search_background_divider">Divider</string>
+    <string name="search_background_none">None</string>
+
     <!-- Launcher orientation     -->
     <string name="orientation_portrait_prefix">"Portrait: "</string>
     <string name="orientation_landscape_prefix">"Landscape: "</string>
@@ -311,6 +324,16 @@
     <string name="orientation_reverseportrait">Reverse Portrait</string>
     <string name="orientation_reverselandscape">Reverse Landscape</string>
     <string name="orientation_fullsensor">Full Auto-Rotate</string>
+
+    <!-- Checkbox list preference entries     -->
+    <string name="checkbox_list_never">Never</string>
+    <string name="checkbox_list_portrait">Portrait</string>
+    <string name="checkbox_list_landscape">Landscape</string>
+    <string name="checkbox_list_always">Always</string>
+    <string name="checkbox_list_never_value">0|0</string>
+    <string name="checkbox_list_portrait_value">1|0</string>
+    <string name="checkbox_list_landscape_value">0|1</string>
+    <string name="checkbox_list_always_value">1|1</string>
 
     <!-- Effects -->
     <string name="effects_standard">Standard</string>

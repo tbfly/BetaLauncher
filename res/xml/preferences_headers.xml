@@ -18,37 +18,37 @@
 
     <header android:id="@+id/preferences_general_section"
             android:icon="@drawable/ic_general"
-            android:fragment="com.android.launcher2.preference.Preferences$GeneralFragment"
+            android:fragment="com.lennox.launcher.preference.Preferences$GeneralFragment"
             android:title="@string/preferences_interface_general_title"
             android:summary="@string/preferences_interface_general_summary" />
 
     <header android:id="@+id/preferences_homescreen_section"
             android:icon="@drawable/ic_homescreen"
-            android:fragment="com.android.launcher2.preference.Preferences$HomescreenFragment"
+            android:fragment="com.lennox.launcher.preference.Preferences$HomescreenFragment"
             android:title="@string/preferences_interface_homescreen_title"
             android:summary="@string/preferences_interface_homescreen_summary" />
 
     <header android:id="@+id/preferences_drawer_section"
             android:icon="@drawable/ic_appdrawer"
-            android:fragment="com.android.launcher2.preference.Preferences$DrawerFragment"
+            android:fragment="com.lennox.launcher.preference.Preferences$DrawerFragment"
             android:title="@string/preferences_interface_drawer_title"
             android:summary="@string/preferences_interface_drawer_summary" />
 
     <header android:id="@+id/preferences_dock_section"
             android:icon="@drawable/ic_dock"
-            android:fragment="com.android.launcher2.preference.Preferences$DockFragment"
+            android:fragment="com.lennox.launcher.preference.Preferences$DockFragment"
             android:title="@string/preferences_interface_dock_title"
             android:summary="@string/preferences_interface_dock_summary" />
 
     <header android:id="@+id/preferences_gestures_section"
             android:icon="@drawable/ic_gestures"
-            android:fragment="com.android.launcher2.preference.Preferences$GesturesFragment"
+            android:fragment="com.lennox.launcher.preference.Preferences$GesturesFragment"
             android:title="@string/preferences_interface_gestures_title"
             android:summary="@string/preferences_interface_gestures_summary" />
 
     <header android:id="@+id/preferences_backup_section"
             android:icon="@drawable/ic_backup"
-            android:fragment="com.android.launcher2.preference.Preferences$BackupFragment"
+            android:fragment="com.lennox.launcher.preference.Preferences$BackupFragment"
             android:title="@string/preferences_backup_title"
             android:summary="@string/preferences_backup_summary" />
 

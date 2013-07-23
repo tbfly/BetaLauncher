@@ -15,8 +15,8 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
-    android:key="ui_general"
+    xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
+    android:key="lennox_general"
     android:title="@string/preferences_backup_title">
     <Preference android:key="backup_workspace"
         android:title="@string/preferences_backup_workspace_title" />

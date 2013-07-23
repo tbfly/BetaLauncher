@@ -14,16 +14,16 @@
      limitations under the License.
 -->
 
-<com.android.launcher2.DragLayer
+<com.lennox.launcher.DragLayer
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res/com.android.launcher"
+    xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
 
     android:id="@+id/drag_layer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <!-- The workspace contains 5 screens of cells -->
-    <com.android.launcher2.Workspace
+    <com.lennox.launcher.Workspace
         android:id="@+id/workspace"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -63,7 +63,7 @@
         layout="@layout/scroll_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom" />
+        android:layout_gravity="right" />
 
     <include
         android:id="@+id/paged_view_indicator_bottom"
@@ -71,6 +71,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom" />
+
+    <include
+        android:id="@+id/paged_view_indicator_left"
+        layout="@layout/scroll_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left" />
+
+    <include
+        android:id="@+id/paged_view_indicator_right"
+        layout="@layout/scroll_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right" />
 
     <include layout="@layout/hotseat"
         android:id="@+id/hotseat"
@@ -81,16 +95,9 @@
         android:id="@+id/qsb_bar"
         layout="@layout/qsb_bar" />
 
-    <com.android.launcher2.DrawableStateProxyView
-        android:id="@+id/voice_button_proxy"
-        android:layout_width="@dimen/qsb_bar_height"
-        android:layout_height="@dimen/app_icon_size"
-        android:layout_gravity="top|left"
-        android:layout_marginTop="64dp"
-        android:clickable="true"
-        android:onClick="onClickVoiceButton"
-        android:importantForAccessibility="no"
-        launcher:sourceViewId="@+id/voice_button" />
+    <include
+        android:id="@+id/qsb_bar_dock"
+        layout="@layout/qsb_bar_dock" />
 
     <include layout="@layout/apps_customize_pane"
         android:id="@+id/apps_customize_pane"
@@ -104,4 +111,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</com.android.launcher2.DragLayer>
+</com.lennox.launcher.DragLayer>

@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.launcher2.PagedViewIcon xmlns:android="http://schemas.android.com/apk/res/android"
+<com.lennox.launcher.PagedViewIcon xmlns:android="http://schemas.android.com/apk/res/android"
    style="@style/WorkspaceIcon"
    android:focusable="true"
    android:background="@drawable/focusable_view_bg" />

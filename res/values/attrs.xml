@@ -27,13 +27,6 @@
 
     <skip />
 
-    <!-- DrawableStateProxyView specific attributes. These attributes are used to customize
-         a DrawableStateProxyView view in XML files. -->
-    <declare-styleable name="DrawableStateProxyView">
-        <!-- The source view to delegate touch presses events to. -->
-        <attr name="sourceViewId" format="integer" />
-    </declare-styleable>
-
     <!-- Workspace specific attributes. These attributes are used to customize
          the workspace in XML files. -->
     <declare-styleable name="Workspace">

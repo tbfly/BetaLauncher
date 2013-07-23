@@ -4,39 +4,25 @@
 
 package com.lennox.utils;
 
-import android.app.ActionBar;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.preference.PreferenceManager;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
-import com.android.launcher2.preference.PreferencesProvider;
-import com.android.launcher2.LauncherApplication;
+import com.lennox.launcher.preference.PreferencesProvider;
+import com.lennox.launcher.LauncherApplication;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -49,7 +35,7 @@ public class ThemeUtils {
 
     // SharedPreferences
     public final static String DEFAULT = "Default";
-    public final static String DEFAULT_PACKAGE = "com.android.launcher";
+    public final static String DEFAULT_PACKAGE = "com.lennox.launcher";
     public final static String THEME_PACKAGE_NAME = "icon_theme";
 
     private static final Canvas sCanvas = new Canvas();
@@ -160,7 +146,6 @@ public class ThemeUtils {
     }
    
     private Bitmap drawableToBitmap(Drawable drawable) {
-        Canvas canvas = sCanvas;
         int i = sIconWidth;
         int j = sIconHeight;
         int k = i;
@@ -296,9 +281,6 @@ public class ThemeUtils {
             outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
         } catch (FileNotFoundException fileNotFoundException) {
             //fileNotFoundException.printStackTrace();
-            return;
-        } catch (IOException ioException) {
-            //ioException.printStackTrace();
             return;
         }
         if (outputStream == null) {
