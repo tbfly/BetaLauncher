@@ -4507,6 +4507,7 @@ public final class Launcher extends Activity
                 mWorkspace.hideScrollingIndicator(true);
             }
             mDockDivider.animate().alpha(0f).setDuration(duration);
+            mQsbDivider.animate().alpha(0f).setDuration(duration);
             fromView.animate().alpha(0f).setDuration(duration);
             hideHotseat(true, false);
         } else {
@@ -4530,6 +4531,7 @@ public final class Launcher extends Activity
                 mWorkspace.hideScrollingIndicator(false);
             }
             mDockDivider.setAlpha(0f);
+            mQsbDivider.setAlpha(0f);
             fromView.setAlpha(0f);
             hideHotseat(false, false);
         }
@@ -4604,6 +4606,7 @@ public final class Launcher extends Activity
                     mWorkspace.showScrollingIndicator(true);
                 }
                 mDockDivider.animate().alpha(1f).setDuration(duration);
+                mQsbDivider.animate().alpha(1f).setDuration(duration);
                 toView.animate().alpha(1f).setDuration(duration);
                 showHotseat(animated, false);
             } else {
@@ -4613,6 +4616,7 @@ public final class Launcher extends Activity
                     mWorkspace.showScrollingIndicator(false);
                 }
                 mDockDivider.setAlpha(1.0f);
+                mQsbDivider.setAlpha(1.0f);
                 toView.setAlpha(1.0f);
                 showHotseat(animated, false);
             }
