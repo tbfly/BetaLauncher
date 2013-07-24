@@ -367,11 +367,11 @@ public final class Launcher extends Activity
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             pm.setComponentEnabledSetting(new ComponentName(
                    "com.lennox.launcher", "com.lennox.launcher.appwidgetpicker.AppWidgetPickerActivity"), 
-                   PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+                   PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
         } else {
             pm.setComponentEnabledSetting(new ComponentName(
                    "com.lennox.launcher", "com.lennox.launcher.appwidgetpicker.AppWidgetPickerActivity"), 
-                   PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+                   PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         }
 
         super.onCreate(savedInstanceState);
