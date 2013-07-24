@@ -91,6 +91,8 @@ public class Workspace extends PagedView
         MultiTouchObjectCanvas<Object> {
     private static final String TAG = "Launcher.Workspace";
 
+    private static final boolean DEBUG_CHANGE_STATE_ANIMATIONS = false;
+
     // Y rotation to apply to the workspace screens
     private static final float WORKSPACE_ROTATION = 12.5f;
     private static final float WORKSPACE_OVERSCROLL_ROTATION = 24f;
@@ -103,7 +105,6 @@ public class Workspace extends PagedView
     private static final int FLING_THRESHOLD_VELOCITY = 500;
 
     private static final int MIN_MULTITOUCH_EVENT_INTERVAL = 500;
-
     private static final int MIN_UP_DOWN_GESTURE_DISTANCE = 200;
     private static final int MIN_LEFT_RIGHT_GESTURE_DISTANCE = 150;
 
@@ -132,7 +133,6 @@ public class Workspace extends PagedView
 
     private long mLastMultitouch = 0;
     private boolean mMultitouchGestureDetected = false;
-
 
     /**
      * CellInfo for the cell that is currently being dragged
@@ -507,7 +507,6 @@ public class Workspace extends PagedView
 
     public void onDragStart(DragSource source, Object info, int dragAction) {
         mIsDragOccuring = true;
-        //mLauncher.getHotseat().setDragOccuring(mIsDragOccuring);
         updateChildrenLayersEnabled(false);
         mLauncher.lockScreenOrientation();
         setChildrenBackgroundAlphaMultipliers(1f);
@@ -518,7 +517,6 @@ public class Workspace extends PagedView
 
     public void onDragEnd() {
         mIsDragOccuring = false;
-        //mLauncher.getHotseat().setDragOccuring(mIsDragOccuring);
         updateChildrenLayersEnabled(false);
         mLauncher.unlockScreenOrientation(false);
         mLauncher.getHotseat().setChildrenOutlineAlpha(0f);
@@ -2671,8 +2669,22 @@ public class Workspace extends PagedView
         }
 
         if (animated) {
+            if (DEBUG_CHANGE_STATE_ANIMATIONS) Log.d(TAG, oldState + " > " + state);
             for (int index = 0; index < getChildCount(); index++) {
                 final int i = index;
+
+                if (DEBUG_CHANGE_STATE_ANIMATIONS) {
+                    Log.d(TAG, i + " alpha: " + mOldAlphas[i] + " > " + mNewAlphas[i]);
+                    Log.d(TAG, i + " translationX: " + mOldTranslationXs[i] + " > " + mNewTranslationXs[i]);
+                    Log.d(TAG, i + " translationY: " + mOldTranslationYs[i] + " > " + mNewTranslationYs[i]);
+                    Log.d(TAG, i + " scaleX: " + mOldScaleXs[i] + " > " + mNewScaleXs[i]);
+                    Log.d(TAG, i + " scaleY: " + mOldScaleYs[i] + " > " + mNewScaleYs[i]);
+                    Log.d(TAG, i + " alpha: " + mOldAlphas[i] + " > " + mNewAlphas[i]);
+                    Log.d(TAG, i + " backgroundAlpha: " + mOldBackgroundAlphas[i] + " > " + mNewBackgroundAlphas[i]);
+                    Log.d(TAG, i + " rotation: " + mOldRotations[i] + " > " + mNewRotations[i]);
+                    Log.d(TAG, i + " rotationY: " + mOldRotationYs[i] + " > " + mNewRotationYs[i]);
+                }
+
                 final CellLayout cl = (CellLayout) getChildAt(i);
                 float currentAlpha = cl.getShortcutsAndWidgets().getAlpha();
                 if (mOldAlphas[i] == 0 && mNewAlphas[i] == 0) {
@@ -2681,10 +2693,7 @@ public class Workspace extends PagedView
                     cl.setScaleX(mNewScaleXs[i]);
                     cl.setScaleY(mNewScaleYs[i]);
                     cl.setBackgroundAlpha(mNewBackgroundAlphas[i]);
-                    // because previews need the workspaces to be visible and opaque
-					// we won't adjust their alpha if Launcher.mState is State.PREVIEW
-					if (mLauncher.mState != Launcher.State.PREVIEW)
-						cl.setShortcutAndWidgetAlpha(mNewAlphas[i]);
+                    cl.setShortcutAndWidgetAlpha(mNewAlphas[i]);
                     cl.setRotation(mNewRotations[i]);
                     cl.setRotationY(mNewRotationYs[i]);
                 } else {
@@ -3099,15 +3108,6 @@ public class Workspace extends PagedView
             int[] targetCell, float distance, boolean external, DragView dragView,
             Runnable postAnimationRunnable) {
         if (distance > mMaxDistanceForFolderCreation) return false;
-
-        //if (targetCell[0] >= LauncherModel.getWorkspaceCellCountX()) targetCell[0] =
-                                                     //LauncherModel.getWorkspaceCellCountX() - 1;
-        //if (targetCell[1] >= LauncherModel.getWorkspaceCellCountY()) targetCell[1] =
-                                                     //LauncherModel.getWorkspaceCellCountY() - 1;
-        //if (targetCell[0] < 0 ) targetCell[0] = 0;
-        //if (targetCell[1] < 0 ) targetCell[1] = 0;
-
-        //if (target == null) return false;
         View v = target.getChildAt(targetCell[0], targetCell[1]);
 
         boolean hasntMoved = false;
@@ -3165,7 +3165,7 @@ public class Workspace extends PagedView
     boolean addToExistingFolderIfNecessary(CellLayout target, int[] targetCell,
             float distance, DragObject d, boolean external) {
         if (distance > mMaxDistanceForFolderCreation) return false;
-        //if (target == null) return false;
+
         View dropOverView = target.getChildAt(targetCell[0], targetCell[1]);
         if (!mAddToExistingFolderOnDrop) return false;
         mAddToExistingFolderOnDrop = false;
@@ -4165,8 +4165,8 @@ public class Workspace extends PagedView
                     info.spanY, insertAtFirst);
             cellLayout.onDropChild(view);
             CellLayout.LayoutParams lp = (CellLayout.LayoutParams) view.getLayoutParams();
-            //lp.cellX = mTargetCell[0];
-            //lp.cellY = mTargetCell[1];
+            lp.cellX = mTargetCell[0];
+            lp.cellY = mTargetCell[1];
             cellLayout.getShortcutsAndWidgets().measureChild(view);
 
             LauncherModel.addOrMoveItemInDatabase(mLauncher, info, container, screen,
