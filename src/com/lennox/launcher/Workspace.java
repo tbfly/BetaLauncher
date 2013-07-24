@@ -3109,10 +3109,12 @@ public class Workspace extends PagedView
         ItemInfo aboveInfo = (ItemInfo) dropOverView.getTag();
         boolean aboveShortcut =
                 (aboveInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
-                aboveInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT);
+                aboveInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+                aboveInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION);
         boolean willBecomeShortcut =
                 (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
-                info.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT);
+                info.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+                info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION);
 
         return (aboveShortcut && willBecomeShortcut);
     }

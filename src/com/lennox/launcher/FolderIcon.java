@@ -333,6 +333,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         final int itemType = item.itemType;
         return ((itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
                 itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+                itemType == LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION ||
                 itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER) &&
                 !mFolder.isFull() && item != mInfo && !mInfo.opened);
     }

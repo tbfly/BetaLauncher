@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -259,7 +260,57 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
     public void onClick(View v) {
         Object tag = v.getTag();
-        if (tag instanceof ShortcutInfo) {
+        if (tag instanceof LauncherActionInfo) {
+            // refactor this code from Folder
+            LauncherActionInfo item = (LauncherActionInfo) tag;
+            LauncherAction.Action action = item.action;
+            switch (action) {
+                case AllApps:
+                    mLauncher.showAllApps(true);
+                    break;
+                case RecentApps:
+                    mLauncher.toggleRecentApps();
+                    break;
+                case Search:
+                    mLauncher.onSearchRequested();
+                    break;
+                case VoiceSearch:
+                    mLauncher.launchVoiceSearch();
+                    break;
+                case ExpandNotifications:
+                    mLauncher.getWorkspace().expandStatusBar(false);
+                    break;
+                case ToggleFullscreen:
+                    mLauncher.toggleFullscreenMode();
+                    break;
+                case DefaultScreen:
+                    mLauncher.getWorkspace().moveToDefaultScreen(true);
+                    break;
+                case ShowPreview:
+                    mLauncher.showPreviewLayout(true);
+                    break;
+                case LockUnlock:
+                    mLauncher.toggleLockWorkspace();
+                    break;
+                case ToggleDock:
+                    mLauncher.toggleHotseat();
+                    break;
+                case QuickSettings:
+                    mLauncher.getWorkspace().expandStatusBar(true);
+                    break;
+                case LauncherSettings:
+                    Intent preferences = new Intent().setClass(mLauncher, com.lennox.launcher.preference.Preferences.class);
+                    preferences.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    mLauncher.startActivity(preferences);
+                    break;
+                default:
+            }
+            ((ItemInfo)tag).launchCount++;
+            LauncherModel.updateItemInDatabase(mLauncher, (ItemInfo)tag);
+            if (mInfo.sortType == SORT_USAGE)
+                sortFolder();
+        } else if (tag instanceof ShortcutInfo) {
             // refactor this code from Folder
             ShortcutInfo item = (ShortcutInfo) tag;
             int[] pos = new int[2];
@@ -586,7 +637,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         final ItemInfo item = (ItemInfo) d.dragInfo;
         final int itemType = item.itemType;
         return ((itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
-                    itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT) &&
+                    itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+                    itemType == LauncherSettings.Favorites.ITEM_TYPE_LAUNCHER_ACTION) &&
                     !isFull());
     }
 

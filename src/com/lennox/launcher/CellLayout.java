@@ -498,7 +498,8 @@ public class CellLayout extends ViewGroup {
             }
         }
 
-        int previewOffset = FolderRingAnimator.sPreviewSize;
+        final int previewOffset = FolderRingAnimator.sPreviewSize;
+        final int topPadding = getResources().getDimensionPixelSize(R.dimen.folder_icon_padding_top);
 
         // The folder outer / inner ring image(s)
         for (FolderRingAnimator ringAnimator : mFolderOuterRings) {
@@ -509,7 +510,7 @@ public class CellLayout extends ViewGroup {
             cellToPoint(ringAnimator.mCellX, ringAnimator.mCellY, mTempLocation);
 
             int centerX = mTempLocation[0] + mCellWidth / 2;
-            int centerY = mTempLocation[1] + previewOffset / 2;
+            int centerY = mTempLocation[1] + previewOffset / 2 + topPadding;
 
             canvas.save();
             canvas.translate(centerX - width / 2, centerY - height / 2);
@@ -524,7 +525,7 @@ public class CellLayout extends ViewGroup {
             cellToPoint(ringAnimator.mCellX, ringAnimator.mCellY, mTempLocation);
 
             centerX = mTempLocation[0] + mCellWidth / 2;
-            centerY = mTempLocation[1] + previewOffset / 2;
+            centerY = mTempLocation[1] + previewOffset / 2 + topPadding;
             canvas.save();
             canvas.translate(centerX - width / 2, centerY - width / 2);
             d.setBounds(0, 0, width, height);
@@ -539,7 +540,7 @@ public class CellLayout extends ViewGroup {
 
             cellToPoint(mFolderLeaveBehindCell[0], mFolderLeaveBehindCell[1], mTempLocation);
             int centerX = mTempLocation[0] + mCellWidth / 2;
-            int centerY = mTempLocation[1] + previewOffset / 2;
+            int centerY = mTempLocation[1] + previewOffset / 2 + topPadding;
 
             canvas.save();
             canvas.translate(centerX - width / 2, centerY - width / 2);
