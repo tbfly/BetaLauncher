@@ -320,10 +320,8 @@ public class PreviewLayout extends FrameLayout
             int childCount = ((CellLayout)cl).getShortcutsAndWidgets().getChildCount();
             Bitmap bitmap = null;
             if (childCount > 0) {
-                float originalAlpha = ((CellLayout)cl).getShortcutsAndWidgets().getAlpha();
                 ((CellLayout)cl).getShortcutsAndWidgets().setAlpha(1f);
                 bitmap = cl.getDrawingCache();
-                ((CellLayout)cl).getShortcutsAndWidgets().setAlpha(originalAlpha);
             }
 
             int m = j % 3;
@@ -353,6 +351,11 @@ public class PreviewLayout extends FrameLayout
         if (toWorkspace) {
             // Going from Previews -> Workspace
             mWorkspace.setVisibility(View.VISIBLE);
+            int cellLayoutCount = mWorkspace.getPageCount();
+            for (int i = 0; i < cellLayoutCount; i++) {
+                View cl = mWorkspace.getChildAt(i);
+                cl.setVisibility(View.VISIBLE);
+            }
         } else {
             mContent.setVisibility(View.VISIBLE);
         }

@@ -1831,9 +1831,16 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             View v = getPageAt(i);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -1847,16 +1854,23 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation = TRANSITION_SCREEN_ROTATION * scrollProgress;
                 float translation = mLauncher.getWorkspace().getOffsetXForRotation(rotation, v.getWidth(), v.getHeight());
 
-                if (!vertical) {
-                    v.setTranslationX(translation);
-                    v.setRotationY(rotation);
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!vertical) {
+                        v.setTranslationX(translation);
+                        v.setRotationY(rotation);
+                    } else {
+                        v.setTranslationY(translation);
+                        v.setRotationX(-rotation);
+                    }
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
                 } else {
-                    v.setTranslationY(translation);
-                    v.setRotationX(-rotation);
-                }
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -1869,22 +1883,29 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f + (in ? -0.2f : 0.1f) * Math.abs(scrollProgress);
 
-                // Extra translation to account for the increase in size
-                if (!in) {
-                    if (!vertical) {
-                        float translationX = v.getMeasuredWidth() * 0.1f * -scrollProgress;
-                        v.setTranslationX(translationX);
-                    } else {
-                        float translationY = v.getMeasuredHeight() * 0.1f * -scrollProgress;
-                        v.setTranslationY(translationY);
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    // Extra translation to account for the increase in size
+                    if (!in) {
+                        if (!vertical) {
+                            float translationX = v.getMeasuredWidth() * 0.1f * -scrollProgress;
+                            v.setTranslationX(translationX);
+                        } else {
+                            float translationY = v.getMeasuredHeight() * 0.1f * -scrollProgress;
+                            v.setTranslationY(translationY);
+                        }
                     }
-                }
 
-                v.setScaleX(scale);
-                v.setScaleY(scale);
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    v.setScaleX(scale);
+                    v.setScaleY(scale);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -1898,40 +1919,48 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation =
                         (up ? TRANSITION_SCREEN_ROTATION : -TRANSITION_SCREEN_ROTATION) * scrollProgress;
 
-                if (!vertical) {
-                    float translationX = v.getMeasuredWidth() * scrollProgress;
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!vertical) {
+                        float translationX = v.getMeasuredWidth() * scrollProgress;
 
-                    float rotatePoint =
+                        float rotatePoint =
                             (v.getMeasuredWidth() * 0.5f) /
                             (float) Math.tan(Math.toRadians((double) (TRANSITION_SCREEN_ROTATION * 0.5f)));
 
-                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
-                    if (up) {
-                        v.setPivotY(-rotatePoint);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        if (up) {
+                            v.setPivotY(-rotatePoint);
+                        } else {
+                            v.setPivotY(v.getMeasuredHeight() + rotatePoint);
+                        }
+                        v.setRotation(rotation);
+                        v.setTranslationX(translationX);
                     } else {
-                        v.setPivotY(v.getMeasuredHeight() + rotatePoint);
-                    }
-                    v.setRotation(rotation);
-                    v.setTranslationX(translationX);
-                } else {
-                    float translationY = v.getMeasuredHeight() * scrollProgress;
+                        float translationY = v.getMeasuredHeight() * scrollProgress;
 
-                    float rotatePoint =
+                        float rotatePoint =
                             (v.getMeasuredHeight() * 0.5f) /
                             (float) Math.tan(Math.toRadians((double) (TRANSITION_SCREEN_ROTATION * 0.5f)));
 
-                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    if (up) {
-                        v.setPivotX(-rotatePoint);
-                    } else {
-                        v.setPivotX(v.getMeasuredWidth() + rotatePoint);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        if (up) {
+                            v.setPivotX(-rotatePoint);
+                        } else {
+                            v.setPivotX(v.getMeasuredWidth() + rotatePoint);
+                        }
+                        v.setRotation(-rotation);
+                        v.setTranslationY(translationY);
+                   }
+
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
                     }
-                    v.setRotation(-rotation);
-                    v.setTranslationY(translationY);
-                }
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -1944,9 +1973,9 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotationAmount = (in ? 90.0f : 120.0f);
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
-                float scale = 1.0f - Math.abs(scrollProgress) * 0.2f;
+                float scale = 1.0f - Math.abs(scrollProgress) * 0.1f;
 
-                if (scrollProgress >= -0.95f && scrollProgress <= 0.95f) {
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
                     if (in) {
                         v.setCameraDistance(mDensity * mCameraDistance);
                     }
@@ -1963,13 +1992,16 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         v.setPivotX(v.getMeasuredWidth() * 0.5f);
                         v.setRotationX(-rotation);
                     }
+
                     if (v.getVisibility() != VISIBLE) {
                         v.setVisibility(VISIBLE);
                     }
-                    float alpha = (1 - Math.abs(scrollProgress));
-                    v.setAlpha(alpha);
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
                 } else {
                     v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -1980,24 +2012,32 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             View v = getPageAt(i);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
-                float rotation = (in ? 90.0f : -90.0f) * scrollProgress;
+                float rotation = (in ? 110.0f : -110.0f) * scrollProgress;
 
-                if (in) {
-                    v.setCameraDistance(mDensity * mCameraDistance);
-                }
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (in) {
+                        v.setCameraDistance(mDensity * mCameraDistance);
+                    }
 
-                if (!vertical) {
-                    v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
-                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    v.setRotationY(rotation);
+                    if (!vertical) {
+                        v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setRotationY(rotation);
+                    } else {
+                        v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setRotationX(-rotation);
+                    }
+
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
                 } else {
-                    v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
-                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
-                    v.setRotationX(-rotation);
-                }
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -2034,11 +2074,21 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         cl.setVisibility(VISIBLE);
                     }
                     if (mFadeInAdjacentScreens) {
-                        float alpha = 1 - Math.abs(scrollProgress);
-                        cl.setAlpha(alpha);
+                        setCellLayoutFadeAdjacent(cl, scrollProgress);
                     }
                 } else {
                     cl.setVisibility(INVISIBLE);
+                    PagedViewCellLayoutChildren children = cl.getChildrenLayout();
+                    for (int j = 0; j < children.getChildCount(); j++) {
+                        View v = children.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setTranslationX(0);
+                        v.setRotationY(0f);
+                        v.setTranslationY(0);
+                        v.setRotationX(0f);
+                    }
+                    cl.invalidate();
                 }
             } else if (view instanceof PagedViewGridLayout) {
                 PagedViewGridLayout cl = (PagedViewGridLayout) view;
@@ -2066,11 +2116,20 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         cl.setVisibility(VISIBLE);
                     }
                     if (mFadeInAdjacentScreens) {
-                        float alpha = 1 - Math.abs(scrollProgress);
-                        cl.setAlpha(alpha);
+                        setCellLayoutFadeAdjacent(cl, scrollProgress);
                     }
                 } else {
                     cl.setVisibility(INVISIBLE);
+                    for (int j = 0; j < cl.getChildCount(); j++) {
+                        View v = cl.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setTranslationX(0);
+                        v.setRotationY(0f);
+                        v.setTranslationY(0);
+                        v.setRotationX(0f);
+                    }
+                    cl.invalidate();
                 }
             } else if (view instanceof CellLayout) {
                 CellLayout cl = (CellLayout) view;
@@ -2099,11 +2158,21 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         cl.setVisibility(VISIBLE);
                     }
                     if (mFadeInAdjacentScreens) {
-                        float alpha = 1 - Math.abs(scrollProgress);
-                        cl.setAlpha(alpha);
+                        setCellLayoutFadeAdjacent(cl, scrollProgress);
                     }
                 } else {
                     cl.setVisibility(INVISIBLE);
+                    ShortcutAndWidgetContainer children = cl.getShortcutsAndWidgets();
+                    for (int j = 0; j < children.getChildCount(); j++) {
+                        View v = children.getChildAt(j);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setTranslationX(0);
+                        v.setRotationY(0f);
+                        v.setTranslationY(0);
+                        v.setRotationX(0f);
+                    }
+                    cl.invalidate();
                 }
             }
         }
@@ -2121,34 +2190,36 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                         (!vertical ? v.getMeasuredWidth() : v.getMeasuredHeight());
                 float alpha;
 
-                if (!LauncherApplication.isScreenLarge() || scrollProgress < 0) {
-                    alpha = scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
-                        1 - Math.abs(scrollProgress)) : 1.0f;
-                } else {
-                    // On large screens we need to fade the page as it nears its leftmost position
-                    alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
-                }
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!LauncherApplication.isScreenLarge() || scrollProgress < 0) {
+                        alpha = scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
+                            1 - Math.abs(scrollProgress)) : 1.0f;
+                    } else {
+                        // On large screens we need to fade the page as it nears its leftmost position
+                        alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
+                    }
+                    if (!vertical) {
+                        v.setTranslationX(translation);
+                    } else {
+                        v.setTranslationY(translation);
+                    }
+                    v.setScaleX(scale);
+                    v.setScaleY(scale);
+                    v.setAlpha(alpha);
 
-                if (!vertical) {
-                    v.setTranslationX(translation);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
                 } else {
-                    v.setTranslationY(translation);
-                }
-                v.setScaleX(scale);
-                v.setScaleY(scale);
-                v.setAlpha(alpha);
-
-                // If the view has 0 alpha, we set it to be invisible so as to prevent
-                // it from accepting touches
-                if (alpha <= 0) {
                     v.setVisibility(INVISIBLE);
-                } else if (v.getVisibility() != VISIBLE) {
-                    v.setVisibility(VISIBLE);
+                    v.invalidate();
                 }
             }
         }
     }
-
 
     private void screenScrolledAccordion(int screenScroll, boolean vertical) {
         for (int i = 0; i < getChildCount(); i++) {
@@ -2157,17 +2228,24 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f - Math.abs(scrollProgress);
 
-                if (!vertical) {
-                    v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
-                    v.setScaleX(scale);
-                } else {
-                    v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
-                    v.setScaleY(scale);
-                }
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!vertical) {
+                        v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
+                        v.setScaleX(scale);
+                    } else {
+                        v.setPivotY(scrollProgress < 0 ? 0 : v.getMeasuredHeight());
+                        v.setScaleY(scale);
+                    }
 
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -2180,17 +2258,23 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = 180.0f * scrollProgress;
 
-                v.setRotation(rotation);
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (getMeasuredHeight() > getMeasuredWidth()) {
+                        float translationX = (getMeasuredHeight() - getMeasuredWidth()) / 2.0f * -scrollProgress;
+                        v.setTranslationX(translationX);
+                    }
 
-                if (getMeasuredHeight() > getMeasuredWidth()) {
-                    float translationX =
-                            (getMeasuredHeight() - getMeasuredWidth()) / 2.0f * -scrollProgress;
-                    v.setTranslationX(translationX);
-                }
+                    v.setRotation(rotation);
 
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -2204,6 +2288,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float rotation = -180.0f * scrollProgress;
 
                 if (scrollProgress >= -0.5f && scrollProgress <= 0.5f) {
+                    v.setCameraDistance(mDensity * mCameraDistance);
                     v.setPivotX(v.getMeasuredWidth() * 0.5f);
                     v.setPivotY(v.getMeasuredHeight() * 0.5f);
                     if (!vertical) {
@@ -2212,17 +2297,16 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     } else {
                         v.setTranslationY(v.getMeasuredHeight() * scrollProgress);
                         v.setRotationX(-rotation);
-                        v.setCameraDistance(mDensity * mCameraDistance);
                     }
                     if (v.getVisibility() != VISIBLE) {
                         v.setVisibility(VISIBLE);
                     }
                     if (mFadeInAdjacentScreens) {
-                        float alpha = 1 - Math.abs(scrollProgress);
-                        v.setAlpha(alpha);
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
                     v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -2235,19 +2319,26 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? TRANSITION_SCREEN_ROTATION : -TRANSITION_SCREEN_ROTATION) * scrollProgress;
 
-                if (!vertical) {
-                    v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
-                    v.setPivotY(v.getMeasuredHeight() * 0.5f);
-                    v.setRotationY(rotation);
-                } else {
-                    v.setPivotY((scrollProgress + 1) * v.getMeasuredHeight() * 0.5f);
-                    v.setPivotX(v.getMeasuredWidth() * 0.5f);
-                    v.setRotationX(-rotation);
-                }
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!vertical) {
+                        v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
+                        v.setPivotY(v.getMeasuredHeight() * 0.5f);
+                        v.setRotationY(rotation);
+                    } else {
+                        v.setPivotY((scrollProgress + 1) * v.getMeasuredHeight() * 0.5f);
+                        v.setPivotX(v.getMeasuredWidth() * 0.5f);
+                        v.setRotationX(-rotation);
+                    }
 
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -2260,22 +2351,28 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = 90.0f * scrollProgress;
 
-                v.setCameraDistance(mDensity * mCameraDistance);
-                if (!vertical) {
-                    v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
-                    v.setPivotX(left ? 0f : v.getMeasuredWidth());
-                    v.setPivotY(v.getMeasuredHeight() / 2);
-                    v.setRotationY(-rotation);
-                } else {
-                    v.setTranslationY(v.getMeasuredHeight() * scrollProgress);
-                    v.setPivotX(v.getMeasuredWidth() / 2);
-                    v.setPivotY(left ? 0f : v.getMeasuredHeight());
-                    v.setRotationX(rotation);
-                }
+                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                    if (!vertical) {
+                        v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
+                        v.setPivotX(left ? 0f : v.getMeasuredWidth());
+                        v.setPivotY(v.getMeasuredHeight() / 2);
+                        v.setRotationY(-rotation);
+                    } else {
+                        v.setTranslationY(v.getMeasuredHeight() * scrollProgress);
+                        v.setPivotX(v.getMeasuredWidth() / 2);
+                        v.setPivotY(left ? 0f : v.getMeasuredHeight());
+                        v.setRotationX(rotation);
+                    }
 
-                if (mFadeInAdjacentScreens) {
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    v.setAlpha(alpha);
+                    if (v.getVisibility() != VISIBLE) {
+                        v.setVisibility(VISIBLE);
+                    }
+                    if (mFadeInAdjacentScreens) {
+                        setCellLayoutFadeAdjacent(v, scrollProgress);
+                    }
+                } else {
+                    v.setVisibility(INVISIBLE);
+                    v.invalidate();
                 }
             }
         }
@@ -2407,6 +2504,11 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 }
             }
         }
+    }
+
+    private void setCellLayoutFadeAdjacent(View child, float scrollProgress) {
+        float alpha = 1 - Math.abs(scrollProgress);
+        child.setAlpha(alpha);
     }
 
     protected void overScroll(float amount) {
