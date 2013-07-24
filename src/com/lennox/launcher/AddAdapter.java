@@ -40,9 +40,10 @@ public class AddAdapter extends BaseAdapter {
 
     public static final int ITEM_ACTION = 0;
     public static final int ITEM_APPLICATION = 1;
-    public static final int ITEM_SHORTCUT = 2;
-    public static final int ITEM_APPWIDGET = 3;
-    public static final int ITEM_WALLPAPER = 4;
+    public static final int ITEM_ACTIVITY = 2;
+    public static final int ITEM_SHORTCUT = 3;
+    public static final int ITEM_APPWIDGET = 4;
+    public static final int ITEM_WALLPAPER = 5;
 
     /**
      * Specific item in our list.
@@ -72,10 +73,13 @@ public class AddAdapter extends BaseAdapter {
         Resources res = launcher.getResources();
 
         mItems.add(new ListItem(res, R.string.group_actions,
-                R.mipmap.ic_launcher_home, ITEM_ACTION));
+                R.drawable.ic_launcher_action, ITEM_ACTION));
 
         mItems.add(new ListItem(res, R.string.group_applications,
-                R.mipmap.ic_launcher_application, ITEM_APPLICATION));
+                R.drawable.ic_launcher_app, ITEM_APPLICATION));
+
+        mItems.add(new ListItem(res, R.string.group_activities,
+                R.drawable.ic_launcher_activity, ITEM_ACTIVITY));
 
         mItems.add(new ListItem(res, R.string.group_shortcuts,
                 R.drawable.ic_launcher_shortcut, ITEM_SHORTCUT));
@@ -84,7 +88,7 @@ public class AddAdapter extends BaseAdapter {
                 R.drawable.ic_launcher_appwidget, ITEM_APPWIDGET));
 
         mItems.add(new ListItem(res, R.string.group_wallpapers,
-                R.mipmap.ic_launcher_wallpaper, ITEM_WALLPAPER));
+                R.drawable.ic_launcher_wallpaper, ITEM_WALLPAPER));
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {

@@ -147,6 +147,7 @@ public final class Launcher extends Activity
     private static final int REQUEST_PICK_SHORTCUT = 7;
     private static final int REQUEST_PICK_APPWIDGET = 9;
     private static final int REQUEST_PICK_WALLPAPER = 10;
+    private static final int REQUEST_PICK_ACTIVITY = 12;
 
     private static final int REQUEST_BIND_APPWIDGET = 11;
 
@@ -598,6 +599,7 @@ public final class Launcher extends Activity
         boolean result = false;
         switch (args.requestCode) {
             case REQUEST_PICK_APPLICATION:
+            case REQUEST_PICK_ACTIVITY:
                 completeAddApplication(args.intent, args.container, args.screen, args.cellX,
                         args.cellY);
                 break;
@@ -2153,7 +2155,21 @@ public final class Launcher extends Activity
     }
 
     void processShortcut(Intent intent) {
-        startActivityForResultSafely(intent, REQUEST_CREATE_SHORTCUT);
+        // Handle case where user selected "Applications"
+        String applicationName = getResources().getString(R.string.group_applications);
+        String shortcutName = intent.getStringExtra(Intent.EXTRA_SHORTCUT_NAME);
+
+        if (applicationName != null && applicationName.equals(shortcutName)) {
+            Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+            Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
+            pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
+            pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_application));
+            startActivityForResultSafely(pickIntent, REQUEST_PICK_APPLICATION);
+        } else {
+            startActivityForResultSafely(intent, REQUEST_CREATE_SHORTCUT);
+        }
     }
 
     void processWallpaper(Intent intent) {
@@ -2937,25 +2953,24 @@ public final class Launcher extends Activity
     }
 
     void pickActivity() {
-        Intent mainIntent = new Intent();
         Intent pickIntent = new Intent("com.lennox.launcher.PICK_ACTIVITY");
-        pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
-        pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_application));
-        startActivityForResultSafely(pickIntent, REQUEST_PICK_APPLICATION);
+        pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_activity));
+
+        startActivityForResultSafely(pickIntent, REQUEST_PICK_ACTIVITY);
     }
 
     void pickApplication() {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
-        Intent pickIntent = new Intent("com.lennox.launcher.PICK_ACTIVITY");
+        Intent pickIntent = new Intent("com.lennox.launcher.PICK_APPLICATION");
         pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
         pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_application));
         startActivityForResultSafely(pickIntent, REQUEST_PICK_APPLICATION);
     }
 
     private void pickShortcut() {
-        Intent pickIntent = new Intent("com.lennox.launcher.PICK_ACTIVITY");
+        Intent pickIntent = new Intent("com.lennox.launcher.PICK_SHORTCUT");
         pickIntent.putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_CREATE_SHORTCUT));
         pickIntent.putExtra(Intent.EXTRA_TITLE, getText(R.string.title_select_shortcut));
 
@@ -3795,6 +3810,10 @@ public final class Launcher extends Activity
             switch (item.actionTag) {
                 case AddAdapter.ITEM_APPLICATION: {
                     pickApplication();
+                    break;
+                }
+                case AddAdapter.ITEM_ACTIVITY: {
+                    pickActivity();
                     break;
                 }
                 case AddAdapter.ITEM_SHORTCUT: {

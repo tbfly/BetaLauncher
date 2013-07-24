@@ -23,8 +23,6 @@
     android:versionCode="3"
     android:versionName="@string/application_version">
 
-    <original-package android:name="com.lennox.launcher" />
-
     <uses-sdk
         android:minSdkVersion="15"
         android:targetSdkVersion="17" />
@@ -110,8 +108,7 @@
         </receiver>
 
         <activity android:name="com.lennox.launcher.preference.Preferences"
-            android:label="@string/preferences_title"
-            android:configChanges="keyboardHidden|orientation" >
+            android:label="@string/preferences_title">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.lennox.category.LAUNCHER_PREFERENCES" />
@@ -145,8 +142,8 @@
                 android:theme="@android:style/Theme.Holo.Dialog"
                 android:finishOnCloseSystemDialogs="true">
             <intent-filter>
-                <action android:name="android.intent.action.PICK_ACTIVITY" />
-                <action android:name="com.lennox.launcher.PICK_ACTIVITY" />
+                <action android:name="com.lennox.launcher.PICK_APPLICATION" />
+                <action android:name="com.lennox.launcher.PICK_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -154,9 +151,10 @@
         <!-- Built in activity shortcut maker -->
         <activity android:name="com.lennox.launcher.ActivityShortcutPicker"
                 android:label="@string/menu_activity_picker_label"
-                android:theme="@android:style/Theme.Holo.Dialog" >
+                android:theme="@android:style/Theme.Holo"
+                android:finishOnCloseSystemDialogs="true">
             <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <action android:name="com.lennox.launcher.PICK_ACTIVITY" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -67,6 +67,8 @@
 
     <!-- Options in "Add to Home" dialog box; Title of the group containing the list of all launcher actions -->
     <string name="group_actions">Actions</string>
+    <string name="group_activities">Activities</string>
+    <string name="title_select_activity">Choose activity</string>
 
     <!-- Widget picker     -->
     <string name="widget_picker">Widget Picker</string>
