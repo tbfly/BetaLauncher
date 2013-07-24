@@ -3795,7 +3795,7 @@ public class Workspace extends PagedView
         if (isSmall()) {
             if (mLauncher.getHotseat() != null && !isExternalDragWidget(d)) {
                 mLauncher.getHotseat().getHitRect(r);
-                if (r.contains(d.x, d.y)) {
+                if (mShowHotseat && r.contains(d.x, d.y)) {
                     layout = mLauncher.getHotseat().getLayout();
                 }
             }
@@ -3816,7 +3816,7 @@ public class Workspace extends PagedView
             // Test to see if we are over the hotseat otherwise just use the current page
             if (mLauncher.getHotseat() != null && !isDragWidget(d)) {
                 mLauncher.getHotseat().getHitRect(r);
-                if (r.contains(d.x, d.y)) {
+                if (mShowHotseat && r.contains(d.x, d.y)) {
                     layout = mLauncher.getHotseat().getLayout();
                 }
             }

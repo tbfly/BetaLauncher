@@ -3646,7 +3646,7 @@ public final class Launcher extends Activity
             showHotseat(true, true);
         } else {
             hideHotseat(true, true);
-            mHotseat.setVisibility(View.GONE);
+            mHotseat.setVisibility(View.INVISIBLE);
             mHotseat.invalidate();
         }
         PreferencesProvider.Interface.Dock.setShowDock(this, newStatus, isLandscape);
