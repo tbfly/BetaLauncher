@@ -36,6 +36,8 @@ import com.lennox.launcher.LennoxCompatibility;
 
 public class AppWidgetPickerActivity extends Activity {
 
+    private static final int REQUEST_BIND_APPWIDGET = 11;
+
         private Intent fIntent = null;
         private PackageManager fPManager = null;
         private AppWidgetManager fAppWManager = null;
@@ -59,7 +61,6 @@ public class AppWidgetPickerActivity extends Activity {
 
                 fItems = new ArrayList<SubItem>();
                 AddAppWidgetProviderInfos();
-                AddCustomAppWidgets();
                 Collections.sort(fItems, new Comparator<SubItem>() {
 
                                 @Override
@@ -86,26 +87,28 @@ public class AppWidgetPickerActivity extends Activity {
 
         public void finishOk(SubItem item) {
         int result;
-        if (item.getExtra() != null) {
-            // If there are any extras, it's because this entry is custom.
-            // Don't try to bind it, just pass it back to the app.
-            setResult(RESULT_OK, getIntent(item));
-        } else {
-            try {
-                LennoxCompatibility.bindAppWidgetIdIfAllowed(fAppWManager, fAppWidgetId, item.getProvider());
-                result = RESULT_OK;
-            } catch (IllegalArgumentException e) {
-                // This is thrown if they're already bound, or otherwise somehow
-                // bogus.  Set the result to canceled, and exit.  The app *should*
-                // clean up at this point.  We could pass the error along, but
-                // it's not clear that that's useful -- the widget will simply not
-                // appear.
-                result = RESULT_CANCELED;
+
+            boolean success = LennoxCompatibility.bindAppWidgetIdIfAllowed(fAppWManager,fAppWidgetId,
+                        item.getProvider());
+            if(!success) {
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, fAppWidgetId);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, item.getProvider());
+            startActivityForResult(intent, REQUEST_BIND_APPWIDGET);
+            } else {
+            setResult(RESULT_OK, fIntent);
+            finish();
             }
-            setResult(result, fIntent);
         }
-        finish();
+
+    @Override
+    protected void onActivityResult(
+            final int requestCode, final int resultCode, final Intent data) {
+        if (requestCode == REQUEST_BIND_APPWIDGET) {
+            setResult(resultCode, fIntent);
+            finish();
         }
+    }
 
         /**
      * Build the {@link Intent} described by this item. If this item
@@ -177,49 +180,6 @@ public class AppWidgetPickerActivity extends Activity {
                         }
                 }
         }
-
-    private void AddCustomAppWidgets() {
-        final Bundle extras = fIntent.getExtras();
-
-        // get and validate the extras they gave us
-        ArrayList<AppWidgetProviderInfo> customInfo = null;
-        ArrayList<Bundle> customExtras = null;
-        try_custom_items: {
-            customInfo = extras.getParcelableArrayList(AppWidgetManager.EXTRA_CUSTOM_INFO);
-
-            if (customInfo == null || customInfo.size() == 0) {
-                break try_custom_items;
-            }
-
-            int customInfoSize = customInfo.size();
-            for (int i=0; i<customInfoSize; i++) {
-                Parcelable p = customInfo.get(i);
-                if (p == null || !(p instanceof AppWidgetProviderInfo)) {
-                    customInfo = null;
-                    break try_custom_items;
-                }
-            }
-
-            customExtras = extras.getParcelableArrayList(AppWidgetManager.EXTRA_CUSTOM_EXTRAS);
-            if (customExtras == null) {
-                customInfo = null;
-                break try_custom_items;
-            }
-            int customExtrasSize = customExtras.size();
-            if (customInfoSize != customExtrasSize) {
-                break try_custom_items;
-            }
-            for (int i=0; i<customExtrasSize; i++) {
-                Parcelable p = customExtras.get(i);
-                if (p == null || !(p instanceof Bundle)) {
-                    customInfo = null;
-                    customExtras = null;
-                    break try_custom_items;
-                }
-            }
-        }
-        putAppWidgetItems(customInfo, customExtras);
-    }
 
     private void putAppWidgetItems(List<AppWidgetProviderInfo> appWidgets, List<Bundle> customExtras) {
         if (appWidgets == null)
