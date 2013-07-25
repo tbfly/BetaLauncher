@@ -50,10 +50,6 @@ public class LennoxCompatibility {
                 //m.setAccessible(true);
                 m.invoke(appWidgetManager,appWidgetId,componentName);
                 return true;
-            //appWidgetManager.bindAppWidgetId(appWidgetId,componentName);
-            //} catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                //    e.printStackTrace();
             } catch (IllegalArgumentException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

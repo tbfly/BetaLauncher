@@ -2143,13 +2143,20 @@ public final class Launcher extends Activity
             if (success) {
                 addAppWidgetImpl(appWidgetId, info, null, info.info);
             } else {
-                mPendingAddWidgetInfo = info.info;
-                Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.componentName);
-                // TODO: we need to make sure that this accounts for the options bundle.
-                // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
-                startActivityForResult(intent, REQUEST_BIND_APPWIDGET);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mPendingAddWidgetInfo = info.info;
+                    Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.componentName);
+                    // TODO: we need to make sure that this accounts for the options bundle.
+                    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
+                    startActivityForResult(intent, REQUEST_BIND_APPWIDGET);
+                } else {
+                    String intent = AppWidgetManager.ACTION_APPWIDGET_PICK;
+                    Intent pickIntent = new Intent(intent);
+                    pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+                    startActivityForResult(pickIntent, REQUEST_PICK_APPWIDGET);
+                }
             }
         }
     }
