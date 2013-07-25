@@ -26,6 +26,8 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -62,28 +64,42 @@ public class ThemeUtils {
         } 
         return px * density / 240;
     } 
-    
-    public String[] createThemeNameList(String[] packageNames) {
-        String[] entries = new String[packageNames.length];
-        for (int i = 0; i < packageNames.length; i++) {
-            String themeName = getThemeName(packageNames[i]);
-            entries[i] = themeName;
-        }
-        entries[0] = DEFAULT;
-        return entries;
-    }
 
-    public String[] createThemePackageList() {
+    public List<Theme> getThemePackageList() {
 
-        List<String> themeList = new ArrayList<String>();
+        List<Theme> mThemeList = new ArrayList<Theme>();
+        List<String> tempList = new ArrayList<String>();
+        final PackageManager pm = mContext.getPackageManager();
 
-        // Initialise with Apex Themes
+        // Initialise with Lennox Launcher themes
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory("com.anddoes.launcher.THEME");
-        PackageManager pm = mContext.getPackageManager();
+        intent.addCategory("com.lennox.launcher.THEME");
+        try {
+            mThemeList.add(new Theme(DEFAULT, DEFAULT_PACKAGE, intent, pm.getApplicationIcon(DEFAULT_PACKAGE)));
+        } catch(PackageManager.NameNotFoundException expt) {
+            mThemeList.add(new Theme(DEFAULT, DEFAULT_PACKAGE, intent, null));
+        }
         List<ResolveInfo> themes = pm.queryIntentActivities(intent, 0);
         for (ResolveInfo ri : themes) {
-            themeList.add(ri.activityInfo.packageName.toString());
+            String packageName = ri.activityInfo.packageName.toString();
+            String label = getThemeName(packageName);
+            Drawable icon = ri.activityInfo.applicationInfo.loadIcon(pm);
+            tempList.add(packageName);
+            mThemeList.add(new Theme(label, packageName, intent, icon));
+        }
+
+        // Add Apex Themes
+        intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory("com.anddoes.launcher.THEME");
+        themes = pm.queryIntentActivities(intent, 0);
+        for (ResolveInfo ri : themes) {
+            String packageName = ri.activityInfo.packageName.toString();
+            if (!tempList.contains(packageName)) {
+                String label = getThemeName(packageName);
+                Drawable icon = ri.activityInfo.applicationInfo.loadIcon(pm);
+                tempList.add(packageName);
+                mThemeList.add(new Theme(label, packageName, intent, icon));
+            }
         }
 
         // Add Go Launcher EX themes
@@ -91,19 +107,23 @@ public class ThemeUtils {
         themes = pm.queryIntentActivities(intent, 0);
         for (ResolveInfo ri : themes) {
             String packageName = ri.activityInfo.packageName.toString();
-            if (!themeList.contains(packageName)) {
-                themeList.add(packageName);
+            if (!tempList.contains(packageName)) {
+                String label = getThemeName(packageName);
+                Drawable icon = ri.activityInfo.applicationInfo.loadIcon(pm);
+                tempList.add(packageName);
+                mThemeList.add(new Theme(label, packageName, intent, icon));
             }
         }
 
-        String[] values = new String[themeList.size() + 1];
-        values[0] = DEFAULT_PACKAGE;
-        for (int i = 0; i < themeList.size(); i++) {
-            values[i + 1] = themeList.get(i);
-        }
-        return values;
+        tempList = null;
+        Collections.sort(mThemeList, new Comparator<Theme>() {
+            public int compare(Theme o1, Theme o2) {
+                return o1.label.compareToIgnoreCase(o2.label);
+            }
+        });
+        return mThemeList;
     }
-    
+
     private Bitmap composeIcon(Bitmap base, Bitmap background) {
         int baseWidth = base.getWidth();
         int baseHeight = base.getHeight();
@@ -399,6 +419,22 @@ public class ThemeUtils {
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(THEME_PACKAGE_NAME, packageName);
         editor.commit();
+    }
+
+    public static class Theme {
+
+        public String label;
+        public String packageName;
+        public String intent;
+        public Drawable icon;
+
+        Theme(String label, String packageName, Intent intent, Drawable icon) {
+            this.label = label;
+            this.packageName = packageName;
+            this.intent = intent.toString();
+            this.icon = icon;
+        }
+
     }
 
 }

@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,6 +46,7 @@ import android.widget.Toast;
 import com.lennox.launcher.LauncherProvider;
 import com.lennox.launcher.LauncherApplication;
 import com.lennox.launcher.R;
+import com.lennox.utils.ThemeUtils;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -200,7 +202,7 @@ public class Preferences extends PreferenceActivity
 
     public static class GeneralFragment extends PreferenceFragment
             implements Preference.OnPreferenceChangeListener {
-        private ListPreference mIconTheme;
+        private ImageListPreference mIconTheme;
         private LauncherApplication context;
 
         @Override
@@ -211,15 +213,25 @@ public class Preferences extends PreferenceActivity
 
             PreferenceScreen prefSet = getPreferenceScreen();
 
-            mIconTheme = (ListPreference) prefSet.findPreference("icon_theme");
+            mIconTheme = (ImageListPreference) prefSet.findPreference("icon_theme");
             mIconTheme.setOnPreferenceChangeListener(this);
 
             context = (LauncherApplication) (getActivity().getApplicationContext());
 
             if (context != null) {
-                String[] packageList = context.mThemeUtils.createThemePackageList();
+                List<ThemeUtils.Theme> themeList = context.mThemeUtils.getThemePackageList();
+                String[] packageList = new String[themeList.size()];
+                String[] labelList = new String[themeList.size()];
+                Drawable[] iconList = new Drawable[themeList.size()];
+                for (int i = 0; i < themeList.size(); i++) {
+                    ThemeUtils.Theme theme = themeList.get(i);
+                    packageList[i] = theme.packageName;
+                    labelList[i] = theme.label;
+                    iconList[i] = theme.icon;
+                }
                 mIconTheme.setEntryValues(packageList);
-                mIconTheme.setEntries(context.mThemeUtils.createThemeNameList(packageList));
+                mIconTheme.setEntryIcons(iconList);
+                mIconTheme.setEntries(labelList);
                 String currentPackage = PreferencesProvider.Interface.General.getThemePackageName();
                 String currentThemeName = context.mThemeUtils.getThemeName(currentPackage);
                 mIconTheme.setSummary(currentThemeName);
@@ -228,7 +240,7 @@ public class Preferences extends PreferenceActivity
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
-            if ( preference instanceof ListPreference && preference.getKey().equals("icon_theme")) {
+            if ( preference instanceof ImageListPreference && preference.getKey().equals("icon_theme")) {
                 mIconTheme.setSummary(mIconTheme.getEntries()[mIconTheme.findIndexOfValue((String) newValue)]);
                 context.mThemeUtils.clearCache();
             /*try {

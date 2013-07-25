@@ -18,7 +18,7 @@
     xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
     android:key="lennox_general"
     android:title="@string/preferences_interface_general_title">
-    <ListPreference
+    <com.lennox.launcher.preference.ImageListPreference
         android:key="icon_theme"
         android:title="@string/icon_theme" />
     <ListPreference

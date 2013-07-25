@@ -202,4 +202,8 @@
         <attr name="pickerRowTitle34" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="ImageListPreference">
+        <attr name="entryImages" format="reference" />
+    </declare-styleable>
+
 </resources>
