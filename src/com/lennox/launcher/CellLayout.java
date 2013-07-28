@@ -2217,7 +2217,10 @@ public class CellLayout extends ViewGroup {
             }
             initDeltaX = child.getTranslationX();
             initDeltaY = child.getTranslationY();
-            finalScale = getChildrenScale() - 4.0f / child.getWidth();
+            finalScale = 1.0f - 4.0f / child.getWidth();
+            if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
+                finalScale = getChildrenScale() - 4.0f / child.getWidth();
+            }
             initScale = child.getScaleX();
             this.child = child;
         }
@@ -2259,7 +2262,10 @@ public class CellLayout extends ViewGroup {
                     // We make sure to end only after a full period
                     initDeltaX = 0;
                     initDeltaY = 0;
-                    initScale = getChildrenScale();
+                    initScale = 1.0f;
+                    if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
+                        initScale = getChildrenScale();
+                    }
                 }
             });
             mShakeAnimators.put(child, this);
@@ -2279,9 +2285,16 @@ public class CellLayout extends ViewGroup {
 
             AnimatorSet s = LauncherAnimUtils.createAnimatorSet();
             a = s;
+            float scaleX = 1.0f;
+            float scaleY = 1.0f;
+            if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
+                scaleX = getChildrenScale();
+                scaleY = scaleX;
+            }
+
             s.playTogether(
-                LauncherAnimUtils.ofFloat(child, "scaleX", getChildrenScale()),
-                LauncherAnimUtils.ofFloat(child, "scaleY", getChildrenScale()),
+                LauncherAnimUtils.ofFloat(child, "scaleX", scaleX),
+                LauncherAnimUtils.ofFloat(child, "scaleY", scaleY),
                 LauncherAnimUtils.ofFloat(child, "translationX", 0f),
                 LauncherAnimUtils.ofFloat(child, "translationY", 0f)
             );

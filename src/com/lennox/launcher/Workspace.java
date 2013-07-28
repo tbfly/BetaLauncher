@@ -554,10 +554,6 @@ public class Workspace extends PagedView
         mOriginalPaddingLeft = getPaddingLeft();
         mOriginalPaddingRight = getPaddingRight();
         mOriginalPaddingBottom = getPaddingBottom();
-        View dockScrollingIndicator = findViewById(R.id.paged_view_indicator_dock);
-        if (dockScrollingIndicator != null) {
-            mOriginalDockScrollingMargin = ((MarginLayoutParams)dockScrollingIndicator.getLayoutParams()).bottomMargin;
-        }
 
         if (!mShowSearchBar) {
             setPadding(0, 0, getPaddingRight(), getPaddingBottom());
@@ -565,10 +561,6 @@ public class Workspace extends PagedView
 
         if (!mShowHotseat || mHotseatAsOverlay) {
             setPadding(getPaddingLeft(), getPaddingTop(), 0, 0);
-
-            if (dockScrollingIndicator != null) {
-                ((MarginLayoutParams)dockScrollingIndicator.getLayoutParams()).bottomMargin = 0;
-            }
         }
 
         if (!mShowScrollingIndicator) {
@@ -902,16 +894,8 @@ public class Workspace extends PagedView
 
         if (!mShowHotseat || mHotseatAsOverlay) {
             setPadding(getPaddingLeft(), getPaddingTop(), 0, 0);
-            View dockScrollingIndicator = findViewById(R.id.paged_view_indicator_dock);
-            if (dockScrollingIndicator != null) {
-                ((MarginLayoutParams)dockScrollingIndicator.getLayoutParams()).bottomMargin = 0;
-            }
         } else {
             setPadding(getPaddingLeft(), getPaddingTop(), mOriginalPaddingRight, mOriginalPaddingBottom);
-            View dockScrollingIndicator = findViewById(R.id.paged_view_indicator_dock);
-            if (dockScrollingIndicator != null) {
-                ((MarginLayoutParams)dockScrollingIndicator.getLayoutParams()).bottomMargin = mOriginalDockScrollingMargin;
-            }
         }
 
         for (int i = 0; i < mNumberHomescreens; i++) {
@@ -1048,7 +1032,7 @@ public class Workspace extends PagedView
             } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_TOP) {
                 return R.id.paged_view_indicator_top;
             } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_DOCK) {
-                if (mShowHotseat && !mHotseatAsOverlay) {
+                if (mShowHotseat && !mHotseatAsOverlay && !LauncherApplication.isScreenLandscape(mLauncher)) {
                     return R.id.paged_view_indicator_dock;
                 } else {
                     return R.id.paged_view_indicator_bottom;
@@ -1060,7 +1044,7 @@ public class Workspace extends PagedView
             } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_TOP) {
                 return R.id.paged_view_indicator_left;
             } else if (mScrollingIndicatorPosition == SCROLLING_INDICATOR_DOCK) {
-                if (mShowHotseat && !mHotseatAsOverlay) {
+                if (mShowHotseat && !mHotseatAsOverlay && LauncherApplication.isScreenLandscape(mLauncher)) {
                     return R.id.paged_view_indicator_dock;
                 } else {
                     return R.id.paged_view_indicator_right;
@@ -2801,6 +2785,9 @@ public class Workspace extends PagedView
                 final CellLayout cl = (CellLayout) getChildAt(i);
                 cl.setShortcutAndWidgetAlpha(1f);
             }
+        } else {
+            final CellLayout cl = (CellLayout) getChildAt(mCurrentPage);
+            cl.setShortcutAndWidgetAlpha(1f);
         }
     }
 

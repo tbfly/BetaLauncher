@@ -350,12 +350,12 @@ public class PreviewLayout extends FrameLayout
         mIsSwitchingState = true;
         if (toWorkspace) {
             // Going from Previews -> Workspace
-            mWorkspace.setVisibility(View.VISIBLE);
             int cellLayoutCount = mWorkspace.getPageCount();
             for (int i = 0; i < cellLayoutCount; i++) {
                 View cl = mWorkspace.getChildAt(i);
                 cl.setVisibility(View.VISIBLE);
             }
+            mWorkspace.setVisibility(View.VISIBLE);
         } else {
             mContent.setVisibility(View.VISIBLE);
         }
