@@ -2462,10 +2462,20 @@ public final class Launcher extends Activity
      */
     public void onClickMessageButton(View v) {
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_APP_MESSAGING);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        final String[] packages = getResources().getStringArray(R.array.messaging_package_names);
+        final String[] components = getResources().getStringArray(R.array.messaging_component_names);
+        for (int i = 0; i < packages.length; i++) {
+            try {
+                Intent intent = new Intent();
+                intent.setClassName(packages[i], components[i]);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                return;
+            } catch (ActivityNotFoundException ex) {
+            }
+        }
+        // Show toast, activity not found
+        Toast.makeText(this, getString(R.string.activity_not_found), Toast.LENGTH_LONG).show();
     }
 
     /**

@@ -271,4 +271,23 @@
         <item>@string/checkbox_list_always_value</item>
     </string-array>
 
+    <string-array name="messaging_package_names" translatable="false" >
+        <item>com.android.mms</item>
+        <item>com.android.mms</item>
+        <item>com.android.mms</item>
+        <item>com.android.mms</item>
+        <item>com.motorola.messaging</item>
+        <item>com.sec.mms</item>
+        <item>com.sonyericsson.conversations.ui.ConversationListActivity</item>
+    </string-array>
+    <string-array name="messaging_component_names" translatable="false" >
+        <item>com.android.mms.ui.ConversationList</item>
+        <item>com.android.mms.ui.MessageTabActivity</item>
+        <item>com.android.mms.ui.MmsTabActivity</item>
+        <item>com.android.mms.MultipleActivitiesMain</item>
+        <item>com.motorola.messaging.activity.ConversationListActivity</item>
+        <item>com.sec.mms.Mms</item>
+        <item>com.sonyericsson.conversations.ui.ConversationListActivity</item>
+    </string-array>
+
 </resources>
