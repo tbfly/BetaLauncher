@@ -553,6 +553,9 @@ public final class PreferencesProvider {
             public static String getThemeName() {
                 return getString("icon_theme_name", DEFAULT);
             }
+            public static int getThemeColor() {
+                return getInt("theme_color", -13388315);
+            }
             public static int getOrientationMode() {
                 return Integer.parseInt(getString("lennox_general_orientation", "5"));
             }

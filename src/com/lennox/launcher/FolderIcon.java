@@ -43,6 +43,7 @@ import com.lennox.launcher.R;
 import com.lennox.launcher.DropTarget.DragObject;
 import com.lennox.launcher.FolderInfo.FolderListener;
 import com.lennox.launcher.preference.PreferencesProvider;
+import com.lennox.utils.LennoxColorFilter;
 
 import java.util.ArrayList;
 
@@ -229,8 +230,10 @@ public class FolderIcon extends LinearLayout implements FolderListener {
                 sPreviewPadding = res.getDimensionPixelSize(R.dimen.folder_preview_padding);
                 sPreviewPaddingTop = res.getDimensionPixelSize(topPaddingResource);
                 sSharedOuterRingDrawable = res.getDrawable(R.drawable.portal_ring_outer_holo);
+                LennoxColorFilter.themeColor(sSharedOuterRingDrawable);
                 sSharedInnerRingDrawable = res.getDrawable(R.drawable.portal_ring_inner_holo);
                 sSharedFolderLeaveBehind = res.getDrawable(R.drawable.portal_ring_rest);
+                LennoxColorFilter.themeColor(sSharedFolderLeaveBehind);
                 sStaticValuesDirty = false;
             }
         }

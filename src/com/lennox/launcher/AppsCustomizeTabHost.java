@@ -22,6 +22,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 
 import com.lennox.launcher.R;
 import com.lennox.launcher.preference.PreferencesProvider;
+import com.lennox.utils.LennoxColorFilter;
 
 import java.util.ArrayList;
 
@@ -127,14 +129,20 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
             }
         };
 
-        mTabsContainer.setBackgroundResource(R.drawable.tab_unselected_holo);
+        Resources res = getResources();
+
+        Drawable tabContainer = res.getDrawable(R.drawable.tab_unselected_holo);
+        LennoxColorFilter.themeColor(tabContainer);
+        mTabsContainer.setBackgroundDrawable(tabContainer);
         // Create the tabs
         TextView tabView;
         String label;
         label = getContext().getString(R.string.all_apps_button_label);
         tabView = (TextView) mLayoutInflater.inflate(R.layout.tab_widget_indicator, tabs, false);
         tabView.setText(label);
-        tabView.setBackgroundResource(R.drawable.tab_widget_indicator_selector);
+        Drawable tabIndicator = res.getDrawable(R.drawable.tab_widget_indicator_selector);
+        LennoxColorFilter.themeColor(tabIndicator);
+        tabView.setBackgroundDrawable(tabIndicator);
         tabView.setContentDescription(label);
         if (getContext() instanceof Launcher) {
             tabView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -151,7 +159,9 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         label = getContext().getString(R.string.widgets_tab_label);
         tabView = (TextView) mLayoutInflater.inflate(R.layout.tab_widget_indicator, tabs, false);
         tabView.setText(label);
-        tabView.setBackgroundResource(R.drawable.tab_widget_indicator_selector);
+        Drawable tabIndicator2 = res.getDrawable(R.drawable.tab_widget_indicator_selector);
+        LennoxColorFilter.themeColor(tabIndicator2);
+        tabView.setBackgroundDrawable(tabIndicator2);
         tabView.setContentDescription(label);
         addTab(newTabSpec(WIDGETS_TAB_TAG).setIndicator(tabView).setContent(contentFactory));
         setOnTabChangedListener(this);

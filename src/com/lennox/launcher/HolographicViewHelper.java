@@ -25,6 +25,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.widget.ImageView;
 
+import com.lennox.launcher.preference.PreferencesProvider;
+
 public class HolographicViewHelper {
 
     private final Canvas mTempCanvas = new Canvas();
@@ -34,7 +36,7 @@ public class HolographicViewHelper {
 
     public HolographicViewHelper(Context context) {
         Resources res = context.getResources();
-        mHighlightColor = res.getColor(android.R.color.holo_blue_light);
+        mHighlightColor = PreferencesProvider.Interface.General.getThemeColor();
     }
 
     /**

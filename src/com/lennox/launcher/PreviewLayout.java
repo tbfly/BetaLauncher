@@ -3,6 +3,7 @@ package com.lennox.launcher;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.*;
+import android.graphics.drawable.*;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.RelativeLayout;
 
 import com.lennox.launcher.preference.PreferencesProvider;
 import com.lennox.launcher.R;
+import com.lennox.utils.LennoxColorFilter;
 
 public class PreviewLayout extends FrameLayout
     implements View.OnClickListener, View.OnLongClickListener,
@@ -145,10 +147,15 @@ public class PreviewLayout extends FrameLayout
         Log.v(TAG, "addPreviewBitmap----" + cellX + cellY);
         ViewGroup layout = (ViewGroup)mLauncher.getLayoutInflater().inflate(R.layout.preview_boxed, null);
         //layout.setBackgroundDrawable(mBackgroundDrawable);
+        Drawable background;
         if (isCurrent)
-            layout.setBackgroundResource(R.drawable.preview_bg_p);
+            background = getResources().getDrawable(R.drawable.preview_bg_p);
         else
-            layout.setBackgroundResource(R.drawable.preview_bg_n);
+            background = getResources().getDrawable(R.drawable.preview_bg_n);
+
+        LennoxColorFilter.themeColor(background);
+        layout.setBackgroundDrawable(background);
+
         CellLayout.LayoutParams params = new CellLayout.LayoutParams(cellX, cellY, 1, 1);
         layout.setLayoutParams(params);
         ImageView image = (ImageView)layout.findViewById(R.id.delete_button);

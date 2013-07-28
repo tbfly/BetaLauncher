@@ -357,4 +357,11 @@
     <string name="effects_carousel_left">Carousel Left</string>
     <string name="effects_carousel_right">Carousel Right</string>
     <string name="effects_shutter">Shutter</string>
+
+    <!-- Color Picker -->
+    <string name="theme_color_title">Highlight colour</string>
+    <string name="theme_color_summary">Set the main highlight colour for general interface elements</string>
+    <string name="dialog_color_picker">Color Picker</string>
+    <string name="press_color_to_apply">Press on Color to apply</string>    
+
 </resources>

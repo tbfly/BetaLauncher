@@ -28,6 +28,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.lennox.launcher.preference.PreferencesProvider;
+
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -84,7 +86,7 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
 
         final Resources res = getContext().getResources();
         mFocusedOutlineColor = mFocusedGlowColor = mPressedOutlineColor = mPressedGlowColor =
-            res.getColor(android.R.color.holo_blue_light);
+            PreferencesProvider.Interface.General.getThemeColor();
 
         setShadowLayer(SHADOW_LARGE_RADIUS, 0.0f, SHADOW_Y_OFFSET, SHADOW_LARGE_COLOUR);
     }

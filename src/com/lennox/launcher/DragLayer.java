@@ -39,6 +39,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.lennox.launcher.R;
+import com.lennox.utils.LennoxColorFilter;
 
 import java.util.ArrayList;
 
@@ -85,7 +86,9 @@ public class DragLayer extends FrameLayout {
         setChildrenDrawingOrderEnabled(true);
 
         mLeftHoverDrawable = getResources().getDrawable(R.drawable.page_hover_left_holo);
+        LennoxColorFilter.themeColor(mLeftHoverDrawable);
         mRightHoverDrawable = getResources().getDrawable(R.drawable.page_hover_right_holo);
+        LennoxColorFilter.themeColor(mRightHoverDrawable);
     }
 
     public void setup(Launcher launcher, DragController controller) {

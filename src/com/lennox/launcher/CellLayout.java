@@ -50,6 +50,7 @@ import android.view.animation.LayoutAnimationController;
 import com.lennox.launcher.R;
 import com.lennox.launcher.FolderIcon.FolderRingAnimator;
 import com.lennox.launcher.preference.PreferencesProvider;
+import com.lennox.utils.LennoxColorFilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -215,10 +216,14 @@ public class CellLayout extends ViewGroup {
 
         final Resources res = getResources();
         mNormalBackground = res.getDrawable(R.drawable.homescreen_blue_normal_holo);
+        LennoxColorFilter.themeColor(mNormalBackground);
         mActiveGlowBackground = res.getDrawable(R.drawable.homescreen_blue_strong_holo);
+        LennoxColorFilter.themeColor(mActiveGlowBackground);
 
         mOverScrollLeft = res.getDrawable(R.drawable.overscroll_glow_left);
+        LennoxColorFilter.themeColor(mOverScrollLeft);
         mOverScrollRight = res.getDrawable(R.drawable.overscroll_glow_right);
+        LennoxColorFilter.themeColor(mOverScrollRight);
         mForegroundPadding =
                 res.getDimensionPixelSize(R.dimen.workspace_overscroll_drawable_padding);
 

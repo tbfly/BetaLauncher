@@ -165,4 +165,8 @@
     <integer name="app_icon_scale_percentage_default">100</integer>
     <integer name="app_icon_scale_percentage_max">150</integer>
     <integer name="app_icon_scale_percentage_min">50</integer>
+
+    <!-- Default theme colour -->
+    <integer name="color_holo_blue">0xff33b5e5</integer>
+
 </resources>

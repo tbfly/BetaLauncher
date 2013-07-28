@@ -40,9 +40,11 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.Scroller;
 
 import com.lennox.launcher.R;
+import com.lennox.utils.LennoxColorFilter;
 
 import java.util.ArrayList;
 
@@ -2094,6 +2096,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 mHasScrollIndicator = mScrollIndicator != null;
                 if (mHasScrollIndicator) {
                     mScrollIndicator.setVisibility(View.VISIBLE);
+                    LennoxColorFilter.themeColor((ImageView) mScrollIndicator);
                 }
             }
         }
@@ -2107,6 +2110,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         if (parent != null) {
             mScrollIndicator = parent.findViewById(getScrollingIndicatorId());
             mHasScrollIndicator = mScrollIndicator != null;
+            if (mHasScrollIndicator) LennoxColorFilter.themeColor((ImageView) mScrollIndicator);
         }
     }
 

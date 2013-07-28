@@ -8,6 +8,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.graphics.Rect;
 import android.os.Build;
 import android.view.Gravity;
@@ -16,6 +17,7 @@ import android.widget.ImageView;
 
 import com.lennox.launcher.R;
 import com.lennox.launcher.preference.PreferencesProvider;
+import com.lennox.utils.LennoxColorFilter;
 
 public class AppWidgetResizeFrame extends FrameLayout {
     private LauncherAppWidgetHostView mWidgetView;
@@ -86,30 +88,36 @@ public class AppWidgetResizeFrame extends FrameLayout {
         mMinHSpan = result[0];
         mMinVSpan = result[1];
 
-        setBackgroundResource(R.drawable.widget_resize_frame_holo);
+        Drawable widgetResizeFrame = getResources().getDrawable(R.drawable.widget_resize_frame_holo);
+        LennoxColorFilter.themeColor(widgetResizeFrame);
+        setBackgroundDrawable(widgetResizeFrame);
         setPadding(0, 0, 0, 0);
 
         LayoutParams lp;
         mLeftHandle = new ImageView(context);
         mLeftHandle.setImageResource(R.drawable.widget_resize_handle_left);
+        LennoxColorFilter.themeColor(mLeftHandle);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 
                 Gravity.LEFT | Gravity.CENTER_VERTICAL);
         addView(mLeftHandle, lp);
 
         mRightHandle = new ImageView(context);
         mRightHandle.setImageResource(R.drawable.widget_resize_handle_right);
+        LennoxColorFilter.themeColor(mRightHandle);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 
                 Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         addView(mRightHandle, lp);
 
         mTopHandle = new ImageView(context);
         mTopHandle.setImageResource(R.drawable.widget_resize_handle_top);
+        LennoxColorFilter.themeColor(mTopHandle);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 
                 Gravity.CENTER_HORIZONTAL | Gravity.TOP);
         addView(mTopHandle, lp);
 
         mBottomHandle = new ImageView(context);
         mBottomHandle.setImageResource(R.drawable.widget_resize_handle_bottom);
+        LennoxColorFilter.themeColor(mBottomHandle);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
         addView(mBottomHandle, lp);

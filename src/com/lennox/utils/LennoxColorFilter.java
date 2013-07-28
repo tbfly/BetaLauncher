@@ -7,6 +7,8 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.widget.ImageView;
@@ -18,6 +20,9 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.MappedByteBuffer;
+
+import com.lennox.launcher.R;
+import com.lennox.launcher.preference.PreferencesProvider;
 
 public class LennoxColorFilter
 {
@@ -58,6 +63,17 @@ public class LennoxColorFilter
     public static void adjustColor ( Drawable drawable, float adjValue ) {
     	drawable.setColorFilter(LennoxColorFilter.adjustHue(adjValue));
     }
+
+    public static void themeColor ( Drawable drawable ) {
+        int color = PreferencesProvider.Interface.General.getThemeColor();
+        drawable.setColorFilter(color,PorterDuff.Mode.MULTIPLY);
+    }
+
+    public static void themeColor ( ImageView view ) {
+        int color = PreferencesProvider.Interface.General.getThemeColor();
+        view.setColorFilter(color,PorterDuff.Mode.MULTIPLY);
+    }
+
 
 /**
  * Converts a immutable bitmap to a mutable bitmap. This operation doesn't allocates
