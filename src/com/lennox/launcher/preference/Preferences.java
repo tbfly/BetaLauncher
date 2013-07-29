@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -101,9 +102,28 @@ public class Preferences extends PreferenceActivity
 
     @Override
     public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.preferences_headers, target);
+        boolean backupInstalled = false;
+        try {
+           getPackageManager().getPackageInfo("com.lennox.backup", PackageManager.GET_ACTIVITIES);
+           backupInstalled = true;
+        } catch (PackageManager.NameNotFoundException e) {
+           backupInstalled = false;
+        }
+        if (backupInstalled) {
+            loadHeadersFromResource(R.xml.preferences_headers, target);
+        } else {
+            loadHeadersFromResource(R.xml.preferences_headers_nobackup, target);
+        }
         mHeaders = target;
         updateHeaders();
+    }
+
+    @Override
+    public void onHeaderClick(Header header, int position) {
+        super.onHeaderClick(header, position);
+        if (header.id == R.id.preferences_backup_section) {
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
     }
 
     private void updateHeaders() {
@@ -134,11 +154,9 @@ public class Preferences extends PreferenceActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (!key.equals("restore_workspace") && !key.equals("backup_workspace")) {
-            SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putBoolean(PreferencesProvider.PREFERENCES_CHANGED, true);
-            editor.commit();
-        }
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(PreferencesProvider.PREFERENCES_CHANGED, true);
+        editor.commit();
     }
 
     public static class HomescreenFragment extends PreferenceFragment {
@@ -232,7 +250,7 @@ public class Preferences extends PreferenceActivity
                 mIconTheme.setEntryValues(packageList);
                 mIconTheme.setEntryIcons(iconList);
                 mIconTheme.setEntries(labelList);
-                String currentPackage = PreferencesProvider.Interface.General.getThemePackageName();
+                String currentPackage = PreferencesProvider.Interface.Theme.getThemePackageName();
                 String currentThemeName = context.mThemeUtils.getThemeName(currentPackage);
                 mIconTheme.setSummary(currentThemeName);
             }
@@ -243,188 +261,18 @@ public class Preferences extends PreferenceActivity
             if ( preference instanceof ImageListPreference && preference.getKey().equals("icon_theme")) {
                 mIconTheme.setSummary(mIconTheme.getEntries()[mIconTheme.findIndexOfValue((String) newValue)]);
                 context.mThemeUtils.clearCache();
+                return true;
             /*try {
                 android.os.Debug.dumpHprofData("/sdcard/hprof");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                Log.e(TAG, "Error backuping up database: " + e.getMessage(), e);
             }*/
+            } else if ( preference instanceof ColorPickerPreference && preference.getKey().equals("theme_color")) {
+                //mColorTheme.onColorChanged(PreferencesProvider.Interface.Theme.getThemeColor());
                 return true;
             }
             return false;
-        }
-
-    }
-
-    public static class BackupFragment extends PreferenceFragment
-            implements Preference.OnPreferenceChangeListener{
-        private Preference mBackup;
-        private ListPreference mRestore;
-        private LauncherApplication context;
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            addPreferencesFromResource(R.xml.preferences_backup);
-
-            context = (LauncherApplication) (getActivity().getApplicationContext());
-
-            PreferenceScreen prefSet = getPreferenceScreen();
-
-            mBackup = prefSet.findPreference("backup_workspace");
-            mBackup.setOnPreferenceChangeListener(this);
-            mRestore = (ListPreference) prefSet.findPreference("restore_workspace");
-            mRestore.setOnPreferenceChangeListener(this);
-
-            getBackupList();
-        }
-
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-            String key = preference.getKey();
-            if (key.equals("restore_workspace")) {
-                final String restoreDir = (String) newValue;
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(R.string.preferences_restore_workspace_confirm_dialog)
-                .setTitle(String.format(context.getString(R.string.preferences_restore_workspace_dialog_title),restoreDir))
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        backupDatabase(true, false, restoreDir);
-                        backupDatabase(true, true, restoreDir);
-                        backupPreference(true, restoreDir);
-                        Toast.makeText(context, context.getString(R.string.preferences_restore_workspace_complete), Toast.LENGTH_LONG).show();
-                        context.mThemeUtils.clearCache();
-                        LauncherApplication.setPerformedRestore(true);
-                        startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null);
-                builder.show();
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferences, Preference preference) {
-            if (preference == mBackup) {
-                final String backupDir = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date());
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View layout = inflater.inflate(R.layout.backup_confirm, null);
-                final EditText backupName = (EditText) layout.findViewById(R.id.backup_title);
-                backupName.setText(backupDir);
-                builder.setView(layout)
-                .setTitle(R.string.preferences_backup_workspace_title)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        String chosenBackupDir = backupName.getText().toString();
-                        backupDatabase(false, false, chosenBackupDir);
-                        backupDatabase(false, true, chosenBackupDir);
-                        backupPreference(false, chosenBackupDir);
-                        Toast.makeText(context, String.format(context.getString(R.string.preferences_backup_workspace_complete),getBackupDatabaseFile(chosenBackupDir, false).getParent()), Toast.LENGTH_LONG).show();
-                        getBackupList();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null);
-                builder.show();
-            }
-            return true;
-        }
-
-        public void getBackupList() {
-            File file = new File( Environment.getExternalStorageDirectory().getAbsolutePath()
-                          + "/LennoxLauncher" );
-            File[] list = null;
-            if (file.exists()) {
-                list = file.listFiles();
-            }
-            if (list != null && list.length > 0) {
-                String[] preferenceList = new String[list.length];   
-                for( int i=0; i< list.length; i++) {
-                    preferenceList[i] = list[i].getName();
-                }
-                mRestore.setEntryValues(preferenceList);
-                mRestore.setEntries(preferenceList);
-                mRestore.setEnabled(true);
-            } else {
-                mRestore.setEnabled(false);
-            }
-
-        }
-
-        public File getCurrentDatabaseFile(boolean landscape) {
-            return new File(Environment.getDataDirectory() + "/data/" + context.getPackageName() + "/databases/", landscape ? LauncherProvider.DATABASE_LANDSCAPE_NAME : LauncherProvider.DATABASE_NAME);
-        }
-
-        public File getCurrentPreferenceFile() {
-            return new File(Environment.getDataDirectory() + "/data/" + context.getPackageName() + "/shared_prefs/", PreferencesProvider.PREFERENCES_KEY + ".xml");
-        }
-
-        public File getBackupDatabaseFile(String dirname, boolean landscape) {
-            String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-            File dir = new File(baseDir + "/LennoxLauncher/" + dirname);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            return new File(dir, landscape ? LauncherProvider.DATABASE_LANDSCAPE_NAME : LauncherProvider.DATABASE_NAME);
-        }
-
-        public File getBackupPreferenceFile(String dirname) {
-            String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-            File dir = new File(baseDir + "/LennoxLauncher/" + dirname);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            return new File(dir, PreferencesProvider.PREFERENCES_KEY + ".xml");
-        }
-
-        public final boolean backupDatabase(boolean restore, boolean landscape, String dirname) {
-            File from = restore ? getBackupDatabaseFile(dirname, landscape) : getCurrentDatabaseFile(landscape);
-            File to = restore ? getCurrentDatabaseFile(landscape) : getBackupDatabaseFile(dirname, landscape);
-            try {
-                copyFile(from, to);
-                return true;
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-               Log.e(TAG, "Error backuping up database: " + e.getMessage(), e);
-            }
-            return false;
-        }
-
-        public final boolean backupPreference(boolean restore, String dirname) {
-            File from = restore ? getBackupPreferenceFile(dirname) : getCurrentPreferenceFile();
-            File to = restore ? getCurrentPreferenceFile() : getBackupPreferenceFile(dirname);
-            try {
-                copyFile(from, to);
-                return true;
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-               Log.e(TAG, "Error backuping up database: " + e.getMessage(), e);
-            }
-            return false;
-        }
-
-        public static void copyFile(File src, File dst) throws IOException {
-            FileInputStream in = new FileInputStream(src);
-            FileOutputStream out = new FileOutputStream(dst);
-            FileChannel fromChannel = null, toChannel = null;
-            try {
-                fromChannel = in.getChannel();
-                toChannel = out.getChannel();
-                fromChannel.transferTo(0, fromChannel.size(), toChannel); 
-            } finally {
-                if (fromChannel != null) 
-                    fromChannel.close();
-                if (toChannel != null) 
-                    toChannel.close();
-            }
-            in.close();
-            out.close();
         }
 
     }

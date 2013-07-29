@@ -733,7 +733,7 @@ public final class Launcher extends Activity
         mPaused = false;
         sPausedFromUserAction = false;
         // Restart launcher when preferences are changed
-        if (preferencesChanged() || LauncherApplication.getPerformedRestore()) {
+        if (preferencesChanged()) {
             android.os.Process.killProcess(android.os.Process.myPid());
         }
         if (mRestoring || mOnResumeNeedsLoad) {
@@ -1378,7 +1378,6 @@ public final class Launcher extends Activity
             }
             DragObject dragObject = new DragObject();
             dragObject.dragInfo = info;
-            android.util.Log.d("LX", "cellx " + cellX + " celly " + cellY);
             if (mWorkspace.addToExistingFolderIfNecessary(layout, cellXY, 0, dragObject,
                     true)) {
                 return;

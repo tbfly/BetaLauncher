@@ -38,7 +38,6 @@ public class LauncherApplication extends Application {
     public IconCache mIconCache;
     public ThemeUtils mThemeUtils;
     private static boolean sIsScreenLarge;
-    private static boolean sPerformedRestore = false;
     private static float sScreenDensity;
     private static int sLongPressTimeout = 300;
     private static final String sSharedPreferencesKey = "com.lennox.launcher.prefs";
@@ -150,14 +149,6 @@ public class LauncherApplication extends Application {
 
     public static int getLongPressTimeout() {
         return sLongPressTimeout;
-    }
-
-    public static void setPerformedRestore(boolean value) {
-        sPerformedRestore = value;
-    }
-
-    public static boolean getPerformedRestore() {
-        return sPerformedRestore;
     }
 
 }

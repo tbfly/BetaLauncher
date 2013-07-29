@@ -276,12 +276,6 @@
 
     <string name="preferences_backup_title">Backup \u0026 Restore</string>
     <string name="preferences_backup_summary">Backup and restore your homescreens</string>
-    <string name="preferences_backup_workspace_title">Backup</string>
-    <string name="preferences_backup_workspace_complete">Settings have been backed up to %s</string>
-    <string name="preferences_restore_workspace_title">Restore</string>
-    <string name="preferences_restore_workspace_dialog_title">Restore %s</string>
-    <string name="preferences_restore_workspace_confirm_dialog">Are you sure you want to restore your backup? Doing so will remove all current settings and homescreens.</string>
-    <string name="preferences_restore_workspace_complete">Settings have been restored</string>
 
     <!-- Folder sort types -->
     <string name="menu_folder_sort_none">None</string>
