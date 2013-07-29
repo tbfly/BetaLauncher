@@ -178,6 +178,19 @@ public class Preferences extends PreferenceActivity
 
             addPreferencesFromResource(R.xml.preferences_folder);
 
+            ImageListPreference pref = (ImageListPreference) getPreferenceScreen().findPreference("lennox_homescreen_folder_style");
+
+            int[] images = new int[]{R.drawable.folder_icon_style_grid, R.drawable.folder_icon_style_stacked,
+                                          R.drawable.folder_icon_style_carousel, R.drawable.folder_icon_style_fan,
+                                          R.drawable.folder_icon_style_ios};
+            Drawable[] previewDrawables = new Drawable[images.length];
+
+            for (int i = 0; i < images.length; i++) {
+                previewDrawables[i] = getActivity().getResources().getDrawable(images[i]);
+            }
+
+            pref.setEntryIcons(previewDrawables);
+
         }
     }
 

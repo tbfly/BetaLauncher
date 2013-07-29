@@ -19,7 +19,7 @@
     android:key="lennox_folder"
     android:title="@string/preferences_interface_folder_title">
 
-        <ListPreference
+        <com.lennox.launcher.preference.ImageListPreference
             android:key="lennox_homescreen_folder_style"
             android:title="@string/preferences_interface_homescreen_folder_style_title"
             android:summary="@string/preferences_interface_homescreen_folder_style_summary"
