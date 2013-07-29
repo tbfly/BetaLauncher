@@ -238,7 +238,7 @@ public final class PreferencesProvider {
                     return getBoolean("lennox_homescreen_scrolling_show_outlines", def);
                 }
                 public static boolean getInfiniteScrolling(boolean landscape) {
-                    int def = landscape ? 1 : 1;
+                    int def = landscape ? 0 : 0;
                     String[] values = getString("lennox_homescreen_scrolling_infinite", def + "|" + def).split("\\|");
                     try {
                         return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);

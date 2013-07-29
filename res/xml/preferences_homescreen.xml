@@ -200,7 +200,7 @@
             android:summary="@string/preferences_interface_homescreen_scrolling_show_outlines_summary"
             android:defaultValue="@bool/config_workspaceDefaultShowOutlines" />
         <ListPreference android:key="lennox_homescreen_scrolling_infinite"
-            android:defaultValue="@string/checkbox_list_always_value"
+            android:defaultValue="@string/checkbox_list_never_value"
             android:entries="@array/checkbox_list_preference_entries"
             android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_scrolling_infinite_title"
