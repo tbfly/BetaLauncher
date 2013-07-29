@@ -105,7 +105,7 @@ public class IconCache {
         }
         if ( xrp == null ) {
             try {
-                Context otherContext = mContext.createPackageContext(PreferencesProvider.Interface.General.getThemePackageName(), 0);
+                Context otherContext = mContext.createPackageContext(PreferencesProvider.Interface.Theme.getThemePackageName(), 0);
                 AssetManager am = otherContext.getAssets();
                 InputStream istr = am.open("appfilter.xml");
                 XmlPullParserFactory factory = XmlPullParserFactory.newInstance(); 

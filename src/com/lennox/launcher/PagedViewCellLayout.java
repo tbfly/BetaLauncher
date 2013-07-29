@@ -46,6 +46,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     private int mMaxGap;
 
     private float mChildrenScale = 1f;
+    private float mTextScale = 1f;
+    private boolean mTextPadding = false;
 
     protected PagedViewCellLayoutChildren mChildren;
 
@@ -111,8 +113,18 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         mChildrenScale = childrenScale;
     }
 
+    public void setTextScale(float textScale, boolean textPadding) {
+        mTextScale = textScale;
+        mTextPadding = textPadding;
+    }
     public float getChildrenScale() {
         return mChildrenScale;
+    }
+    public float getTextScale() {
+        return mTextScale;
+    }
+    public boolean getTextPadding() {
+        return mTextPadding;
     }
 
     void destroyHardwareLayers() {
@@ -145,6 +157,9 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
             child.setScaleX(getChildrenScale());
             child.setScaleY(getChildrenScale());
+            if (child instanceof BubbleTextView) ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof FolderIcon) ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof PagedViewIcon) ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
         }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells

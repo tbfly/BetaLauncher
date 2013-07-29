@@ -65,12 +65,12 @@ public class LennoxColorFilter
     }
 
     public static void themeColor ( Drawable drawable ) {
-        int color = PreferencesProvider.Interface.General.getThemeColor();
+        int color = PreferencesProvider.Interface.Theme.getThemeColor();
         drawable.setColorFilter(color,PorterDuff.Mode.MULTIPLY);
     }
 
     public static void themeColor ( ImageView view ) {
-        int color = PreferencesProvider.Interface.General.getThemeColor();
+        int color = PreferencesProvider.Interface.Theme.getThemeColor();
         view.setColorFilter(color,PorterDuff.Mode.MULTIPLY);
     }
 

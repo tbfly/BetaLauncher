@@ -119,6 +119,25 @@
         launcher:max2="@integer/hotseat_item_scale_percentage_max"
         launcher:defaultValue1="@integer/hotseat_item_scale_percentage"
         launcher:defaultValue2="@integer/hotseat_item_scale_percentage" />
+    <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+        android:key="lennox_dock_text_scale"
+        android:title="@string/preferences_interface_dock_text_scale_title"
+        android:summary="@string/preferences_interface_dock_text_scale_summary"
+        android:dependency="lennox_dock_enabled"
+        launcher:prefix1="@string/orientation_portrait_prefix"
+        launcher:prefix2="@string/orientation_landscape_prefix"
+        launcher:min1="@integer/hotseat_item_scale_percentage_min"
+        launcher:max1="@integer/hotseat_item_scale_percentage_max"
+        launcher:min2="@integer/hotseat_item_scale_percentage_min"
+        launcher:max2="@integer/hotseat_item_scale_percentage_max"
+        launcher:defaultValue1="@integer/hotseat_item_scale_percentage"
+        launcher:defaultValue2="@integer/hotseat_item_scale_percentage" />
+    <ListPreference android:key="lennox_dock_text_padding"
+        android:defaultValue="@string/checkbox_list_never_value"
+        android:entries="@array/checkbox_list_preference_entries"
+        android:entryValues="@array/checkbox_list_preference_values"
+        android:title="@string/preferences_interface_dock_text_padding_title"
+        android:summary="@string/preferences_interface_dock_text_padding_summary" />
     <ListPreference android:key="lennox_dock_divider"
         android:defaultValue="@string/checkbox_list_always_value"
         android:entries="@array/checkbox_list_preference_entries"

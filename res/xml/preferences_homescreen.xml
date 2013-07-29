@@ -74,6 +74,24 @@
             launcher:max2="@integer/app_icon_scale_percentage_max"
             launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
             launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+            android:key="lennox_homescreen_text_scale"
+            android:title="@string/preferences_interface_homescreen_text_scale_title"
+            android:summary="@string/preferences_interface_homescreen_text_scale_summary"
+            launcher:prefix1="@string/orientation_portrait_prefix"
+            launcher:prefix2="@string/orientation_landscape_prefix"
+            launcher:min1="@integer/app_icon_scale_percentage_min"
+            launcher:max1="@integer/app_icon_scale_percentage_max"
+            launcher:min2="@integer/app_icon_scale_percentage_min"
+            launcher:max2="@integer/app_icon_scale_percentage_max"
+            launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
+            launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
+        <ListPreference android:key="lennox_homescreen_text_padding"
+            android:defaultValue="@string/checkbox_list_never_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
+            android:title="@string/preferences_interface_homescreen_text_padding_title"
+            android:summary="@string/preferences_interface_homescreen_text_padding_summary" />
         <ListPreference android:key="lennox_homescreen_general_hide_icon_labels"
             android:defaultValue="@string/checkbox_list_never_value"
             android:entries="@array/checkbox_list_preference_entries"
@@ -126,6 +144,23 @@
             launcher:max2="@integer/app_icon_scale_percentage_max"
             launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
             launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference android:key="lennox_homescreen_folder_text_scale"
+            android:title="@string/preferences_interface_homescreen_folder_text_scale_title"
+            android:summary="@string/preferences_interface_homescreen_folder_text_scale_summary"
+            launcher:prefix1="@string/orientation_portrait_prefix"
+            launcher:prefix2="@string/orientation_landscape_prefix"
+            launcher:min1="@integer/app_icon_scale_percentage_min"
+            launcher:max1="@integer/app_icon_scale_percentage_max"
+            launcher:min2="@integer/app_icon_scale_percentage_min"
+            launcher:max2="@integer/app_icon_scale_percentage_max"
+            launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
+            launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
+        <ListPreference android:key="lennox_homescreen_folder_text_padding"
+            android:defaultValue="@string/checkbox_list_never_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
+            android:title="@string/preferences_interface_homescreen_folder_text_padding_title"
+            android:summary="@string/preferences_interface_homescreen_folder_text_padding_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_scrolling_category">

@@ -133,6 +133,10 @@
     <string name="preferences_interface_homescreen_general_hide_icon_labels_summary">Hide homescreen icon labels</string>
     <string name="preferences_interface_homescreen_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_homescreen_icon_scale_summary">Scale of icons on homescreens</string>
+    <string name="preferences_interface_homescreen_text_scale_title">Text scale</string>
+    <string name="preferences_interface_homescreen_text_scale_summary">Scale of text for icons on homescreen</string>
+    <string name="preferences_interface_homescreen_text_padding_title">Text padding</string>
+    <string name="preferences_interface_homescreen_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
     <string name="preferences_interface_homescreen_general_auto_install_shortcuts_title">Automatically add shortcuts</string>
     <string name="preferences_interface_homescreen_general_auto_install_shortcuts_summary">Allow applications to automatically add shortcuts to the homescreen</string>
     <string name="preferences_interface_homescreen_scrolling_category">Scrolling</string>
@@ -162,6 +166,10 @@
     <string name="preferences_interface_homescreen_folder_style_summary">Icon style for folders</string>
     <string name="preferences_interface_homescreen_folder_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_homescreen_folder_icon_scale_summary">Scale of icons inside folders on homescreen</string>
+    <string name="preferences_interface_homescreen_folder_text_scale_title">Text scale</string>
+    <string name="preferences_interface_homescreen_folder_text_scale_summary">Scale of text inside folders on homescreen</string>
+    <string name="preferences_interface_homescreen_folder_text_padding_title">Text padding</string>
+    <string name="preferences_interface_homescreen_folder_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
     <string name="preferences_interface_homescreen_folder_background_title">Background</string>
     <string name="preferences_interface_homescreen_folder_background_summary">Folder background icon</string>
     <!-- Drawer -->
@@ -194,6 +202,10 @@
     <string name="preferences_interface_drawer_widgets_list_actions_summary">List launcher actions in the widget drawer</string>
     <string name="preferences_interface_drawer_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_drawer_icon_scale_summary">Scale of icons in the app drawer</string>
+    <string name="preferences_interface_drawer_text_scale_title">Text scale</string>
+    <string name="preferences_interface_drawer_text_scale_summary">Scale of text for icons in the app drawer</string>
+    <string name="preferences_interface_drawer_text_padding_title">Text padding</string>
+    <string name="preferences_interface_drawer_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
     <string name="preferences_interface_drawer_widgets_scale_title">Widget preview scale</string>
     <string name="preferences_interface_drawer_widgets_scale_summary">Scale of widget previews in app drawer</string>
     <string name="preferences_interface_drawer_scrolling_category">Scrolling</string>
@@ -245,6 +257,10 @@
     <string name="preferences_interface_dock_hide_icon_labels_summary">Hide dock icon labels</string>
     <string name="preferences_interface_dock_icon_scale_title">Icon scale</string>
     <string name="preferences_interface_dock_icon_scale_summary">Scale of icons in the dock</string>
+    <string name="preferences_interface_dock_text_scale_title">Text scale</string>
+    <string name="preferences_interface_dock_text_scale_summary">Scale of text in the dock</string>
+    <string name="preferences_interface_dock_text_padding_title">Text padding</string>
+    <string name="preferences_interface_dock_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
     <string name="preferences_interface_dock_divider_title">Show dock divider</string>
     <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
     <string name="preferences_interface_dock_scrolling_fade_adjacent_screens_title">Fade side pages</string>
@@ -273,6 +289,9 @@
     <string name="preferences_interface_general_fullscreen_summary">Hide the status bar to extend the homescreen</string>
     <string name="preferences_interface_general_persist_title">Keep in memory</string>
     <string name="preferences_interface_general_persist_summary">Lock launcher in memory to reduce redraws</string>
+
+    <string name="preferences_interface_theme_title">Theme</string>
+    <string name="preferences_interface_theme_summary">Set theming related options</string>
 
     <string name="preferences_backup_title">Backup \u0026 Restore</string>
     <string name="preferences_backup_summary">Backup and restore your homescreens</string>

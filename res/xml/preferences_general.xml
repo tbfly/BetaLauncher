@@ -18,16 +18,6 @@
     xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
     android:key="lennox_general"
     android:title="@string/preferences_interface_general_title">
-    <net.margaritov.preference.colorpicker.ColorPickerPreference
-        android:key="theme_color"
-        android:title="@string/theme_color_title"
-        android:summary="@string/theme_color_summary"
-	android:defaultValue="@integer/color_holo_blue"
-	alphaSlider="true"
-	hexValue="true"  />
-    <com.lennox.launcher.preference.ImageListPreference
-        android:key="icon_theme"
-        android:title="@string/icon_theme" />
     <ListPreference
         android:key="lennox_general_orientation"
         android:title="@string/preferences_interface_general_orientation_title"

@@ -136,14 +136,12 @@ public class ThemeUtils {
 
         //Bitmap background = getCachedThemeIcon("icon_background.png");
         if (background != null) {
-            android.util.Log.d("LX", "composeIcon() drawing background");
             canvas.drawBitmap(background, 0, 0, null);
             isComposed = true;
         }
 
         //Bitmap pattern = getCachedThemeIcon("icon_pattern.png");
         //if (pattern != null) {
-        //    android.util.Log.d("LX", "composeIcon() drawing icon pattern");
         //    canvas.drawBitmap(pattern, 0.0F, 0.0F, null);
          //   isComposed = true;
         //}
@@ -318,7 +316,7 @@ public class ThemeUtils {
      * @param resourceName
      */
     public Drawable getDrawable(String resourceName) {
-        String themePackage = PreferencesProvider.Interface.General.getThemePackageName();
+        String themePackage = PreferencesProvider.Interface.Theme.getThemePackageName();
         PackageManager pm = mContext.getPackageManager();
         Resources themeResources = null;
         try {
@@ -339,7 +337,7 @@ public class ThemeUtils {
      * @param resourceName
      */
     public int getColor(String resourceName) {
-        String themePackage = PreferencesProvider.Interface.General.getThemePackageName();
+        String themePackage = PreferencesProvider.Interface.Theme.getThemePackageName();
         PackageManager pm = mContext.getPackageManager();
         Resources themeResources = null;
         try {
@@ -360,7 +358,7 @@ public class ThemeUtils {
      * @param resourceName
      */
     public XmlPullParser getXml(String resourceName) {
-        String themePackage = PreferencesProvider.Interface.General.getThemePackageName();
+        String themePackage = PreferencesProvider.Interface.Theme.getThemePackageName();
         PackageManager pm = mContext.getPackageManager();
         Resources themeResources = null;
         try {

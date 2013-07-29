@@ -114,6 +114,8 @@ public class Hotseat extends PagedView {
                 (mVertical && !LauncherApplication.isScreenLarge());
 
         float childrenScale = PreferencesProvider.Interface.Dock.getIconScale(mIsLandscape) / 100f;
+        float textScale = PreferencesProvider.Interface.Dock.getTextScale(mIsLandscape) / 100f;
+        boolean textPadding = PreferencesProvider.Interface.Dock.getTextPadding(mIsLandscape);
 
         LayoutInflater inflater =
                 (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -122,6 +124,7 @@ public class Hotseat extends PagedView {
             cl.setChildrenScale(childrenScale);
             cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1), mVertical);
             cl.setStretchCells(mStretchCells, mFitToCells, hideDockIconLabels, mVertical);
+            cl.setTextScale(textScale, textPadding);
 
             addView(cl);
         }

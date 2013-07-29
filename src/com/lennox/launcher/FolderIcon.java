@@ -28,7 +28,9 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -104,6 +106,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private int mTotalWidth = -1;
     private int mPreviewOffsetX;
     private int mPreviewOffsetY;
+    private int mOriginalTextSize;
     private float mMaxPerspectiveShift;
     boolean mAnimating = false;
 
@@ -155,6 +158,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
         icon.mFolderName = (BubbleTextView) icon.findViewById(R.id.folder_icon_name);
         icon.mFolderName.setText(folderInfo.title);
+        icon.mOriginalTextSize = (int) icon.mFolderName.getTextSize();
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
 
         icon.setTag(folderInfo);
@@ -799,6 +803,17 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         });
         va.setDuration(duration);
         va.start();
+    }
+
+    public void setTextScale(float scale, boolean padding) {
+        mFolderName.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) mOriginalTextSize * (float) scale);
+        if (padding) {
+            mFolderName.setEllipsize(TextUtils.TruncateAt.END);
+            int sidePadding = getResources().getDimensionPixelSize(R.dimen.app_icon_size) / 3;
+            int topPadding = getPaddingTop();
+            int bottomPadding = getPaddingBottom();
+            setPadding(sidePadding, topPadding, sidePadding, bottomPadding);
+        }
     }
 
     public void setTextVisible(boolean visible) {

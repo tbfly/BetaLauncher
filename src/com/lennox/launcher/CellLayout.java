@@ -144,6 +144,9 @@ public class CellLayout extends ViewGroup {
     private ShortcutAndWidgetContainer mShortcutsAndWidgets;
 
     private float mChildrenScale = 1f;
+    private float mTextScale = 1f;
+    private boolean mTextPadding = false;
+    private boolean mChildrenPadding = false;
 
     public static final int MODE_DRAG_OVER = 0;
     public static final int MODE_ON_DROP = 1;
@@ -319,6 +322,19 @@ public class CellLayout extends ViewGroup {
 
     public float getChildrenScale() {
         return mChildrenScale;
+    }
+
+    public void setTextScale(float textScale, boolean textPadding) {
+        mTextScale = textScale;
+        mTextPadding = textPadding;
+    }
+
+    public float getTextScale() {
+        return mTextScale;
+    }
+
+    public boolean getTextPadding() {
+        return mTextPadding;
     }
 
     public void setGridSize(int x, int y) {
@@ -637,6 +653,9 @@ public class CellLayout extends ViewGroup {
         if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
             child.setScaleX(getChildrenScale());
             child.setScaleY(getChildrenScale());
+            if (child instanceof BubbleTextView) ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof FolderIcon) ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof PagedViewIcon) ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
         }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells

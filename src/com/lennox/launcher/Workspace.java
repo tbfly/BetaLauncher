@@ -322,6 +322,8 @@ public class Workspace extends PagedView
     private boolean mResizeAnyWidget;
     private boolean mHideIconLabels;
     private float mIconScale = 1.0f;
+    private float mTextScale = 1.0f;
+    private boolean mTextPadding = false;
     private boolean mHideDockIconLabels;
     private boolean mScrollWallpaper;
     private int mWallpaperSize;
@@ -424,6 +426,8 @@ public class Workspace extends PagedView
         mHotseatAsOverlay = PreferencesProvider.Interface.Dock.getDockAsOverlay(isLandscape);
         mHideIconLabels = PreferencesProvider.Interface.Homescreen.getHideIconLabels(isLandscape);
         mIconScale = (float) PreferencesProvider.Interface.Homescreen.getIconScale(isLandscape) / 100f;
+        mTextScale = (float) PreferencesProvider.Interface.Homescreen.getTextScale(isLandscape) / 100f;
+        mTextPadding = PreferencesProvider.Interface.Homescreen.getTextPadding(isLandscape);
         mHideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels(isLandscape);
         mTransitionEffect = PreferencesProvider.Interface.Homescreen.Scrolling.getTransitionEffect(
                 res.getString(R.string.config_workspaceDefaultTransitionEffect));
@@ -547,6 +551,7 @@ public class Workspace extends PagedView
             screen.setChildrenScale(mIconScale);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
             screen.setStretchCells(mStretchScreens, mFitToCells);
+            screen.setTextScale(mTextScale, mTextPadding);
             addView(screen);
         }
 
@@ -680,7 +685,7 @@ public class Workspace extends PagedView
             }
         } else if (container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
             if (screen < 0 || screen >= mLauncher.getHotseat().getChildCount()) {
-                Log.e(TAG, "The screen must be >= 0 and < " + getChildCount()
+                Log.e(TAG, "The screen must be >= 0 and < " + mLauncher.getHotseat().getChildCount()
                         + " (was " + screen + "); skipping child");
                 return;
             }
@@ -904,6 +909,7 @@ public class Workspace extends PagedView
                 screen.setChildrenScale(mIconScale);
                 screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
                 screen.setStretchCells(mStretchScreens, mFitToCells);
+                screen.setTextScale(mTextScale, mTextPadding);
             }
         }
 
@@ -2786,6 +2792,7 @@ public class Workspace extends PagedView
                 cl.setShortcutAndWidgetAlpha(1f);
             }
         } else {
+            // Double check at least current page is not transparent
             final CellLayout cl = (CellLayout) getChildAt(mCurrentPage);
             cl.setShortcutAndWidgetAlpha(1f);
         }
@@ -2874,7 +2881,7 @@ public class Workspace extends PagedView
      * Responsibility for the bitmap is transferred to the caller.
      */
     private Bitmap createDragOutline(View v, Canvas canvas, int padding) {
-        final int outlineColor = PreferencesProvider.Interface.General.getThemeColor();
+        final int outlineColor = PreferencesProvider.Interface.Theme.getThemeColor();
         final Bitmap b = Bitmap.createBitmap(
                 v.getWidth() + padding, v.getHeight() + padding, Bitmap.Config.ARGB_8888);
 
@@ -2891,7 +2898,7 @@ public class Workspace extends PagedView
      */
     private Bitmap createDragOutline(Bitmap orig, Canvas canvas, int padding, int w, int h,
             boolean clipAlpha) {
-        final int outlineColor = PreferencesProvider.Interface.General.getThemeColor();
+        final int outlineColor = PreferencesProvider.Interface.Theme.getThemeColor();
         final Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         canvas.setBitmap(b);
 

@@ -24,7 +24,9 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
@@ -56,6 +58,8 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
     private int mPressedOutlineColor;
     private int mPressedGlowColor;
 
+    private int mOriginalTextSize;
+
     private boolean mBackgroundSizeChanged;
     private Drawable mBackground;
 
@@ -86,9 +90,10 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
 
         final Resources res = getContext().getResources();
         mFocusedOutlineColor = mFocusedGlowColor = mPressedOutlineColor = mPressedGlowColor =
-            PreferencesProvider.Interface.General.getThemeColor();
+            PreferencesProvider.Interface.Theme.getThemeColor();
 
         setShadowLayer(SHADOW_LARGE_RADIUS, 0.0f, SHADOW_Y_OFFSET, SHADOW_LARGE_COLOUR);
+        mOriginalTextSize = (int) getTextSize();
     }
 
     public void applyFromShortcutInfo(ShortcutInfo info, IconCache iconCache) {
@@ -271,6 +276,17 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
                 CellLayout layout = (CellLayout) parent.getParent();
                 layout.setPressedOrFocusedIcon((mPressedOrFocusedBackground != null) ? this : null);
             }
+        }
+    }
+
+    public void setTextScale(float scale, boolean padding) {
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) mOriginalTextSize * (float) scale);
+        if (padding) {
+            setEllipsize(TextUtils.TruncateAt.END);
+            int sidePadding = getResources().getDimensionPixelSize(R.dimen.app_icon_size) / 3;
+            int topPadding = getPaddingTop();
+            int bottomPadding = getPaddingBottom();
+            setPadding(sidePadding, topPadding, sidePadding, bottomPadding);
         }
     }
 

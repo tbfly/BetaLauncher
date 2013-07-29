@@ -56,6 +56,8 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.margaritov.preference.colorpicker.ColorPickerPreference;
+
 public class Preferences extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -218,21 +220,32 @@ public class Preferences extends PreferenceActivity
 
     }
 
-    public static class GeneralFragment extends PreferenceFragment
+    public static class GeneralFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.preferences_general);
+        }
+    }
+
+    public static class ThemeFragment extends PreferenceFragment
             implements Preference.OnPreferenceChangeListener {
         private ImageListPreference mIconTheme;
+        private ColorPickerPreference mColorTheme;
         private LauncherApplication context;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            addPreferencesFromResource(R.xml.preferences_general);
+            addPreferencesFromResource(R.xml.preferences_theme);
 
             PreferenceScreen prefSet = getPreferenceScreen();
 
             mIconTheme = (ImageListPreference) prefSet.findPreference("icon_theme");
             mIconTheme.setOnPreferenceChangeListener(this);
+            mColorTheme = (ColorPickerPreference) prefSet.findPreference("theme_color");
+            mColorTheme.setOnPreferenceChangeListener(this);
 
             context = (LauncherApplication) (getActivity().getApplicationContext());
 

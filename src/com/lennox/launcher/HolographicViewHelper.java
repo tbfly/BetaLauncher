@@ -36,7 +36,7 @@ public class HolographicViewHelper {
 
     public HolographicViewHelper(Context context) {
         Resources res = context.getResources();
-        mHighlightColor = PreferencesProvider.Interface.General.getThemeColor();
+        mHighlightColor = PreferencesProvider.Interface.Theme.getThemeColor();
     }
 
     /**

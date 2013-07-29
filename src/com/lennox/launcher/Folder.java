@@ -120,6 +120,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
 
     private boolean mIsLandscape;
     private float mIconScale = 1.0f;
+    private float mTextScale = 1.0f;
+    private boolean mTextPadding = false;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -170,6 +172,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mContent.setGridSize(0, 0);
         mContent.setStretchCells(true, true);
         mContent.setChildrenScale(mIconScale);
+        mContent.setTextScale(mTextScale, mTextPadding);
         mContent.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
         mFolderFooter = (LinearLayout) findViewById(R.id.folder_footer);
         mFolderName = (FolderEditText) findViewById(R.id.folder_name);

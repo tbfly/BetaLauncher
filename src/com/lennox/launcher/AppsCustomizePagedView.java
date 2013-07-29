@@ -276,6 +276,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     private int mContentWidth;
     private int mAppIconSize;
     private float mIconScale = 1.0f;
+    private float mTextScale = 1.0f;
+    private boolean mTextPadding = false;
     private float mWidgetScale = 1.0f;
     private int mMaxAppCellCountX, mMaxAppCellCountY;
     private int mWidgetCountX, mWidgetCountY;
@@ -417,6 +419,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
         // Save the default widget preview background
         mIconScale = (float) PreferencesProvider.Interface.Drawer.getIconScale(isLandscape) / 100f;
+        mTextScale = (float) PreferencesProvider.Interface.Drawer.getTextScale(isLandscape) / 100f;
+        mTextPadding = PreferencesProvider.Interface.Drawer.getTextPadding(isLandscape);
         // Save the default widget preview background
         mWidgetScale = (float) PreferencesProvider.Interface.Drawer.getWidgetScale(isLandscape) / 100f;
         mAppIconSize = (int)((float)resources.getDimensionPixelSize(R.dimen.app_icon_size) * mIconScale);
@@ -1217,6 +1221,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         layout.measure(widthSpec, heightSpec);
         layout.setChildrenScale(mIconScale);
         layout.setStretchCells(mStretchScreens, mFitToCells);
+        layout.setTextScale(mTextScale, mTextPadding);
         setVisibilityOnChildren(layout, View.VISIBLE);
     }
     public void syncAppsPages() {
