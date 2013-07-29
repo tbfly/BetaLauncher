@@ -18,12 +18,31 @@
     xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
     android:key="lennox_drawer"
     android:title="@string/preferences_interface_drawer_title">
-    <ListPreference android:key="lennox_drawer_orientation"
-        android:title="@string/preferences_interface_drawer_orientation_title"
-        android:summary="@string/preferences_interface_drawer_orientation_summary"
-        android:entries="@array/preferences_interface_drawer_orientation_entries"
-        android:entryValues="@array/preferences_interface_drawer_orientation_values"
-        android:defaultValue="horizontal" />
+    <PreferenceCategory android:title="@string/preferences_interface_drawer_general_category">
+        <ListPreference android:key="lennox_drawer_orientation"
+            android:title="@string/preferences_interface_drawer_orientation_title"
+            android:summary="@string/preferences_interface_drawer_orientation_summary"
+            android:entries="@array/preferences_interface_drawer_orientation_entries"
+            android:entryValues="@array/preferences_interface_drawer_orientation_values"
+            android:defaultValue="horizontal" />
+        <CheckBoxPreference android:key="lennox_drawer_dismiss_on_tap"
+            android:title="@string/preferences_interface_drawer_dismiss_on_tap_title"
+            android:summary="@string/preferences_interface_drawer_dismiss_on_tap_summary"
+            android:defaultValue="false" />
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+            android:key="lennox_drawer_transparency"
+            android:title="@string/preferences_interface_drawer_transparency_title"
+            android:summary="@string/preferences_interface_drawer_transparency_summary"
+            launcher:prefix1="@string/orientation_portrait_prefix"
+            launcher:prefix2="@string/orientation_landscape_prefix"
+            launcher:min1="0"
+            launcher:max1="100"
+            launcher:min2="0"
+            launcher:max2="100"
+            launcher:defaultValue1="@integer/config_appDrawerTransparencyDefault"
+            launcher:defaultValue2="@integer/config_appDrawerTransparencyDefault" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/preferences_interface_drawer_apps_category">
         <Preference android:key="lennox_drawer_hidden_apps"
             android:title="@string/preferences_interface_drawer_hidden_apps_title"
@@ -59,18 +78,6 @@
             launcher:min3="@integer/config_minAppRowsLand"
             launcher:max4="@integer/config_maxAppColumnsLand"
             launcher:min4="@integer/config_minAppColumnsLand" />
-        <ListPreference android:key="lennox_drawer_stretch_screens"
-            android:defaultValue="@string/checkbox_list_always_value"
-            android:entries="@array/checkbox_list_preference_entries"
-            android:entryValues="@array/checkbox_list_preference_values"
-            android:title="@string/preferences_interface_drawer_stretch_screens_title"
-            android:summary="@string/preferences_interface_drawer_stretch_screens_summary" />
-        <ListPreference android:key="lennox_drawer_fit_to_cells"
-            android:defaultValue="@string/checkbox_list_never_value"
-            android:entries="@array/checkbox_list_preference_entries"
-            android:entryValues="@array/checkbox_list_preference_values"
-            android:title="@string/preferences_interface_drawer_fit_to_cells_title"
-            android:summary="@string/preferences_interface_drawer_fit_to_cells_summary" />
         <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
             android:key="lennox_drawer_icon_scale"
             android:title="@string/preferences_interface_drawer_icon_scale_title"
@@ -101,22 +108,18 @@
             android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_drawer_text_padding_title"
             android:summary="@string/preferences_interface_drawer_text_padding_summary" />
-        <CheckBoxPreference android:key="lennox_drawer_dismiss_on_tap"
-            android:title="@string/preferences_interface_drawer_dismiss_on_tap_title"
-            android:summary="@string/preferences_interface_drawer_dismiss_on_tap_summary"
-            android:defaultValue="false" />
-        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
-            android:key="lennox_drawer_transparency"
-            android:title="@string/preferences_interface_drawer_transparency_title"
-            android:summary="@string/preferences_interface_drawer_transparency_summary"
-            launcher:prefix1="@string/orientation_portrait_prefix"
-            launcher:prefix2="@string/orientation_landscape_prefix"
-            launcher:min1="0"
-            launcher:max1="100"
-            launcher:min2="0"
-            launcher:max2="100"
-            launcher:defaultValue1="@integer/config_appDrawerTransparencyDefault"
-            launcher:defaultValue2="@integer/config_appDrawerTransparencyDefault" />
+        <ListPreference android:key="lennox_drawer_stretch_screens"
+            android:defaultValue="@string/checkbox_list_always_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
+            android:title="@string/preferences_interface_drawer_stretch_screens_title"
+            android:summary="@string/preferences_interface_drawer_stretch_screens_summary" />
+        <ListPreference android:key="lennox_drawer_fit_to_cells"
+            android:defaultValue="@string/checkbox_list_never_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
+            android:title="@string/preferences_interface_drawer_fit_to_cells_title"
+            android:summary="@string/preferences_interface_drawer_fit_to_cells_summary" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_drawer_widgets_category">
         <com.lennox.launcher.preference.QuadrupleNumberPickerPreference android:key="lennox_drawer_widget_grid"
@@ -150,10 +153,6 @@
             launcher:max2="@integer/app_icon_scale_percentage_max"
             launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
             launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
-        <CheckBoxPreference android:key="lennox_drawer_widgets_join_apps"
-            android:title="@string/preferences_interface_drawer_widgets_join_apps_title"
-            android:summary="@string/preferences_interface_drawer_widgets_join_apps_summary"
-            android:defaultValue="false" />
         <CheckBoxPreference android:key="lennox_drawer_widgets_list_actions"
             android:title="@string/preferences_interface_drawer_widgets_list_actions_title"
             android:summary="@string/preferences_interface_drawer_widgets_list_actions_summary"
@@ -170,6 +169,10 @@
             android:title="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_title"
             android:summary="@string/preferences_interface_drawer_scrolling_fade_adjacent_screens_summary"
             android:defaultValue="true" />
+        <CheckBoxPreference android:key="lennox_drawer_widgets_join_apps"
+            android:title="@string/preferences_interface_drawer_widgets_join_apps_title"
+            android:summary="@string/preferences_interface_drawer_widgets_join_apps_summary"
+            android:defaultValue="false" />
         <ListPreference android:key="lennox_drawer_scrolling_infinite"
             android:defaultValue="@string/checkbox_list_always_value"
             android:entries="@array/checkbox_list_preference_entries"

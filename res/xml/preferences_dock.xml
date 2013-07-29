@@ -18,6 +18,8 @@
     xmlns:launcher="http://schemas.android.com/apk/res/com.lennox.launcher"
     android:key="lennox_dock"
     android:title="@string/preferences_interface_dock_title">
+
+    <PreferenceCategory android:title="@string/preferences_interface_dock_general_category">
     <ListPreference android:key="lennox_dock_enabled"
         android:defaultValue="@string/checkbox_list_always_value"
         android:entries="@array/checkbox_list_preference_entries"
@@ -57,11 +59,15 @@
         <!-- TODO - code this
         launcher:maxExternal1="lennox_dock_pages|0"
         launcher:maxExternal2="lennox_dock_pages|1"-->
-    <CheckBoxPreference android:key="lennox_dock_scrolling_fade_adjacent_screens"
-        android:title="@string/preferences_interface_dock_scrolling_fade_adjacent_screens_title"
-        android:summary="@string/preferences_interface_dock_scrolling_fade_adjacent_screens_summary"
-        android:dependency="lennox_dock_enabled"
-        android:defaultValue="true" />
+    <ListPreference android:key="lennox_dock_divider"
+        android:defaultValue="@string/checkbox_list_always_value"
+        android:entries="@array/checkbox_list_preference_entries"
+        android:entryValues="@array/checkbox_list_preference_values"
+        android:title="@string/preferences_interface_dock_divider_title"
+        android:summary="@string/preferences_interface_dock_divider_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preferences_interface_dock_icon_category">
     <com.lennox.launcher.preference.DoubleNumberPickerPreference android:key="lennox_dock_icons"
         android:title="@string/preferences_interface_dock_icons_title"
         android:summary="@string/preferences_interface_dock_icons_summary"
@@ -74,38 +80,6 @@
         launcher:min1="@integer/hotseat_min_cell_count"
         launcher:max2="@integer/hotseat_max_cell_count"
         launcher:min2="@integer/hotseat_min_cell_count" />
-    <ListPreference android:key="lennox_dock_scrolling_transition_effect"
-        android:title="@string/preferences_interface_dock_scrolling_transition_effect_title"
-        android:summary="@string/preferences_interface_dock_scrolling_transition_effect_summary"
-        android:dependency="lennox_dock_enabled"
-        android:entries="@array/preferences_interface_dock_scrolling_transition_effect_entries"
-        android:entryValues="@array/preferences_interface_dock_scrolling_transition_effect_values"
-        android:defaultValue="@string/config_dockDefaultTransitionEffect" />
-    <ListPreference android:key="lennox_dock_scrolling_infinite"
-        android:defaultValue="@string/checkbox_list_always_value"
-        android:entries="@array/checkbox_list_preference_entries"
-        android:entryValues="@array/checkbox_list_preference_values"
-        android:title="@string/preferences_interface_dock_scrolling_infinite_title"
-        android:summary="@string/preferences_interface_dock_scrolling_infinite_summary" />
-    <ListPreference android:key="lennox_dock_stretch_screens"
-        android:defaultValue="@string/checkbox_list_always_value"
-        android:entries="@array/checkbox_list_preference_entries"
-        android:entryValues="@array/checkbox_list_preference_values"
-        android:dependency="lennox_dock_enabled"
-        android:title="@string/preferences_interface_dock_stretch_screens_title"
-        android:summary="@string/preferences_interface_dock_stretch_screens_summary" />
-    <ListPreference android:key="lennox_dock_fit_to_cells"
-        android:defaultValue="@string/checkbox_list_always_value"
-        android:entries="@array/checkbox_list_preference_entries"
-        android:entryValues="@array/checkbox_list_preference_values"
-        android:title="@string/preferences_interface_dock_fit_to_cells_title"
-        android:summary="@string/preferences_interface_dock_fit_to_cells_summary" />
-    <ListPreference android:key="lennox_dock_hide_icon_labels"
-        android:defaultValue="@string/checkbox_list_always_value"
-        android:entries="@array/checkbox_list_preference_entries"
-        android:entryValues="@array/checkbox_list_preference_values"
-        android:title="@string/preferences_interface_dock_hide_icon_labels_title"
-        android:summary="@string/preferences_interface_dock_hide_icon_labels_summary" />
     <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
         android:key="lennox_dock_icon_scale"
         android:title="@string/preferences_interface_dock_icon_scale_title"
@@ -138,10 +112,46 @@
         android:entryValues="@array/checkbox_list_preference_values"
         android:title="@string/preferences_interface_dock_text_padding_title"
         android:summary="@string/preferences_interface_dock_text_padding_summary" />
-    <ListPreference android:key="lennox_dock_divider"
+    <ListPreference android:key="lennox_dock_hide_icon_labels"
         android:defaultValue="@string/checkbox_list_always_value"
         android:entries="@array/checkbox_list_preference_entries"
         android:entryValues="@array/checkbox_list_preference_values"
-        android:title="@string/preferences_interface_dock_divider_title"
-        android:summary="@string/preferences_interface_dock_divider_summary" />
+        android:title="@string/preferences_interface_dock_hide_icon_labels_title"
+        android:summary="@string/preferences_interface_dock_hide_icon_labels_summary" />
+    <ListPreference android:key="lennox_dock_stretch_screens"
+        android:defaultValue="@string/checkbox_list_always_value"
+        android:entries="@array/checkbox_list_preference_entries"
+        android:entryValues="@array/checkbox_list_preference_values"
+        android:dependency="lennox_dock_enabled"
+        android:title="@string/preferences_interface_dock_stretch_screens_title"
+        android:summary="@string/preferences_interface_dock_stretch_screens_summary" />
+    <ListPreference android:key="lennox_dock_fit_to_cells"
+        android:defaultValue="@string/checkbox_list_always_value"
+        android:entries="@array/checkbox_list_preference_entries"
+        android:entryValues="@array/checkbox_list_preference_values"
+        android:title="@string/preferences_interface_dock_fit_to_cells_title"
+        android:summary="@string/preferences_interface_dock_fit_to_cells_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preferences_interface_dock_scrolling_category">
+        <ListPreference android:key="lennox_dock_scrolling_transition_effect"
+            android:title="@string/preferences_interface_dock_scrolling_transition_effect_title"
+            android:summary="@string/preferences_interface_dock_scrolling_transition_effect_summary"
+            android:dependency="lennox_dock_enabled"
+            android:entries="@array/preferences_interface_dock_scrolling_transition_effect_entries"
+            android:entryValues="@array/preferences_interface_dock_scrolling_transition_effect_values"
+            android:defaultValue="@string/config_dockDefaultTransitionEffect" />
+        <CheckBoxPreference android:key="lennox_dock_scrolling_fade_adjacent_screens"
+            android:title="@string/preferences_interface_dock_scrolling_fade_adjacent_screens_title"
+            android:summary="@string/preferences_interface_dock_scrolling_fade_adjacent_screens_summary"
+            android:dependency="lennox_dock_enabled"
+            android:defaultValue="true" />
+        <ListPreference android:key="lennox_dock_scrolling_infinite"
+            android:defaultValue="@string/checkbox_list_always_value"
+            android:entries="@array/checkbox_list_preference_entries"
+            android:entryValues="@array/checkbox_list_preference_values"
+            android:title="@string/preferences_interface_dock_scrolling_infinite_title"
+            android:summary="@string/preferences_interface_dock_scrolling_infinite_summary" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

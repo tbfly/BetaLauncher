@@ -146,9 +146,9 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         }
 
         mIsLandscape = LauncherApplication.isScreenLandscape(context);
-        mIconScale = (float) PreferencesProvider.Interface.Homescreen.FolderIconStyle.getIconScale(mIsLandscape) / 100f;
-        mTextScale = (float) PreferencesProvider.Interface.Homescreen.FolderIconStyle.getTextScale(mIsLandscape) / 100f;
-        mTextPadding = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getTextPadding(mIsLandscape);
+        mIconScale = (float) PreferencesProvider.Interface.Folder.getIconScale(mIsLandscape) / 100f;
+        mTextScale = (float) PreferencesProvider.Interface.Folder.getTextScale(mIsLandscape) / 100f;
+        mTextPadding = PreferencesProvider.Interface.Folder.getTextPadding(mIsLandscape);
         mInputMethodManager = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 

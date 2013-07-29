@@ -258,35 +258,35 @@ public final class PreferencesProvider {
                     return Integer.parseInt(getString("lennox_homescreen_indicator_position", "0"));
                 }
             }
+        }
 
-            public static class FolderIconStyle {
-                public static int getFolderIconStyle() {
-                    return Integer.parseInt(getString("lennox_homescreen_folder_style", "0"));
+        public static class Folder {
+            public static int getFolderIconStyle() {
+                return Integer.parseInt(getString("lennox_homescreen_folder_style", "0"));
+            }
+            public static int getIconScale(boolean landscape) {
+                String[] values = getString("lennox_homescreen_folder_icon_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
                 }
-                public static int getIconScale(boolean landscape) {
-                    String[] values = getString("lennox_homescreen_folder_icon_scale", "100|100").split("\\|");
-                    try {
-                        return Integer.parseInt(values[landscape ? 1 : 0]);
-                    } catch (NumberFormatException e) {
-                        return 100;
-                    }
+            }
+            public static int getTextScale(boolean landscape) {
+                String[] values = getString("lennox_homescreen_folder_text_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
                 }
-                public static int getTextScale(boolean landscape) {
-                    String[] values = getString("lennox_homescreen_folder_text_scale", "100|100").split("\\|");
-                    try {
-                        return Integer.parseInt(values[landscape ? 1 : 0]);
-                    } catch (NumberFormatException e) {
-                        return 100;
-                    }
-                }
-                public static boolean getTextPadding(boolean landscape) {
-                    int def = landscape ? 0 : 0;
-                    String[] values = getString("lennox_homescreen_folder_text_padding", def + "|" + def).split("\\|");
-                    try {
-                        return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                    } catch (NumberFormatException e) {
-                        return (def == 1);
-                    }
+            }
+            public static boolean getTextPadding(boolean landscape) {
+                int def = landscape ? 0 : 0;
+                String[] values = getString("lennox_homescreen_folder_text_padding", def + "|" + def).split("\\|");
+                try {
+                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
+                } catch (NumberFormatException e) {
+                    return (def == 1);
                 }
             }
         }

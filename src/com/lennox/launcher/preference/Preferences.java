@@ -171,6 +171,16 @@ public class Preferences extends PreferenceActivity
         }
     }
 
+    public static class FolderFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            addPreferencesFromResource(R.xml.preferences_folder);
+
+        }
+    }
+
     public static class DrawerFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {

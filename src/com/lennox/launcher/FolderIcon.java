@@ -125,7 +125,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     }
 
     private void init() {
-        mFolderIconStyle = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconStyle();
+        mFolderIconStyle = PreferencesProvider.Interface.Folder.getFolderIconStyle();
 
         switch (mFolderIconStyle) {
             case STYLE_STACKED:
@@ -207,7 +207,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             mFolderIcon = folderIcon;
             Resources res = launcher.getResources();
 
-            int folderIconStyle = PreferencesProvider.Interface.Homescreen.FolderIconStyle.getFolderIconStyle();
+            int folderIconStyle = PreferencesProvider.Interface.Folder.getFolderIconStyle();
             int topPaddingResource;
             switch (folderIconStyle) {
                 case FolderIcon.STYLE_STACKED:
