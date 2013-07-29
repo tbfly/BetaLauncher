@@ -427,6 +427,8 @@ public class CellLayout extends ViewGroup {
         if (mScrollingTransformsDirty) {
             setOverscrollTransformsDirty(false);
             setTranslationX(0);
+            setTranslationY(0);
+            setRotationX(0);
             setRotationY(0);
             // It doesn't matter if we pass true or false here, the important thing is that we
             // pass 0, which results in the overscroll drawable not being drawn any more.

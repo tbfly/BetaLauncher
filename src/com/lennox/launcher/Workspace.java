@@ -1481,7 +1481,7 @@ public class Workspace extends PagedView
             View v = getPageAt(i);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (v.getVisibility() != VISIBLE) {
                         v.setVisibility(VISIBLE);
                     }
@@ -1489,8 +1489,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1504,7 +1503,7 @@ public class Workspace extends PagedView
                 float rotation = WORKSPACE_ROTATION * scrollProgress;
                 float translation = getOffsetXForRotation(rotation, v.getWidth(), v.getHeight());
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (!vertical) {
                         v.setTranslationX(translation);
                         v.setRotationY(rotation);
@@ -1519,8 +1518,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1533,7 +1531,7 @@ public class Workspace extends PagedView
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f + (in ? -0.2f : 0.1f) * Math.abs(scrollProgress);
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     // Extra translation to account for the increase in size
                     if (!in) {
                         if (!vertical) {
@@ -1554,8 +1552,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1569,7 +1566,7 @@ public class Workspace extends PagedView
                 float rotation =
                         (up ? WORKSPACE_ROTATION : -WORKSPACE_ROTATION) * scrollProgress;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (!vertical) {
                         float translationX = v.getMeasuredWidth() * scrollProgress;
 
@@ -1609,8 +1606,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1625,7 +1621,7 @@ public class Workspace extends PagedView
                 float rotation = (in ? rotationAmount : -1f * rotationAmount) * scrollProgress;
                 float scale = 1.0f - Math.abs(scrollProgress) * 0.1f;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (in) {
                         v.setCameraDistance(mDensity * mCameraDistance);
                     }
@@ -1650,8 +1646,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1664,7 +1659,7 @@ public class Workspace extends PagedView
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? 110.0f : -110.0f) * scrollProgress;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (in) {
                         v.setCameraDistance(mDensity * mCameraDistance);
                     }
@@ -1686,8 +1681,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1840,7 +1834,7 @@ public class Workspace extends PagedView
                         (!vertical ? v.getMeasuredWidth() : v.getMeasuredHeight());
                 float alpha;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (!LauncherApplication.isScreenLarge() || scrollProgress < 0) {
                         alpha = scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
                             1 - Math.abs(scrollProgress)) : 1.0f;
@@ -1864,8 +1858,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1878,7 +1871,7 @@ public class Workspace extends PagedView
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float scale = 1.0f - Math.abs(scrollProgress);
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (!vertical) {
                         v.setPivotX(scrollProgress < 0 ? 0 : v.getMeasuredWidth());
                         v.setScaleX(scale);
@@ -1894,8 +1887,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1908,7 +1900,7 @@ public class Workspace extends PagedView
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = 180.0f * scrollProgress;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (getMeasuredHeight() > getMeasuredWidth()) {
                         float translationX = (getMeasuredHeight() - getMeasuredWidth()) / 2.0f * -scrollProgress;
                         v.setTranslationX(translationX);
@@ -1923,8 +1915,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1955,8 +1946,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -1969,7 +1959,7 @@ public class Workspace extends PagedView
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = (in ? WORKSPACE_ROTATION : -WORKSPACE_ROTATION) * scrollProgress;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (!vertical) {
                         v.setPivotX((scrollProgress + 1) * v.getMeasuredWidth() * 0.5f);
                         v.setPivotY(v.getMeasuredHeight() * 0.5f);
@@ -1987,8 +1977,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -2001,7 +1990,7 @@ public class Workspace extends PagedView
                 float scrollProgress = getScrollProgress(screenScroll, v, i);
                 float rotation = 90.0f * scrollProgress;
 
-                if (scrollProgress >= -0.98f && scrollProgress <= 0.98f) {
+                if (scrollProgress >= -0.99f && scrollProgress <= 0.99f) {
                     if (!vertical) {
                         v.setTranslationX(v.getMeasuredWidth() * scrollProgress);
                         v.setPivotX(left ? 0f : v.getMeasuredWidth());
@@ -2021,8 +2010,7 @@ public class Workspace extends PagedView
                         setCellLayoutFadeAdjacent(v, scrollProgress);
                     }
                 } else {
-                    v.setVisibility(INVISIBLE);
-                    v.invalidate();
+                    setCellHide(v);
                 }
             }
         }
@@ -2064,25 +2052,8 @@ public class Workspace extends PagedView
                 }
                 if (mOverscrollTransformsDirty && !mInfiniteScrolling) {
                     mOverscrollTransformsDirty = false;
-                    CellLayout cl0 = (CellLayout) getChildAt(0);
-                    CellLayout cl1 = (CellLayout) getChildAt(getChildCount() - 1);
-                    if (!mVertical) {
-                        cl0.setTranslationX(0);
-                        cl1.setTranslationX(0);
-                        cl0.setRotationY(0);
-                        cl1.setRotationY(0);
-                    } else {
-                        cl0.setTranslationY(0);
-                        cl1.setTranslationY(0);
-                        cl0.setRotationX(0);
-                        cl1.setRotationX(0);
-                    }
-                    cl0.setCameraDistance(mDensity * 1280);
-                    cl1.setCameraDistance(mDensity * 1280);
-                    cl0.setPivotX(cl0.getMeasuredWidth() / 2);
-                    cl1.setPivotX(cl1.getMeasuredWidth() / 2);
-                    cl0.setPivotY(cl0.getMeasuredHeight() / 2);
-                    cl1.setPivotY(cl1.getMeasuredHeight() / 2);
+                    ((CellLayout) getChildAt(0)).resetOverscrollTransforms();
+                    ((CellLayout) getChildAt(getChildCount() - 1)).resetOverscrollTransforms();
                 }
 
                 switch (mTransitionEffect) {
@@ -2162,11 +2133,9 @@ public class Workspace extends PagedView
                         if (!mVertical) {
                             cl.setPivotX(cl.getMeasuredWidth() * (index == 0 ? 0.75f : 0.25f));
                             cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
-                            cl.setTranslationX(0);
                         } else {
                             cl.setPivotX(cl.getMeasuredWidth() * 0.5f);
                             cl.setPivotY(cl.getMeasuredHeight() * (index == 0 ? 0.75f : 0.25f));
-                            cl.setTranslationY(0);
                         }
                     }
                     if (!mVertical) {
@@ -2180,10 +2149,9 @@ public class Workspace extends PagedView
     }
 
     private void setCellLayoutFadeAdjacent(CellLayout child, float scrollProgress) {
-        if (isSmall()) return;
-        float alpha = 1 - Math.abs(scrollProgress);
+        float alpha = isSmall() ? 1 : 1 - Math.abs(scrollProgress);
         child.getShortcutsAndWidgets().setAlpha(alpha);
-        if (!mIsDragOccuring) {
+        if (!mIsDragOccuring && !isSmall()) {
            child.setBackgroundAlphaMultiplier(
            backgroundAlphaInterpolator(Math.abs(scrollProgress)));
         } else {
@@ -2192,13 +2160,24 @@ public class Workspace extends PagedView
     }
 
     private void setCellLayoutFadeAdjacent(View child, float scrollProgress) {
-        if (isSmall()) return;
         if (child instanceof CellLayout) {
             setCellLayoutFadeAdjacent((CellLayout) child, scrollProgress);
-            return;
+        } else {
+            float alpha = 1 - Math.abs(scrollProgress);
+            child.setAlpha(alpha);
         }
-        float alpha = 1 - Math.abs(scrollProgress);
-        child.setAlpha(alpha);
+    }
+
+    private void setCellHide(View v) {
+        if (v.getVisibility() != INVISIBLE) {
+            v.setVisibility(INVISIBLE);
+            v.setTranslationX(0);
+            v.setTranslationY(0);
+            v.setPivotX(0);
+            v.setPivotY(0);
+            v.setRotationX(0);
+            v.setRotationY(0);
+        }
     }
 
     @Override
@@ -2582,8 +2561,6 @@ public class Workspace extends PagedView
             float finalAlpha = (!mFadeInAdjacentScreens || stateIsSpringLoaded ||
                     (i == mCurrentPage)) ? 1f : 0f;
             float initialAlpha = cl.getShortcutsAndWidgets().getAlpha();
-            // All effects, fix visibility
-            cl.setVisibility(VISIBLE);
 
             // Tablet effect
             if (mTransitionEffect == TransitionEffect.Tablet || stateIsSmall || stateIsSpringLoaded) {
@@ -2595,57 +2572,13 @@ public class Workspace extends PagedView
                 }
             }
 
-            // Zoom Effects
-            if ((mTransitionEffect == TransitionEffect.ZoomIn ||
-                    mTransitionEffect == TransitionEffect.ZoomOut) && stateIsNormal) {
-                if (i != mCurrentPage) {
-                    scale = (mTransitionEffect == TransitionEffect.ZoomIn ? 0.5f : 1.1f);
-                }
-            }
-
-            // Rotate Effects
-            if ((mTransitionEffect == TransitionEffect.RotateUp ||
-                    mTransitionEffect == TransitionEffect.RotateDown) && stateIsNormal) {
-                boolean up = mTransitionEffect == TransitionEffect.RotateUp;
-                rotation = (up ? WORKSPACE_ROTATION : -WORKSPACE_ROTATION) * Math.max(-1.0f, Math.min(1.0f , mCurrentPage - i));
-                translationX = cl.getMeasuredWidth() * (Math.max(-1.0f, Math.min(1.0f, i - mCurrentPage))) +
-                        (up ? -1.0f : 1.0f) * (float) Math.sin(Math.toRadians((double) rotation)) *
-                        (mRotatePivotPoint + cl.getMeasuredHeight() * 0.5f);
-                translationY += (up ? -1.0f : 1.0f) * (1.0f - Math.cos(Math.toRadians((double) rotation))) *
-                        (mRotatePivotPoint + cl.getMeasuredHeight() * 0.5f);
-            }
-
-            // Cube Effects
-            if ((mTransitionEffect == TransitionEffect.CubeIn || mTransitionEffect == TransitionEffect.CubeOut) && stateIsNormal) {
-                if (i < mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? -120.0f : 90.0f;
-                } else if (i > mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeOut ? 120.0f : -90.0f;
-                }
-            }
-
-            // Cube Bouncy Effects
-            if ((mTransitionEffect == TransitionEffect.CubeBouncyIn || mTransitionEffect == TransitionEffect.CubeBouncyOut) && stateIsNormal) {
-                if (i < mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeBouncyOut ? -90.0f : 90.0f;
-                } else if (i > mCurrentPage) {
-                    rotationY = mTransitionEffect == TransitionEffect.CubeBouncyOut ? 90.0f : -90.0f;
-                }
-            }
-
-            // Carousel Effects
-            if (mTransitionEffect == TransitionEffect.CarouselLeft || mTransitionEffect == TransitionEffect.CarouselRight && stateIsNormal) {
-                if (i < mCurrentPage) {
-                    rotationY = 90.0f;
-                } else if (i > mCurrentPage) {
-                    rotationY = -90.0f;
-                }
-            }
+            if (i == mCurrentPage) cl.setVisibility(VISIBLE);
 
             if (stateIsSmall || stateIsSpringLoaded) {
                 cl.setCameraDistance(1280 * mDensity);
                 cl.setPivotX(cl.getMeasuredWidth() * 0.5f);
                 cl.setPivotY(cl.getMeasuredHeight() * 0.5f);
+                cl.setVisibility(VISIBLE);
             }
 
             // Determine the pages alpha during the state transition
