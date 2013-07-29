@@ -287,6 +287,10 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
             int topPadding = getPaddingTop();
             int bottomPadding = getPaddingBottom();
             setPadding(sidePadding, topPadding, sidePadding, bottomPadding);
+        } else {
+            setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            setSingleLine(false);
+            setMaxLines(2);
         }
     }
 

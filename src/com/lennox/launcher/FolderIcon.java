@@ -810,9 +810,13 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         if (padding) {
             mFolderName.setEllipsize(TextUtils.TruncateAt.END);
             int sidePadding = getResources().getDimensionPixelSize(R.dimen.app_icon_size) / 3;
-            int topPadding = getPaddingTop();
-            int bottomPadding = getPaddingBottom();
-            setPadding(sidePadding, topPadding, sidePadding, bottomPadding);
+            int topPadding = mFolderName.getPaddingTop();
+            int bottomPadding = mFolderName.getPaddingBottom();
+            mFolderName.setPadding(sidePadding, topPadding, sidePadding, bottomPadding);
+        } else {
+            mFolderName.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            mFolderName.setSingleLine(false);
+            mFolderName.setMaxLines(2);
         }
     }
 
