@@ -136,6 +136,14 @@ public final class PreferencesProvider {
                     return (def == 1);
                 }
             }
+            public static int getHomescreenPadding(boolean landscape) {
+                String[] values = getString("lennox_homescreen_padding", "0|0").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
+            }
             public static int getIconScale(boolean landscape) {
                 String[] values = getString("lennox_homescreen_icon_scale", "100|100").split("\\|");
                 try {

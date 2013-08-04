@@ -332,6 +332,7 @@ public class Workspace extends PagedView
     private int mScrollingIndicatorPosition;
     private boolean mShowDockDivider;
     private boolean mShowOutlines;
+    private int mHomescreenPadding;
 
     private static final int SCROLLING_INDICATOR_DOCK = 0;
     private static final int SCROLLING_INDICATOR_TOP = 1;
@@ -443,6 +444,7 @@ public class Workspace extends PagedView
         mFadeScrollingIndicator = PreferencesProvider.Interface.Homescreen.Indicator.getFadeScrollingIndicator();
         mScrollingIndicatorPosition = PreferencesProvider.Interface.Homescreen.Indicator.getScrollingIndicatorPosition();
         mShowDockDivider = PreferencesProvider.Interface.Dock.getShowDivider(isLandscape) && mShowHotseat;
+        mHomescreenPadding = PreferencesProvider.Interface.Homescreen.getHomescreenPadding(isLandscape);
 
         mUpGestureAction = PreferencesProvider.Interface.Gestures.getUpGestureAction();
         mDownGestureAction = PreferencesProvider.Interface.Gestures.getDownGestureAction();
@@ -550,7 +552,7 @@ public class Workspace extends PagedView
             CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
             screen.setChildrenScale(mIconScale);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-            screen.setStretchCells(mStretchScreens, mFitToCells);
+            screen.setStretchCells(mStretchScreens, mFitToCells, mHomescreenPadding);
             screen.setTextScale(mTextScale, mTextPadding);
             addView(screen);
         }
@@ -908,7 +910,7 @@ public class Workspace extends PagedView
             if (screen != null) {
                 screen.setChildrenScale(mIconScale);
                 screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-                screen.setStretchCells(mStretchScreens, mFitToCells);
+                screen.setStretchCells(mStretchScreens, mFitToCells, mHomescreenPadding);
                 screen.setTextScale(mTextScale, mTextPadding);
             }
         }
@@ -4859,7 +4861,7 @@ public class Workspace extends PagedView
 
             CellLayout screen = (CellLayout)inflater.inflate(R.layout.workspace_screen, null);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-            screen.setStretchCells(mStretchScreens, mFitToCells);
+            screen.setStretchCells(mStretchScreens, mFitToCells, mHomescreenPadding);
             addView(screen, index);
             mNumberHomescreens++;
         }

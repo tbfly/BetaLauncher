@@ -50,6 +50,18 @@
             launcher:min3="@integer/config_minWorkspaceRowsLand"
             launcher:max4="@integer/config_maxWorkspaceColumnsLand"
             launcher:min4="@integer/config_minWorkspaceColumnsLand" />
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+            android:key="lennox_homescreen_padding"
+            android:title="@string/preferences_interface_homescreen_padding_title"
+            android:summary="@string/preferences_interface_homescreen_padding_summary"
+            launcher:prefix1="@string/orientation_portrait_prefix"
+            launcher:prefix2="@string/orientation_landscape_prefix"
+            launcher:min1="-50"
+            launcher:max1="50"
+            launcher:min2="-50"
+            launcher:max2="50"
+            launcher:defaultValue1="0"
+            launcher:defaultValue2="0" />
         <CheckBoxPreference android:key="lennox_homescreen_general_resize_any_widget"
             android:title="@string/preferences_interface_homescreen_general_resize_any_widget_title"
             android:summary="@string/preferences_interface_homescreen_general_resize_any_widget_summary"
