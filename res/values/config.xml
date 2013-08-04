@@ -93,30 +93,30 @@
 
     <!-- Workspace grid size -->
     <integer name="config_defaultWorkspaceRows">5</integer>
-    <integer name="config_maxWorkspaceRows">10</integer>
+    <integer name="config_maxWorkspaceRows">12</integer>
     <integer name="config_minWorkspaceRows">3</integer>
     <integer name="config_defaultWorkspaceColumns">4</integer>
-    <integer name="config_maxWorkspaceColumns">10</integer>
+    <integer name="config_maxWorkspaceColumns">12</integer>
     <integer name="config_minWorkspaceColumns">3</integer>
     <integer name="config_defaultWorkspaceRowsLand">4</integer>
-    <integer name="config_maxWorkspaceRowsLand">10</integer>
+    <integer name="config_maxWorkspaceRowsLand">12</integer>
     <integer name="config_minWorkspaceRowsLand">3</integer>
     <integer name="config_defaultWorkspaceColumnsLand">5</integer>
-    <integer name="config_maxWorkspaceColumnsLand">10</integer>
+    <integer name="config_maxWorkspaceColumnsLand">12</integer>
     <integer name="config_minWorkspaceColumnsLand">3</integer>
 
     <!-- App drawer grid size -->
     <integer name="config_defaultAppRows">6</integer>
-    <integer name="config_maxAppRows">10</integer>
+    <integer name="config_maxAppRows">12</integer>
     <integer name="config_minAppRows">3</integer>
     <integer name="config_defaultAppColumns">5</integer>
-    <integer name="config_maxAppColumns">10</integer>
+    <integer name="config_maxAppColumns">12</integer>
     <integer name="config_minAppColumns">3</integer>
     <integer name="config_defaultAppRowsLand">4</integer>
-    <integer name="config_maxAppRowsLand">10</integer>
+    <integer name="config_maxAppRowsLand">12</integer>
     <integer name="config_minAppRowsLand">3</integer>
     <integer name="config_defaultAppColumnsLand">7</integer>
-    <integer name="config_maxAppColumnsLand">10</integer>
+    <integer name="config_maxAppColumnsLand">12</integer>
     <integer name="config_minAppColumnsLand">3</integer>
 
     <!-- App drawer widget list grid size -->
