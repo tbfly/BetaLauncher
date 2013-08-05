@@ -171,7 +171,7 @@ class LauncherSettings {
          */
         static final String CELLY = "cellY";
 
-        /**2
+        /**
          * The X span of the cell holding the favorite
          * <P>Type: INTEGER</P>
          */

@@ -77,6 +77,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
         if (!ACTION_INSTALL_SHORTCUT.equals(data.getAction())) {
             return;
         }
+
         Intent intent = data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);
         if (intent == null) {
             return;
