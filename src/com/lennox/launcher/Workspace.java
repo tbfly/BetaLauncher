@@ -314,8 +314,6 @@ public class Workspace extends PagedView
     // Preferences
     private int mNumberHomescreens;
     private int mDefaultHomescreen;
-    private boolean mStretchScreens;
-    private boolean mFitToCells;
     private boolean mShowSearchBar;
     private boolean mShowHotseat;
     private boolean mHotseatAsOverlay;
@@ -387,8 +385,6 @@ public class Workspace extends PagedView
         final Resources res = getResources();
         mHandleFadeInAdjacentScreens = true;
         mWallpaperManager = WallpaperManager.getInstance(context);
-        mStretchScreens = PreferencesProvider.Interface.Homescreen.getStretchScreens(isLandscape);
-        mFitToCells = PreferencesProvider.Interface.Homescreen.getFitToCells(isLandscape);
 
         mUsePagingTouchSlop = false;
 
@@ -552,7 +548,7 @@ public class Workspace extends PagedView
             CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
             screen.setChildrenScale(mIconScale);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-            screen.setStretchCells(mStretchScreens, mFitToCells, mHomescreenPadding);
+            screen.setStretchCells(true, true, mHomescreenPadding);
             screen.setTextScale(mTextScale, mTextPadding);
             addView(screen);
         }
@@ -910,7 +906,7 @@ public class Workspace extends PagedView
             if (screen != null) {
                 screen.setChildrenScale(mIconScale);
                 screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-                screen.setStretchCells(mStretchScreens, mFitToCells, mHomescreenPadding);
+                screen.setStretchCells(true, true, mHomescreenPadding);
                 screen.setTextScale(mTextScale, mTextPadding);
             }
         }
@@ -4861,7 +4857,7 @@ public class Workspace extends PagedView
 
             CellLayout screen = (CellLayout)inflater.inflate(R.layout.workspace_screen, null);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-            screen.setStretchCells(mStretchScreens, mFitToCells, mHomescreenPadding);
+            screen.setStretchCells(true, true, mHomescreenPadding);
             addView(screen, index);
             mNumberHomescreens++;
         }

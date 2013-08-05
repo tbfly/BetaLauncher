@@ -141,18 +141,6 @@
             launcher:min3="@integer/config_minWidgetRowsLand"
             launcher:max4="@integer/config_maxWidgetColumnsLand"
             launcher:min4="@integer/config_minWidgetColumnsLand" />
-        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
-            android:key="lennox_drawer_widgets_scale"
-            android:title="@string/preferences_interface_drawer_widgets_scale_title"
-            android:summary="@string/preferences_interface_drawer_widgets_scale_summary"
-            launcher:prefix1="@string/orientation_portrait_prefix"
-            launcher:prefix2="@string/orientation_landscape_prefix"
-            launcher:min1="@integer/app_icon_scale_percentage_min"
-            launcher:max1="@integer/app_icon_scale_percentage_max"
-            launcher:min2="@integer/app_icon_scale_percentage_min"
-            launcher:max2="@integer/app_icon_scale_percentage_max"
-            launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
-            launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
         <CheckBoxPreference android:key="lennox_drawer_widgets_list_actions"
             android:title="@string/preferences_interface_drawer_widgets_list_actions_title"
             android:summary="@string/preferences_interface_drawer_widgets_list_actions_summary"

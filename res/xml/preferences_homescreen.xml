@@ -56,9 +56,9 @@
             android:summary="@string/preferences_interface_homescreen_padding_summary"
             launcher:prefix1="@string/orientation_portrait_prefix"
             launcher:prefix2="@string/orientation_landscape_prefix"
-            launcher:min1="-50"
+            launcher:min1="0"
             launcher:max1="50"
-            launcher:min2="-50"
+            launcher:min2="0"
             launcher:max2="50"
             launcher:defaultValue1="0"
             launcher:defaultValue2="0" />
@@ -126,18 +126,6 @@
             android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_homescreen_general_hide_icon_labels_title"
             android:summary="@string/preferences_interface_homescreen_general_hide_icon_labels_summary" />
-        <ListPreference android:key="lennox_homescreen_stretch_screens"
-            android:defaultValue="@string/checkbox_list_always_value"
-            android:entries="@array/checkbox_list_preference_entries"
-            android:entryValues="@array/checkbox_list_preference_values"
-            android:title="@string/preferences_interface_homescreen_general_stretch_screens_title"
-            android:summary="@string/preferences_interface_homescreen_general_stretch_screens_summary" />
-        <ListPreference android:key="lennox_homescreen_fit_to_cells"
-            android:defaultValue="@string/checkbox_list_never_value"
-            android:entries="@array/checkbox_list_preference_entries"
-            android:entryValues="@array/checkbox_list_preference_values"
-            android:title="@string/preferences_interface_homescreen_general_fit_to_cells_title"
-            android:summary="@string/preferences_interface_homescreen_general_fit_to_cells_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_interface_homescreen_scrolling_category">

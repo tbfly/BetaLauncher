@@ -118,24 +118,6 @@ public final class PreferencesProvider {
                     return def;
                 }
             }
-            public static boolean getStretchScreens(boolean landscape) {
-                int def = landscape ? 1 : 1;
-                String[] values = getString("lennox_homescreen_stretch_screens", def + "|" + def).split("\\|");
-                try {
-                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                } catch (NumberFormatException e) {
-                    return (def == 1);
-                }
-            }
-            public static boolean getFitToCells(boolean landscape) {
-                int def = landscape ? 0 : 0;
-                String[] values = getString("lennox_homescreen_fit_to_cells", def + "|" + def).split("\\|");
-                try {
-                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                } catch (NumberFormatException e) {
-                    return (def == 1);
-                }
-            }
             public static int getHomescreenPadding(boolean landscape) {
                 String[] values = getString("lennox_homescreen_padding", "0|0").split("\\|");
                 try {
@@ -401,14 +383,6 @@ public final class PreferencesProvider {
                     return (def == 1);
                 }
             }
-            public static int getWidgetScale(boolean landscape) {
-                String[] values = getString("lennox_drawer_widgets_scale", "100|100").split("\\|");
-                try {
-                    return Integer.parseInt(values[landscape ? 1 : 0]);
-                } catch (NumberFormatException e) {
-                    return 100;
-                }
-            }
             public static boolean getDismissDrawerOnTap() {
                 return getBoolean("lennox_drawer_dismiss_on_tap", false);
             }
@@ -505,24 +479,6 @@ public final class PreferencesProvider {
                     return Integer.parseInt(values[landscape ? 1 : 0]);
                 } catch (NumberFormatException e) {
                     return def;
-                }
-            }
-            public static boolean getStretchScreens(boolean landscape) {
-                int def = landscape ? 1 : 1;
-                String[] values = getString("lennox_dock_stretch_screens", def + "|" + def).split("\\|");
-                try {
-                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                } catch (NumberFormatException e) {
-                    return (def == 1);
-                }
-            }
-            public static boolean getFitToCells(boolean landscape) {
-                int def = landscape ? 1 : 1;
-                String[] values = getString("lennox_dock_fit_to_cells", def + "|" + def).split("\\|");
-                try {
-                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                } catch (NumberFormatException e) {
-                    return (def == 1);
                 }
             }
             public static boolean getHideIconLabels(boolean landscape) {

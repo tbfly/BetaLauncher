@@ -118,19 +118,6 @@
         android:entryValues="@array/checkbox_list_preference_values"
         android:title="@string/preferences_interface_dock_hide_icon_labels_title"
         android:summary="@string/preferences_interface_dock_hide_icon_labels_summary" />
-    <ListPreference android:key="lennox_dock_stretch_screens"
-        android:defaultValue="@string/checkbox_list_always_value"
-        android:entries="@array/checkbox_list_preference_entries"
-        android:entryValues="@array/checkbox_list_preference_values"
-        android:dependency="lennox_dock_enabled"
-        android:title="@string/preferences_interface_dock_stretch_screens_title"
-        android:summary="@string/preferences_interface_dock_stretch_screens_summary" />
-    <ListPreference android:key="lennox_dock_fit_to_cells"
-        android:defaultValue="@string/checkbox_list_always_value"
-        android:entries="@array/checkbox_list_preference_entries"
-        android:entryValues="@array/checkbox_list_preference_values"
-        android:title="@string/preferences_interface_dock_fit_to_cells_title"
-        android:summary="@string/preferences_interface_dock_fit_to_cells_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preferences_interface_dock_scrolling_category">

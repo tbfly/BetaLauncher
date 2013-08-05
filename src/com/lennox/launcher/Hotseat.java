@@ -40,9 +40,6 @@ public class Hotseat extends PagedView {
     private boolean mOverscrollTransformsDirty = false;
     private int mCameraDistance;
 
-    private boolean mStretchCells;
-    private boolean mFitToCells;
-
     boolean mIsDragOccuring = false;
 
     private float[] mTempCellLayoutCenterCoordinates = new float[2];
@@ -106,8 +103,6 @@ public class Hotseat extends PagedView {
 
         mVertical = hasVerticalHotseat();
 
-        mStretchCells = PreferencesProvider.Interface.Dock.getStretchScreens(mIsLandscape);
-        mFitToCells = PreferencesProvider.Interface.Dock.getFitToCells(mIsLandscape);
         mInfiniteScrolling = PreferencesProvider.Interface.Dock.Scrolling.getInfiniteScrolling(mIsLandscape);
 
         boolean hideDockIconLabels = PreferencesProvider.Interface.Dock.getHideIconLabels(mIsLandscape) ||
@@ -123,7 +118,7 @@ public class Hotseat extends PagedView {
             CellLayout cl = (CellLayout) inflater.inflate(R.layout.hotseat_page, null);
             cl.setChildrenScale(childrenScale);
             cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1), mVertical);
-            cl.setStretchCells(mStretchCells, mFitToCells, hideDockIconLabels, mVertical);
+            cl.setStretchCells(true, true, hideDockIconLabels, mVertical);
             cl.setTextScale(textScale, textPadding);
 
             addView(cl);

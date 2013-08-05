@@ -123,10 +123,6 @@
     <string name="preferences_interface_homescreen_general_grid_summary">Choose the number of rows/columns on the homescreen</string>
     <string name="preferences_interface_homescreen_general_grid_rows_title">Rows</string>
     <string name="preferences_interface_homescreen_general_grid_columns_title">Columns</string>
-    <string name="preferences_interface_homescreen_general_stretch_screens_title">Stretch screens</string>
-    <string name="preferences_interface_homescreen_general_stretch_screens_summary">Expand homescreens to fill the size of display</string>
-    <string name="preferences_interface_homescreen_general_fit_to_cells_title">Fit icons to cells</string>
-    <string name="preferences_interface_homescreen_general_fit_to_cells_summary">Resize cells to fit screen and force icon to stay within the cell</string>
     <string name="preferences_interface_homescreen_general_resize_any_widget_title">Resize any widget</string>
     <string name="preferences_interface_homescreen_general_resize_any_widget_summary">Allow resizing of widgets that normally aren\'t resizeable</string>
     <string name="preferences_interface_homescreen_icon_category">Icons</string>
@@ -214,8 +210,6 @@
     <string name="preferences_interface_drawer_text_scale_summary">Scale of text for icons in the app drawer</string>
     <string name="preferences_interface_drawer_text_padding_title">Text padding</string>
     <string name="preferences_interface_drawer_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
-    <string name="preferences_interface_drawer_widgets_scale_title">Widget preview scale</string>
-    <string name="preferences_interface_drawer_widgets_scale_summary">Scale of widget previews in app drawer</string>
     <string name="preferences_interface_drawer_scrolling_category">Scrolling</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>
@@ -259,10 +253,6 @@
     <string name="preferences_interface_dock_scrolling_transition_effect_summary">Scrolling effect when scrolling pages</string>
     <string name="preferences_interface_dock_scrolling_infinite_title">Infinite scrolling</string>
     <string name="preferences_interface_dock_scrolling_infinite_summary">Scroll between the first and last hotseat pages</string>
-    <string name="preferences_interface_dock_stretch_screens_title">Stretch pages</string>
-    <string name="preferences_interface_dock_stretch_screens_summary">Expand dock pages to fill the size of the dock</string>
-    <string name="preferences_interface_dock_fit_to_cells_title">Fit icons to cells</string>
-    <string name="preferences_interface_dock_fit_to_cells_summary">Resize cells to fit screen and force icon to stay within the cell</string>
     <string name="preferences_interface_dock_hide_icon_labels_title">Hide icon labels</string>
     <string name="preferences_interface_dock_hide_icon_labels_summary">Hide dock icon labels</string>
     <string name="preferences_interface_dock_icon_scale_title">Icon scale</string>
