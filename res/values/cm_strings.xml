@@ -134,8 +134,8 @@
     <string name="preferences_interface_homescreen_icon_scale_summary">Scale of icons on homescreens</string>
     <string name="preferences_interface_homescreen_text_scale_title">Text scale</string>
     <string name="preferences_interface_homescreen_text_scale_summary">Scale of text for icons on homescreen</string>
-    <string name="preferences_interface_homescreen_text_padding_title">Text padding</string>
-    <string name="preferences_interface_homescreen_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
+    <string name="preferences_interface_homescreen_text_padding_title">Single line text</string>
+    <string name="preferences_interface_homescreen_text_padding_summary">Restrict icon labels to single line</string>
     <string name="preferences_interface_homescreen_general_auto_install_shortcuts_title">Automatically add shortcuts</string>
     <string name="preferences_interface_homescreen_general_auto_install_shortcuts_summary">Allow applications to automatically add shortcuts to the homescreen</string>
     <string name="preferences_interface_homescreen_scrolling_category">Scrolling</string>
@@ -170,8 +170,8 @@
     <string name="preferences_interface_homescreen_folder_icon_scale_summary">Scale of icons inside folders on homescreen</string>
     <string name="preferences_interface_homescreen_folder_text_scale_title">Text scale</string>
     <string name="preferences_interface_homescreen_folder_text_scale_summary">Scale of text inside folders on homescreen</string>
-    <string name="preferences_interface_homescreen_folder_text_padding_title">Text padding</string>
-    <string name="preferences_interface_homescreen_folder_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
+    <string name="preferences_interface_homescreen_folder_text_padding_title">Single line text</string>
+    <string name="preferences_interface_homescreen_folder_text_padding_summary">Restrict icon labels to single line</string>
     <string name="preferences_interface_homescreen_folder_background_title">Background</string>
     <string name="preferences_interface_homescreen_folder_background_summary">Background image for the folder icon</string>
 
@@ -208,8 +208,8 @@
     <string name="preferences_interface_drawer_icon_scale_summary">Scale of icons in the app drawer</string>
     <string name="preferences_interface_drawer_text_scale_title">Text scale</string>
     <string name="preferences_interface_drawer_text_scale_summary">Scale of text for icons in the app drawer</string>
-    <string name="preferences_interface_drawer_text_padding_title">Text padding</string>
-    <string name="preferences_interface_drawer_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
+    <string name="preferences_interface_drawer_text_padding_title">Single line text</string>
+    <string name="preferences_interface_drawer_text_padding_summary">Restrict icon labels to single line</string>
     <string name="preferences_interface_drawer_scrolling_category">Scrolling</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_title">Transition effect</string>
     <string name="preferences_interface_drawer_scrolling_transition_effect_summary">Scrolling effect when scrolling screens</string>
@@ -259,8 +259,8 @@
     <string name="preferences_interface_dock_icon_scale_summary">Scale of icons in the dock</string>
     <string name="preferences_interface_dock_text_scale_title">Text scale</string>
     <string name="preferences_interface_dock_text_scale_summary">Scale of text in the dock</string>
-    <string name="preferences_interface_dock_text_padding_title">Text padding</string>
-    <string name="preferences_interface_dock_text_padding_summary">Pad text so it doesn\'t overflow icon</string>
+    <string name="preferences_interface_dock_text_padding_title">Single line text</string>
+    <string name="preferences_interface_dock_text_padding_summary">Restrict icon labels to single line</string>
     <string name="preferences_interface_dock_divider_title">Show dock divider</string>
     <string name="preferences_interface_dock_divider_summary">Show divider between homescreen and dock</string>
     <string name="preferences_interface_dock_scrolling_fade_adjacent_screens_title">Fade side pages</string>

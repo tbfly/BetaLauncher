@@ -283,10 +283,6 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
         setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) mOriginalTextSize * (float) scale);
         if (padding) {
             setEllipsize(TextUtils.TruncateAt.END);
-            int sidePadding = getResources().getDimensionPixelSize(R.dimen.app_icon_size) / 3;
-            int topPadding = getPaddingTop();
-            int bottomPadding = getPaddingBottom();
-            setPadding(sidePadding, topPadding, sidePadding, bottomPadding);
         } else {
             setEllipsize(TextUtils.TruncateAt.MARQUEE);
             setSingleLine(false);

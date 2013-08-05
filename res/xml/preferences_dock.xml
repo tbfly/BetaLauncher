@@ -107,7 +107,7 @@
         launcher:defaultValue1="@integer/hotseat_item_scale_percentage"
         launcher:defaultValue2="@integer/hotseat_item_scale_percentage" />
     <ListPreference android:key="lennox_dock_text_padding"
-        android:defaultValue="@string/checkbox_list_never_value"
+        android:defaultValue="@string/checkbox_list_always_value"
         android:entries="@array/checkbox_list_preference_entries"
         android:entryValues="@array/checkbox_list_preference_values"
         android:title="@string/preferences_interface_dock_text_padding_title"
