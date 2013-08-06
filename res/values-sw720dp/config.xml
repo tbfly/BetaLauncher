@@ -24,4 +24,49 @@
     <!-- Camera distance for the overscroll effect -->
     <integer name="config_cameraDistance">18000</integer>
 
+    <integer name="hotseat_max_cell_count">15</integer>
+    <integer name="hotseat_min_cell_count">5</integer>
+
+    <!-- Workspace grid size -->
+    <integer name="config_defaultWorkspaceRows">8</integer>
+    <integer name="config_maxWorkspaceRows">15</integer>
+    <integer name="config_minWorkspaceRows">3</integer>
+    <integer name="config_defaultWorkspaceColumns">5</integer>
+    <integer name="config_maxWorkspaceColumns">15</integer>
+    <integer name="config_minWorkspaceColumns">3</integer>
+    <integer name="config_defaultWorkspaceRowsLand">5</integer>
+    <integer name="config_maxWorkspaceRowsLand">15</integer>
+    <integer name="config_minWorkspaceRowsLand">3</integer>
+    <integer name="config_defaultWorkspaceColumnsLand">8</integer>
+    <integer name="config_maxWorkspaceColumnsLand">15</integer>
+    <integer name="config_minWorkspaceColumnsLand">3</integer>
+
+    <!-- App drawer grid size -->
+    <integer name="config_defaultAppRows">10</integer>
+    <integer name="config_maxAppRows">15</integer>
+    <integer name="config_minAppRows">3</integer>
+    <integer name="config_defaultAppColumns">6</integer>
+    <integer name="config_maxAppColumns">15</integer>
+    <integer name="config_minAppColumns">3</integer>
+    <integer name="config_defaultAppRowsLand">6</integer>
+    <integer name="config_maxAppRowsLand">15</integer>
+    <integer name="config_minAppRowsLand">3</integer>
+    <integer name="config_defaultAppColumnsLand">10</integer>
+    <integer name="config_maxAppColumnsLand">15</integer>
+    <integer name="config_minAppColumnsLand">3</integer>
+
+    <!-- App drawer widget list grid size -->
+    <integer name="config_defaultWidgetRows">4</integer>
+    <integer name="config_maxWidgetRows">9</integer>
+    <integer name="config_minWidgetRows">1</integer>
+    <integer name="config_defaultWidgetColumns">3</integer>
+    <integer name="config_maxWidgetColumns">6</integer>
+    <integer name="config_minWidgetColumns">1</integer>
+    <integer name="config_defaultWidgetRowsLand">3</integer>
+    <integer name="config_maxWidgetRowsLand">6</integer>
+    <integer name="config_minWidgetRowsLand">1</integer>
+    <integer name="config_defaultWidgetColumnsLand">4</integer>
+    <integer name="config_maxWidgetColumnsLand">9</integer>
+    <integer name="config_minWidgetColumnsLand">1</integer>
+
 </resources>
