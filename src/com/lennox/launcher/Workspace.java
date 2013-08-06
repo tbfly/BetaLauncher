@@ -2882,7 +2882,7 @@ public class Workspace extends PagedView
         Point dragVisualizeOffset = null;
         Rect dragRect = null;
         if (child instanceof BubbleTextView || child instanceof PagedViewIcon || child instanceof FolderIcon) {
-            int previewSize = r.getDimensionPixelSize(R.dimen.folder_preview_size);
+            int previewSize = r.getDimensionPixelSize(R.dimen.app_icon_size);
             dragRect = new Rect(0, 0, child.getWidth(), previewSize);
         }
 

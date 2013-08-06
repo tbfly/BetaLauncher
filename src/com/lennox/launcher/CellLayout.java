@@ -323,7 +323,7 @@ public class CellLayout extends ViewGroup {
 
     public void setChildrenScale(float childrenScale) {
         mChildrenScale = childrenScale;
-        mPreviewSize = adjustForScale(getResources().getDimensionPixelSize(R.dimen.folder_preview_size));
+        mPreviewSize = adjustForScale(getResources().getDimensionPixelSize(R.dimen.app_icon_size));
     }
 
     public float getChildrenScale() {

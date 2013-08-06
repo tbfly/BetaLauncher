@@ -192,7 +192,7 @@ public class ActivityPicker extends ListActivity  {
             protected IconResizer getResizer(Context context) {
                 if (sResizer == null) {
                     final Resources resources = context.getResources();
-                    int size = (int) resources.getDimension(android.R.dimen.app_icon_size);
+                    int size = (int) resources.getDimension(R.dimen.app_icon_size);
                     sResizer = new IconResizer(size, size, resources.getDisplayMetrics());
                 }
                 return sResizer;

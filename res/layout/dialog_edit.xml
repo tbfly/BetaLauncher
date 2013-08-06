@@ -10,10 +10,10 @@
     android:orientation="horizontal">
     <ImageButton
         android:padding="5dp"
-        android:layout_width="@android:dimen/app_icon_size"
+        android:layout_width="@dimen/app_icon_size"
         style="?android:attr/borderlessButtonStyle"
         android:id="@+id/dialog_edit_icon"
-        android:layout_height="@android:dimen/app_icon_size" />
+        android:layout_height="@dimen/app_icon_size" />
     <View
         android:layout_width="2dp"
         android:layout_height="match_parent"
