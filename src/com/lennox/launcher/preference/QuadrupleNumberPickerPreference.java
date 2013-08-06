@@ -136,22 +136,22 @@ public class QuadrupleNumberPickerPreference extends DialogPreference {
         }
 
         // Initialize state
-        mNumberPicker1.setWrapSelectorWheel(false);
         mNumberPicker1.setMaxValue(max1);
         mNumberPicker1.setMinValue(min1);
         mNumberPicker1.setValue(getPersistedValue(1));
-        mNumberPicker2.setWrapSelectorWheel(false);
+        mNumberPicker1.setWrapSelectorWheel(false);
         mNumberPicker2.setMaxValue(max2);
         mNumberPicker2.setMinValue(min2);
         mNumberPicker2.setValue(getPersistedValue(2));
-        mNumberPicker3.setWrapSelectorWheel(false);
+        mNumberPicker2.setWrapSelectorWheel(false);
         mNumberPicker3.setMaxValue(max3);
         mNumberPicker3.setMinValue(min3);
         mNumberPicker3.setValue(getPersistedValue(3));
-        mNumberPicker4.setWrapSelectorWheel(false);
+        mNumberPicker3.setWrapSelectorWheel(false);
         mNumberPicker4.setMaxValue(max4);
         mNumberPicker4.setMinValue(min4);
         mNumberPicker4.setValue(getPersistedValue(4));
+        mNumberPicker4.setWrapSelectorWheel(false);
 
         // Titles
         TextView pickerTitle1 = (TextView) view.findViewById(R.id.picker_title_1);
