@@ -115,7 +115,7 @@
             launcher:defaultValue1="@integer/app_icon_scale_percentage_default"
             launcher:defaultValue2="@integer/app_icon_scale_percentage_default" />
         <ListPreference android:key="lennox_drawer_text_padding"
-            android:defaultValue="@string/checkbox_list_never_value"
+            android:defaultValue="@string/checkbox_list_landscape_value"
             android:entries="@array/checkbox_list_preference_entries"
             android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_drawer_text_padding_title"

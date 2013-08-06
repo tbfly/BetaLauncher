@@ -365,7 +365,7 @@ public final class PreferencesProvider {
                 }
             }
             public static boolean getTextPadding(boolean landscape) {
-                int def = landscape ? 0 : 0;
+                int def = landscape ? 1 : 0;
                 String[] values = getString("lennox_drawer_text_padding", def + "|" + def).split("\\|");
                 try {
                     return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
