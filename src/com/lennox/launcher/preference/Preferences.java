@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -125,6 +126,9 @@ public class Preferences extends PreferenceActivity
         super.onHeaderClick(header, position);
         if (header.id == R.id.preferences_backup_section) {
             android.os.Process.killProcess(android.os.Process.myPid());
+        } else if (header.id == R.id.preferences_application_version) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lennykano%40gmail%2ecom&lc=AU&item_name=Lennox%20Corporation&item_number=LENNOX_LAUNCHER&currency_code=AUD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted"));
+            startActivity(browserIntent);
         }
     }
 
