@@ -937,7 +937,8 @@ public class CellLayout extends ViewGroup {
 
     void setStretchCells(int outsidePadding) {
         setCellGaps(-1, -1);
-        setPadding(outsidePadding, outsidePadding, outsidePadding, outsidePadding);
+        int extraPaddingTop = getResources().getDimensionPixelSize(R.dimen.extra_padding_top);
+        setPadding(outsidePadding, outsidePadding + extraPaddingTop, outsidePadding, outsidePadding);
         mCellWidth = getMaxCellWidth();
         mCellHeight = getMaxCellHeight();
         mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
@@ -945,10 +946,8 @@ public class CellLayout extends ViewGroup {
 
     void setStretchCells(boolean hideDockLabels, boolean vertical) {
         setCellGaps(-1, -1);
-        if (!vertical) {
-            int iconPaddingTop = (int) ((float) getResources().getDimensionPixelSize(R.dimen.hotseat_icon_padding_top) / getChildrenScale());
-            setPadding(0, iconPaddingTop, 0, 0);
-        }
+        int extraPaddingTop = getResources().getDimensionPixelSize(R.dimen.extra_padding_top);
+        setPadding(0, extraPaddingTop, 0, 0);
         mCellWidth = getMaxCellWidth();
         mCellHeight = getMaxCellHeight();
         mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);

@@ -87,7 +87,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
 
     void setStretchCells(int outsidePadding) {
         setCellGaps(-1, -1);
-        setPadding(outsidePadding, outsidePadding, outsidePadding, outsidePadding);
+        int extraPaddingTop = getResources().getDimensionPixelSize(R.dimen.extra_padding_top);
+        setPadding(outsidePadding, outsidePadding + extraPaddingTop, outsidePadding, outsidePadding);
         mCellWidth = getMaxCellWidth();
         mCellHeight = getMaxCellHeight();
         mChildren.setCellDimensions(mCellWidth, mCellHeight);
