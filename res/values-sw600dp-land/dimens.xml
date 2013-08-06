@@ -15,13 +15,8 @@
 -->
 
 <resources>
-    <dimen name="app_icon_padding_top">0dp</dimen>
     <dimen name="app_icon_drawable_padding_land">0dp</dimen>
     <dimen name="workspace_icon_text_size">11sp</dimen>
-
-<!-- Hotseat -->
-    <dimen name="button_bar_width_left_padding">14dp</dimen>
-    <dimen name="button_bar_width_right_padding">14dp</dimen>
 
 <!-- AppsCustomize -->
     <dimen name="apps_customize_pageLayoutWidthGap">36dp</dimen>
@@ -34,9 +29,7 @@
     <dimen name="toolbar_button_vertical_padding">12dip</dimen>
     <dimen name="toolbar_button_horizontal_padding">20dip</dimen>
 
-<!-- Workspace -->
-    <dimen name="workspace_divider_padding_top">12dp</dimen>
-    <dimen name="workspace_divider_padding_bottom">12dp</dimen>
-    <dimen name="workspace_divider_padding_left">0dp</dimen>
-    <dimen name="workspace_divider_padding_right">0dp</dimen>
+<!-- Preview cell size -->
+    <dimen name="preview_cell_width">@dimen/preview_cell_width_land</dimen>
+    <dimen name="preview_cell_height">@dimen/preview_cell_height_land</dimen>
 </resources>

@@ -1,13 +1,13 @@
 <resources>
-    <integer name="cell_count_x">6</integer>
-    <integer name="cell_count_y">6</integer>
+    <integer name="default_cell_count_x">6</integer>
+    <integer name="default_cell_count_y">6</integer>
     <integer name="hotseat_cell_count">7</integer>
     <integer name="hotseat_all_apps_index">3</integer>
     <bool name="allow_rotation">true</bool>
 
 <!-- Workspace -->
     <!-- Whether to show outlines on the screens when scrolling -->
-    <bool name="config_workspaceDefaultShowOutlines">false</bool>
+    <bool name="config_workspaceDefaultShowOutlines">true</bool>
 
 <!-- DragController -->
     <integer name="config_flingToDeleteMinVelocity">-1000</integer>
@@ -26,4 +26,50 @@
 <!-- Hotseat -->
     <!-- must be between 0 and 100 -->
     <integer name="hotseat_item_scale_percentage">80</integer>
+
+    <integer name="hotseat_max_cell_count">12</integer>
+    <integer name="hotseat_min_cell_count">4</integer>
+
+    <!-- Workspace grid size -->
+    <integer name="config_defaultWorkspaceRows">6</integer>
+    <integer name="config_maxWorkspaceRows">12</integer>
+    <integer name="config_minWorkspaceRows">3</integer>
+    <integer name="config_defaultWorkspaceColumns">6</integer>
+    <integer name="config_maxWorkspaceColumns">12</integer>
+    <integer name="config_minWorkspaceColumns">3</integer>
+    <integer name="config_defaultWorkspaceRowsLand">6</integer>
+    <integer name="config_maxWorkspaceRowsLand">12</integer>
+    <integer name="config_minWorkspaceRowsLand">3</integer>
+    <integer name="config_defaultWorkspaceColumnsLand">6</integer>
+    <integer name="config_maxWorkspaceColumnsLand">12</integer>
+    <integer name="config_minWorkspaceColumnsLand">3</integer>
+
+    <!-- App drawer grid size -->
+    <integer name="config_defaultAppRows">6</integer>
+    <integer name="config_maxAppRows">12</integer>
+    <integer name="config_minAppRows">3</integer>
+    <integer name="config_defaultAppColumns">6</integer>
+    <integer name="config_maxAppColumns">12</integer>
+    <integer name="config_minAppColumns">3</integer>
+    <integer name="config_defaultAppRowsLand">6</integer>
+    <integer name="config_maxAppRowsLand">12</integer>
+    <integer name="config_minAppRowsLand">3</integer>
+    <integer name="config_defaultAppColumnsLand">6</integer>
+    <integer name="config_maxAppColumnsLand">12</integer>
+    <integer name="config_minAppColumnsLand">3</integer>
+
+    <!-- App drawer widget list grid size -->
+    <integer name="config_defaultWidgetRows">4</integer>
+    <integer name="config_maxWidgetRows">9</integer>
+    <integer name="config_minWidgetRows">1</integer>
+    <integer name="config_defaultWidgetColumns">3</integer>
+    <integer name="config_maxWidgetColumns">6</integer>
+    <integer name="config_minWidgetColumns">1</integer>
+    <integer name="config_defaultWidgetRowsLand">3</integer>
+    <integer name="config_maxWidgetRowsLand">6</integer>
+    <integer name="config_minWidgetRowsLand">1</integer>
+    <integer name="config_defaultWidgetColumnsLand">4</integer>
+    <integer name="config_maxWidgetColumnsLand">9</integer>
+    <integer name="config_minWidgetColumnsLand">1</integer>
+
 </resources>
