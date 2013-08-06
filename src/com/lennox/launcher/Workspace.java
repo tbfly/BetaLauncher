@@ -348,12 +348,6 @@ public class Workspace extends PagedView
     private Runnable mDoubleTapCallback = null;
     private final Handler mHandler = new Handler();
 
-    private int mOriginalPaddingTop;
-    private int mOriginalPaddingRight;
-    private int mOriginalPaddingLeft;
-    private int mOriginalPaddingBottom;
-    private int mOriginalDockScrollingMargin;
-
     /**
      * Used to inflate the Workspace from XML.
      *
@@ -548,15 +542,10 @@ public class Workspace extends PagedView
             CellLayout screen = (CellLayout) inflater.inflate(R.layout.workspace_screen, null);
             screen.setChildrenScale(mIconScale);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-            screen.setStretchCells(true, true, mHomescreenPadding);
+            screen.setStretchCells(mHomescreenPadding);
             screen.setTextScale(mTextScale, mTextPadding);
             addView(screen);
         }
-
-        mOriginalPaddingTop = getPaddingTop();
-        mOriginalPaddingLeft = getPaddingLeft();
-        mOriginalPaddingRight = getPaddingRight();
-        mOriginalPaddingBottom = getPaddingBottom();
 
         if (!mShowSearchBar) {
             setPadding(0, 0, getPaddingRight(), getPaddingBottom());
@@ -889,30 +878,49 @@ public class Workspace extends PagedView
         mShowHotseat = showDock;
         mShowDockDivider = showDockDivider;
 
-        if (!mShowSearchBar) {
-            setPadding(0, 0, mOriginalPaddingRight, mOriginalPaddingBottom);
-        } else {
-            setPadding(mOriginalPaddingLeft, mOriginalPaddingTop, mOriginalPaddingRight, mOriginalPaddingBottom);
+        boolean isLandscape = LauncherApplication.isScreenLandscape(getContext());
+
+        int leftMargin = (isLandscape && mShowSearchBar) ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0;
+        int topMargin = (!isLandscape && mShowSearchBar) ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0;
+        int bottomMargin = (!isLandscape && mShowHotseat && !mHotseatAsOverlay) ? getResources().getDimensionPixelSize(R.dimen.button_bar_height) : 0;
+        bottomMargin = (int) ((float) bottomMargin * mLauncher.getDockScale());
+        int rightMargin = (isLandscape && mShowHotseat && !mHotseatAsOverlay) ? getResources().getDimensionPixelSize(R.dimen.button_bar_height) : 0;
+        rightMargin = (int) ((float) rightMargin * mLauncher.getDockScale());
+
+        setPadding(leftMargin, topMargin, rightMargin, bottomMargin);
+
+        View divider = mLauncher.getDockDivider();
+        if (divider != null) {
+            ((MarginLayoutParams) divider.getLayoutParams()).rightMargin = rightMargin;
+            ((MarginLayoutParams) divider.getLayoutParams()).bottomMargin = bottomMargin;
         }
 
-        if (!mShowHotseat || mHotseatAsOverlay) {
-            setPadding(getPaddingLeft(), getPaddingTop(), 0, 0);
+        if (isLandscape) {
+            mLauncher.getHotseat().getLayoutParams().width = rightMargin;
         } else {
-            setPadding(getPaddingLeft(), getPaddingTop(), mOriginalPaddingRight, mOriginalPaddingBottom);
+            mLauncher.getHotseat().getLayoutParams().height = bottomMargin;
         }
+
+        mScrollIndicatorPaddingLeft = leftMargin;
+        mScrollIndicatorPaddingRight = rightMargin;
 
         for (int i = 0; i < mNumberHomescreens; i++) {
             CellLayout screen = (CellLayout) getChildAt(i);
             if (screen != null) {
                 screen.setChildrenScale(mIconScale);
                 screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-                screen.setStretchCells(true, true, mHomescreenPadding);
+                screen.setStretchCells(mHomescreenPadding);
                 screen.setTextScale(mTextScale, mTextPadding);
             }
         }
 
         resetScrollingIndicator();
+        View dockIndicator = mLauncher.findViewById(R.id.paged_view_indicator_dock);
+        if (!isLandscape && dockIndicator != null) {
+            ((MarginLayoutParams) dockIndicator.getLayoutParams()).bottomMargin = bottomMargin;
+        }
         if (mShowScrollingIndicator) showScrollingIndicator(false);
+
     }
 
     @Override

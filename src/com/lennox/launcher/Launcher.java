@@ -310,6 +310,7 @@ public final class Launcher extends Activity
     private boolean mFullscreenMode;
     private String mDoubleTapAction;
 
+    private float mDockScale = 1.0f;
     // Previews
     private PreviewLayout mPreviewLayout;
 
@@ -399,6 +400,7 @@ public final class Launcher extends Activity
 
         boolean isLandscape = (res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
+        mDockScale = (float) PreferencesProvider.Interface.Dock.getScale(isLandscape) / 100f;
         // Preferences
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar(isLandscape);
         mTabletSearchBar = PreferencesProvider.Interface.Homescreen.getTabletSearchBar();
@@ -965,15 +967,8 @@ public final class Launcher extends Activity
             mDockDivider.setVisibility(View.GONE);
         }
 
-        // Redim the hotseat and statusbar to let some extra size for the item text
-        //if (mShowHotseat && !mHideDockIconLabels && !mHotseat.hasVerticalHotseat()) {
-        if (mShowHotseat && !mHotseat.hasVerticalHotseat() && !mHotseatAsOverlay) {
-            mWorkspace.setPadding(
-                mWorkspace.getPaddingLeft(),
-                mWorkspace.getPaddingTop(),
-                mWorkspace.getPaddingRight(),
-                getResources().getDimensionPixelSize(R.dimen.workspace_bottom_padding_port));
-        }
+        // Redim the hotseat if need be
+        mWorkspace.toggleHotseat(mShowHotseat, mShowDockDivider);
 
         // Setup AppsCustomize
         mAppsCustomizeTabHost = (AppsCustomizeTabHost) findViewById(R.id.apps_customize_pane);
@@ -2394,6 +2389,13 @@ public final class Launcher extends Activity
     }
 
     /**
+     * Re-listen when widgets are reset.
+     */
+    public float getDockScale() {
+        return mDockScale;
+    }
+
+    /**
      * Event handler for the search button
      *
      * @param v The view that was clicked.
@@ -2898,6 +2900,9 @@ public final class Launcher extends Activity
     boolean isHotseatLayout(View layout) {
         return mHotseat != null && layout != null &&
                 (layout instanceof CellLayout) && mHotseat.hasPage(layout);
+    }
+    View getDockDivider() {
+        return mDockDivider;
     }
     Hotseat getHotseat() {
         return mHotseat;

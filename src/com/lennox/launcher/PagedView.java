@@ -191,10 +191,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // Scrolling indicator
     private ValueAnimator mScrollIndicatorAnimator;
     private View mScrollIndicator;
-    private int mScrollIndicatorPaddingLeft;
-    private int mScrollIndicatorPaddingTop;
-    private int mScrollIndicatorPaddingRight;
-    private int mScrollIndicatorPaddingBottom;
+    int mScrollIndicatorPaddingLeft;
+    int mScrollIndicatorPaddingTop;
+    int mScrollIndicatorPaddingRight;
+    int mScrollIndicatorPaddingBottom;
     private boolean mHasScrollIndicator = true;
     private boolean mShouldShowScrollIndicator = false;
     private boolean mShouldShowScrollIndicatorImmediately = false;

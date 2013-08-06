@@ -237,6 +237,8 @@
     <string name="preferences_interface_dock_style_title">Style</string>
     <string name="preferences_interface_dock_enabled_title">Show dock</string>
     <string name="preferences_interface_dock_enabled_summary">Show the dock underneath the homescreen</string>
+    <string name="preferences_interface_dock_scale_title">Dock scale</string>
+    <string name="preferences_interface_dock_scale_summary">Set the overall size of the dock</string>
     <string name="preferences_interface_dock_as_overlay_title">Overlay</string>
     <string name="preferences_interface_dock_as_overlay_summary">Show the dock as an overlay, useful when using gesture/action to toggle</string>
     <string name="preferences_interface_dock_pages_title">Pages</string>

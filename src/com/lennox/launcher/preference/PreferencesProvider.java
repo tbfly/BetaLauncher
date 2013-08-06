@@ -480,6 +480,14 @@ public final class PreferencesProvider {
                     return (def == 1);
                 }
             }
+            public static int getScale(boolean landscape) {
+                String[] values = getString("lennox_dock_scale", "100|100").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 100;
+                }
+            }
             public static int getIconScale(boolean landscape) {
                 String[] values = getString("lennox_dock_icon_scale", "100|100").split("\\|");
                 try {

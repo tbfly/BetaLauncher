@@ -32,9 +32,9 @@
     <dimen name="workspace_divider_padding_right">3dp</dimen>
     <dimen name="workspace_divider_padding_top">0dp</dimen>
     <dimen name="workspace_divider_padding_bottom">0dp</dimen>
+    <dimen name="hotseat_icon_padding_top">8dp</dimen>
     <dimen name="hotseat_cell_width">64dp</dimen>
     <dimen name="hotseat_cell_height">64dp</dimen>
-    <dimen name="hotseat_cell_top_padding">-5dp</dimen>
     <dimen name="hotseat_width_gap">-1dp</dimen>
     <dimen name="hotseat_height_gap">-1dp</dimen>
     <dimen name="workspace_overscroll_drawable_padding">0dp</dimen>
@@ -68,13 +68,6 @@
 
     <!-- height of the bottom row of controls -->
     <dimen name="button_bar_height">62dip</dimen>
-    <!-- Because portal animations go beyond the bounds of an icon, we need
-         to make the dock layout slightly larger than the button_bar_height -->
-    <dimen name="button_bar_height_top_padding">8dp</dimen>
-    <dimen name="button_bar_height_bottom_padding">0dp</dimen>
-    <dimen name="button_bar_width_left_padding">0dp</dimen>
-    <dimen name="button_bar_width_right_padding">0dp</dimen>
-    <dimen name="button_bar_height_plus_padding">70dp</dimen>
 
     <!-- Drag padding to add to the bottom of drop targets -->
     <dimen name="drop_target_drag_padding">14dp</dimen>

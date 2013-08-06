@@ -26,6 +26,18 @@
         android:entryValues="@array/checkbox_list_preference_values"
         android:title="@string/preferences_interface_dock_enabled_title"
         android:summary="@string/preferences_interface_dock_enabled_summary" />
+    <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+        android:key="lennox_dock_scale"
+        android:title="@string/preferences_interface_dock_scale_title"
+        android:summary="@string/preferences_interface_dock_scale_summary"
+        launcher:prefix1="@string/orientation_portrait_prefix"
+        launcher:prefix2="@string/orientation_landscape_prefix"
+        launcher:min1="50"
+        launcher:max1="150"
+        launcher:min2="50"
+        launcher:max2="150"
+        launcher:defaultValue1="100"
+        launcher:defaultValue2="100" />
     <ListPreference android:key="lennox_dock_as_overlay"
         android:defaultValue="@string/checkbox_list_never_value"
         android:entries="@array/checkbox_list_preference_entries"

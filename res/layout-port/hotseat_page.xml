@@ -21,10 +21,6 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:paddingTop="@dimen/button_bar_height_top_padding"
-    android:paddingBottom="@dimen/button_bar_height_bottom_padding"
-    android:paddingLeft="@dimen/button_bar_width_left_padding"
-    android:paddingRight="@dimen/button_bar_width_right_padding"
 
     launcher:cellLayoutType="@integer/cell_layout_hotseat"
     launcher:cellWidth="@dimen/hotseat_cell_width"

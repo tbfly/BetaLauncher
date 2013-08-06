@@ -1014,27 +1014,22 @@ public class CellLayout extends ViewGroup {
         metrics.set(cellWidth, cellHeight, widthGap, heightGap);
     }
 
-    private int getDockHeight(boolean landscape) {
+    private int getDockSize() {
         return (int) ((float) mLauncher.getDockScale() *
                    (float) getResources().getDimensionPixelSize(R.dimen.button_bar_height));
-    }
-
-    private int getDockWidth(boolean landscape) {
-        int dockWidthResource = R.dimen.button_bar_height;
-        return getResources().getDimensionPixelSize(dockWidthResource);
     }
 
     private int getMaxCellWidth() {
         if ( mCountX == 0 ) return mCellWidth;
         boolean landscape = LauncherApplication.isScreenLandscape(getContext());
         if (mCellLayoutType == CELL_LAYOUT_HOTSEAT && landscape) {
-            return getDockWidth(landscape);
+            return getDockSize();
         }
         boolean showSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar(landscape);
         boolean showDock = PreferencesProvider.Interface.Dock.getShowDock(landscape);
         int searchBarWidth = landscape ? (showSearchBar
                 ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0) : 0;
-        int dockWidth = (landscape && showDock) ? getDockWidth(landscape) : 0;
+        int dockWidth = (landscape && showDock) ? getDockSize() : 0;
         int width = (int) (getResources().getConfiguration().screenWidthDp *
                 LauncherApplication.getScreenDensity()) - searchBarWidth - dockWidth;
         return (width - getPaddingRight() - getPaddingLeft()) / mCountX;
@@ -1044,13 +1039,13 @@ public class CellLayout extends ViewGroup {
         if ( mCountY == 0 ) return mCellHeight;
         boolean landscape = LauncherApplication.isScreenLandscape(getContext());
         if (mCellLayoutType == CELL_LAYOUT_HOTSEAT && !landscape) {
-            return getDockHeight(landscape);
+            return getDockSize();
         }
         boolean showSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar(landscape);
         boolean showDock = PreferencesProvider.Interface.Dock.getShowDock(landscape);
         int searchBarHeight = landscape ? 0 : (showSearchBar
                 ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0);
-        int dockHeight = (!landscape && showDock) ? getDockHeight(landscape) : 0;
+        int dockHeight = (!landscape && showDock) ? getDockSize() : 0;
         int statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
         int height = (int) (getResources().getConfiguration().screenHeightDp *
                 LauncherApplication.getScreenDensity()) - searchBarHeight - dockHeight - statusBarHeight;
