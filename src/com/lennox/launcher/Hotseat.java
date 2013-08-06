@@ -118,7 +118,7 @@ public class Hotseat extends PagedView {
             CellLayout cl = (CellLayout) inflater.inflate(R.layout.hotseat_page, null);
             cl.setChildrenScale(childrenScale);
             cl.setGridSize((!hasVerticalHotseat() ? mCellCount : 1), (hasVerticalHotseat() ? mCellCount : 1), mVertical);
-            cl.setStretchCells(true, true, hideDockIconLabels, mVertical);
+            cl.setStretchCells(hideDockIconLabels, mVertical);
             cl.setTextScale(textScale, textPadding);
 
             addView(cl);

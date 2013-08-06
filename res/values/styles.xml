@@ -106,6 +106,9 @@
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
     </style>
+    <style name="TabIndicator.AppsCustomize">
+        <!-- Overridden in values-land -->
+    </style>
 
     <style name="MarketButton">
         <item name="android:paddingLeft">5dp</item>

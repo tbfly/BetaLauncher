@@ -79,6 +79,18 @@
             launcher:max4="@integer/config_maxAppColumnsLand"
             launcher:min4="@integer/config_minAppColumnsLand" />
         <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
+            android:key="lennox_drawer_padding"
+            android:title="@string/preferences_interface_drawer_padding_title"
+            android:summary="@string/preferences_interface_drawer_padding_summary"
+            launcher:prefix1="@string/orientation_portrait_prefix"
+            launcher:prefix2="@string/orientation_landscape_prefix"
+            launcher:min1="0"
+            launcher:max1="50"
+            launcher:min2="0"
+            launcher:max2="50"
+            launcher:defaultValue1="0"
+            launcher:defaultValue2="0" />
+        <com.lennox.launcher.preference.DoubleSeekBarDialogPreference
             android:key="lennox_drawer_icon_scale"
             android:title="@string/preferences_interface_drawer_icon_scale_title"
             android:summary="@string/preferences_interface_drawer_icon_scale_summary"
@@ -108,18 +120,6 @@
             android:entryValues="@array/checkbox_list_preference_values"
             android:title="@string/preferences_interface_drawer_text_padding_title"
             android:summary="@string/preferences_interface_drawer_text_padding_summary" />
-        <ListPreference android:key="lennox_drawer_stretch_screens"
-            android:defaultValue="@string/checkbox_list_always_value"
-            android:entries="@array/checkbox_list_preference_entries"
-            android:entryValues="@array/checkbox_list_preference_values"
-            android:title="@string/preferences_interface_drawer_stretch_screens_title"
-            android:summary="@string/preferences_interface_drawer_stretch_screens_summary" />
-        <ListPreference android:key="lennox_drawer_fit_to_cells"
-            android:defaultValue="@string/checkbox_list_never_value"
-            android:entries="@array/checkbox_list_preference_entries"
-            android:entryValues="@array/checkbox_list_preference_values"
-            android:title="@string/preferences_interface_drawer_fit_to_cells_title"
-            android:summary="@string/preferences_interface_drawer_fit_to_cells_summary" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_interface_drawer_widgets_category">
         <com.lennox.launcher.preference.QuadrupleNumberPickerPreference android:key="lennox_drawer_widget_grid"

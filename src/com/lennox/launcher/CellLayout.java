@@ -348,19 +348,9 @@ public class CellLayout extends ViewGroup {
         mTmpOccupied = new boolean[mCountX][mCountY];
         mTempRectStack.clear();
 
-        if (mCellLayoutType == CELL_LAYOUT_HOTSEAT) {
-            // Scale dock better when icon number is changed.
-            if (!isVerticalHotseat) {
-                mCellWidth = mOriginalCellWidth * 5 / mCountX;
-                mCellHeight = mCellWidth;
-            } else {
-                mCellHeight = mOriginalCellHeight * 5 / mCountY;
-                mCellWidth = mCellHeight;
-            }
-        } else {
-            mCellWidth = mOriginalCellWidth;
-            mCellHeight = mOriginalCellHeight;
-        }
+        // Reset scaling if the grid has been modified. This is a folder or the hotseat
+        mCellWidth = mOriginalCellWidth;
+        mCellHeight = mOriginalCellHeight;
         mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
 
         requestLayout();
@@ -930,39 +920,23 @@ public class CellLayout extends ViewGroup {
         mHeightGap = mOriginalHeightGap = heightGap;
     }
 
-    void setStretchCells(boolean stretch, boolean fit) {
-        if (stretch) {
-            setCellGaps(-1, -1);
-            //int iconPaddingTop = getResources().getDimensionPixelSize(R.dimen.app_icon_padding_top);
-            if (mCellLayoutType == CELL_LAYOUT_HOTSEAT) {
-                setPadding(0, 0, 0, 0);
-            } else {
-                int padding = (int) (10f * (float) getChildrenScale());
-                setPadding(padding, padding, padding, padding);
-            }
-        }
-        if (fit) {
-            mCellWidth = getMaxCellWidth();
-            mCellHeight = getMaxCellHeight();
-            mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
-        }
+    void setStretchCells(int outsidePadding) {
+        setCellGaps(-1, -1);
+        setPadding(outsidePadding, outsidePadding, outsidePadding, outsidePadding);
+        mCellWidth = getMaxCellWidth();
+        mCellHeight = getMaxCellHeight();
+        mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
     }
 
-    void setStretchCells(boolean stretch, boolean fit, boolean hideDockLabels, boolean vertical) {
-        if (stretch) {
-            setCellGaps(-1, -1);
-            int iconPaddingTop = getResources().getDimensionPixelSize(R.dimen.hotseat_cell_top_padding);
-            if (!hideDockLabels && !vertical) {
-                setPadding(0, iconPaddingTop, 0, 0);
-            } else {
-                setPadding(0, 0, 0, 0);
-            }
+    void setStretchCells(boolean hideDockLabels, boolean vertical) {
+        setCellGaps(-1, -1);
+        if (!vertical) {
+            int iconPaddingTop = (int) ((float) getResources().getDimensionPixelSize(R.dimen.hotseat_icon_padding_top) / getChildrenScale());
+            setPadding(0, iconPaddingTop, 0, 0);
         }
-        if (fit) {
-            mCellWidth = getMaxCellWidth();
-            mCellHeight = getMaxCellHeight();
-            mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
-        }
+        mCellWidth = getMaxCellWidth();
+        mCellHeight = getMaxCellHeight();
+        mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap);
     }
 
     int getCellWidth() {
@@ -1040,40 +1014,46 @@ public class CellLayout extends ViewGroup {
         metrics.set(cellWidth, cellHeight, widthGap, heightGap);
     }
 
+    private int getDockHeight(boolean landscape) {
+        return (int) ((float) mLauncher.getDockScale() *
+                   (float) getResources().getDimensionPixelSize(R.dimen.button_bar_height));
+    }
+
+    private int getDockWidth(boolean landscape) {
+        int dockWidthResource = R.dimen.button_bar_height;
+        return getResources().getDimensionPixelSize(dockWidthResource);
+    }
+
     private int getMaxCellWidth() {
         if ( mCountX == 0 ) return mCellWidth;
         boolean landscape = LauncherApplication.isScreenLandscape(getContext());
+        if (mCellLayoutType == CELL_LAYOUT_HOTSEAT && landscape) {
+            return getDockWidth(landscape);
+        }
         boolean showSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar(landscape);
         boolean showDock = PreferencesProvider.Interface.Dock.getShowDock(landscape);
         int searchBarWidth = landscape ? (showSearchBar
                 ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0) : 0;
-        int dockWidth = (landscape && showDock) ?
-                getResources().getDimensionPixelSize(
-                R.dimen.button_bar_height) : 0;
+        int dockWidth = (landscape && showDock) ? getDockWidth(landscape) : 0;
         int width = (int) (getResources().getConfiguration().screenWidthDp *
                 LauncherApplication.getScreenDensity()) - searchBarWidth - dockWidth;
-        if (mCellLayoutType == CELL_LAYOUT_HOTSEAT && landscape) {
-            width = getResources().getDimensionPixelSize(R.dimen.button_bar_height);
-        }
         return (width - getPaddingRight() - getPaddingLeft()) / mCountX;
     }
 
     private int getMaxCellHeight() {
         if ( mCountY == 0 ) return mCellHeight;
         boolean landscape = LauncherApplication.isScreenLandscape(getContext());
+        if (mCellLayoutType == CELL_LAYOUT_HOTSEAT && !landscape) {
+            return getDockHeight(landscape);
+        }
         boolean showSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar(landscape);
         boolean showDock = PreferencesProvider.Interface.Dock.getShowDock(landscape);
         int searchBarHeight = landscape ? 0 : (showSearchBar
                 ? getResources().getDimensionPixelSize(R.dimen.qsb_bar_height) : 0);
-        int dockHeight = (landscape || !showDock) ? 0 :
-                getResources().getDimensionPixelSize(
-                R.dimen.button_bar_height);
+        int dockHeight = (!landscape && showDock) ? getDockHeight(landscape) : 0;
         int statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
         int height = (int) (getResources().getConfiguration().screenHeightDp *
                 LauncherApplication.getScreenDensity()) - searchBarHeight - dockHeight - statusBarHeight;
-        if (mCellLayoutType == CELL_LAYOUT_HOTSEAT && !landscape) {
-            height = getResources().getDimensionPixelSize(R.dimen.button_bar_height);
-        }
         return (height - getPaddingTop() - getPaddingBottom()) / mCountY;
     }
 

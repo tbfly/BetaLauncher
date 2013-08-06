@@ -314,30 +314,20 @@ public final class PreferencesProvider {
                     return def;
                 }
             }
-            public static boolean getStretchScreens(boolean landscape) {
-                int def = landscape ? 1 : 1;
-                String[] values = getString("lennox_drawer_stretch_screens", def + "|" + def).split("\\|");
-                try {
-                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                } catch (NumberFormatException e) {
-                    return (def == 1);
-                }
-            }
-            public static boolean getFitToCells(boolean landscape) {
-                int def = landscape ? 0 : 0;
-                String[] values = getString("lennox_drawer_fit_to_cells", def + "|" + def).split("\\|");
-                try {
-                    return (Integer.parseInt(values[landscape ? 1 : 0]) == 1);
-                } catch (NumberFormatException e) {
-                    return (def == 1);
-                }
-            }
             public static int getDrawerTransparency(boolean landscape) {
                 String[] values = getString("lennox_drawer_transparency", "50|50").split("\\|");
                 try {
                     return Integer.parseInt(values[landscape ? 1 : 0]);
                 } catch (NumberFormatException e) {
                     return 50;
+                }
+            }
+            public static int getDrawerPadding(boolean landscape) {
+                String[] values = getString("lennox_drawer_padding", "0|0").split("\\|");
+                try {
+                    return Integer.parseInt(values[landscape ? 1 : 0]);
+                } catch (NumberFormatException e) {
+                    return 0;
                 }
             }
             public static boolean getVertical() {

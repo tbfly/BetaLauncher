@@ -35,8 +35,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
 
     private int mCellCountX;
     private int mCellCountY;
-    private int mOriginalCellWidth;
-    private int mOriginalCellHeight;
+    private int mDefaultCellCountX;
+    private int mDefaultCellCountY;
     private int mCellWidth;
     private int mCellHeight;
     private int mOriginalWidthGap;
@@ -66,10 +66,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
 
         // setup default cell parameters
         Resources resources = context.getResources();
-        mOriginalCellWidth = mCellWidth =
-            resources.getDimensionPixelSize(R.dimen.apps_customize_cell_width);
-        mOriginalCellHeight = mCellHeight =
-            resources.getDimensionPixelSize(R.dimen.apps_customize_cell_height);
+        mCellWidth = resources.getDimensionPixelSize(R.dimen.apps_customize_cell_width);
+        mCellHeight = resources.getDimensionPixelSize(R.dimen.apps_customize_cell_height);
         mCellCountX = LauncherModel.getWorkspaceCellCountX();
         mCellCountY = LauncherModel.getWorkspaceCellCountY();
         mOriginalWidthGap = mOriginalHeightGap = mWidthGap = mHeightGap = -1;
@@ -82,23 +80,17 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         addView(mChildren);
     }
 
-    void setStretchCells(boolean stretch, boolean fit) {
-        if (stretch) {
-            setCellGaps(-1, -1);
-            int padding = (int) (10f * (float) getChildrenScale());
-            setPadding(padding, padding, padding, padding);
-        }
-        if (fit) {
-            mCellWidth = getMaxCellWidth();
-            mCellHeight = getMaxCellHeight();
-            mChildren.setCellDimensions(mCellWidth, mCellHeight);
-            mChildren.setGap(mWidthGap, mHeightGap);
-        }
-    }
-
     void setCellGaps(int widthGap, int heightGap) {
         mWidthGap = mOriginalWidthGap = widthGap;
         mHeightGap = mOriginalHeightGap = heightGap;
+    }
+
+    void setStretchCells(int outsidePadding) {
+        setCellGaps(-1, -1);
+        setPadding(outsidePadding, outsidePadding, outsidePadding, outsidePadding);
+        mCellWidth = getMaxCellWidth();
+        mCellHeight = getMaxCellHeight();
+        mChildren.setCellDimensions(mCellWidth, mCellHeight);
     }
 
     public int getCellWidth() {
@@ -155,11 +147,12 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         final PagedViewCellLayout.LayoutParams lp = params;
 
         if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
-            child.setScaleX(getChildrenScale());
-            child.setScaleY(getChildrenScale());
             if (child instanceof BubbleTextView) ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
-            if (child instanceof FolderIcon) ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
             if (child instanceof PagedViewIcon) ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof FolderIcon) {
+                ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
+                ((FolderIcon) child).setIconScale(getChildrenScale());
+            }
         }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells
@@ -244,8 +237,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         if (mOriginalWidthGap < 0 || mOriginalHeightGap < 0) {
             int hSpace = widthSpecSize - getPaddingLeft() - getPaddingRight();
             int vSpace = heightSpecSize - getPaddingTop() - getPaddingBottom();
-            int hFreeSpace = hSpace - (mCellCountX * mOriginalCellWidth);
-            int vFreeSpace = vSpace - (mCellCountY * mOriginalCellHeight);
+            int hFreeSpace = hSpace - (mCellCountX * mCellWidth);
+            int vFreeSpace = vSpace - (mCellCountY * mCellHeight);
             mWidthGap = Math.min(mMaxGap, numWidthGaps > 0 ? (hFreeSpace / numWidthGaps) : 0);
             mHeightGap = Math.min(mMaxGap,numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0);
 
@@ -282,28 +275,36 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     }
 
     int getContentWidth() {
-        return getWidthBeforeFirstLayout() + getPaddingLeft() + getPaddingRight();
-    }
-
-    int getContentHeight() {
-        if (mCellCountY > 0) {
-            return mCellCountY * mCellHeight + (mCellCountY - 1) * Math.max(0, mHeightGap);
+        if (mCellCountX > 0) {
+            return (int) (getResources().getConfiguration().screenWidthDp *
+                LauncherApplication.getScreenDensity());
         }
         return 0;
     }
 
-    private int getMaxCellWidth() {
+    int getContentHeight() {
+        if (mCellCountY > 0) {
+            int actionBarHeight = getResources().getDimensionPixelSize(R.dimen.apps_customize_tab_bar_height);
+            int statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+            return (int) (getResources().getConfiguration().screenHeightDp *
+                LauncherApplication.getScreenDensity()) - actionBarHeight - statusBarHeight;
+        }
+        return 0;
+    }
+
+    public int getMaxCellWidth() {
         if ( mCellCountX == 0 ) return mCellWidth;
         int width = (int) (getResources().getConfiguration().screenWidthDp *
                 LauncherApplication.getScreenDensity());
         return (width - getPaddingRight() - getPaddingLeft()) / mCellCountX;
     }
 
-    private int getMaxCellHeight() {
+    public int getMaxCellHeight() {
         if ( mCellCountY == 0 ) return mCellHeight;
+        int actionBarHeight = getResources().getDimensionPixelSize(R.dimen.apps_customize_tab_bar_height);
         int statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
         int height = (int) (getResources().getConfiguration().screenHeightDp *
-                LauncherApplication.getScreenDensity()) - statusBarHeight;
+                LauncherApplication.getScreenDensity()) - actionBarHeight - statusBarHeight;
         return (height - getPaddingTop() - getPaddingBottom()) / mCellCountY;
     }
 
@@ -423,10 +424,15 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         };
     }
 
-    public void calculateCellCount(int width, int height, int maxCellCountX, int maxCellCountY) {
-        mCellCountX = Math.min(maxCellCountX, estimateCellHSpan(width));
-        mCellCountY = Math.min(maxCellCountY, estimateCellVSpan(height));
+    public void setGridSize(int cellCountX, int cellCountY) {
+        mCellCountX = cellCountX;
+        mCellCountY = cellCountY;
         requestLayout();
+    }
+
+    public void setDefaultGridSize(int cellCountX, int cellCountY) {
+        mDefaultCellCountX = cellCountX;
+        mDefaultCellCountY = cellCountY;
     }
 
     /**

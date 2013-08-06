@@ -181,6 +181,8 @@
     <string name="preferences_interface_drawer_general_category">General</string>
     <string name="preferences_interface_drawer_orientation_title">Orientation</string>
     <string name="preferences_interface_drawer_orientation_summary">Choose which way the drawer scrolls</string>
+    <string name="preferences_interface_drawer_padding_title">Drawer padding</string>
+    <string name="preferences_interface_drawer_padding_summary">Padding around the drawer border</string>
     <string name="preferences_interface_drawer_apps_category">Apps</string>
     <string name="preferences_interface_drawer_hidden_apps_title">Hidden apps</string>
     <string name="preferences_interface_drawer_hidden_apps_summary">Hide apps from the drawer</string>
@@ -194,10 +196,6 @@
     <string name="preferences_interface_drawer_widgets_category">Widgets</string>
     <string name="preferences_interface_drawer_widget_grid_title">Widget grid size</string>
     <string name="preferences_interface_drawer_widget_grid_summary">Choose the number of rows/columns for widgets in drawer</string>
-    <string name="preferences_interface_drawer_stretch_screens_title">Stretch screens</string>
-    <string name="preferences_interface_drawer_stretch_screens_summary">Expand app pages to fill the size of display</string>
-    <string name="preferences_interface_drawer_fit_to_cells_title">Fit icons to cells</string>
-    <string name="preferences_interface_drawer_fit_to_cells_summary">Resize cells to fit screen and force icon to stay within the cell</string>
     <!--<string name="preferences_interface_drawer_widget_icon_style_title">Icon style widgets</string>
     <string name="preferences_interface_drawer_widget_icon_style_summary">Make widgets use icon style in drawer rather than preview</string>-->
     <string name="preferences_interface_drawer_widgets_join_apps_title">Join with apps</string>

@@ -121,16 +121,16 @@
 
     <!-- App drawer widget list grid size -->
     <integer name="config_defaultWidgetRows">3</integer>
-    <integer name="config_maxWidgetRows">8</integer>
+    <integer name="config_maxWidgetRows">6</integer>
     <integer name="config_minWidgetRows">1</integer>
     <integer name="config_defaultWidgetColumns">2</integer>
-    <integer name="config_maxWidgetColumns">5</integer>
+    <integer name="config_maxWidgetColumns">4</integer>
     <integer name="config_minWidgetColumns">1</integer>
     <integer name="config_defaultWidgetRowsLand">2</integer>
-    <integer name="config_maxWidgetRowsLand">5</integer>
+    <integer name="config_maxWidgetRowsLand">4</integer>
     <integer name="config_minWidgetRowsLand">1</integer>
     <integer name="config_defaultWidgetColumnsLand">3</integer>
-    <integer name="config_maxWidgetColumnsLand">8</integer>
+    <integer name="config_maxWidgetColumnsLand">6</integer>
     <integer name="config_minWidgetColumnsLand">1</integer>
 
     <!-- More lennox ints -->
