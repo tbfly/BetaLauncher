@@ -92,7 +92,7 @@
     <integer name="folder_max_num_items">16</integer>
 
     <!-- Workspace grid size -->
-    <integer name="config_defaultWorkspaceRows">5</integer>
+    <integer name="config_defaultWorkspaceRows">4</integer>
     <integer name="config_maxWorkspaceRows">12</integer>
     <integer name="config_minWorkspaceRows">3</integer>
     <integer name="config_defaultWorkspaceColumns">4</integer>
@@ -101,7 +101,7 @@
     <integer name="config_defaultWorkspaceRowsLand">4</integer>
     <integer name="config_maxWorkspaceRowsLand">12</integer>
     <integer name="config_minWorkspaceRowsLand">3</integer>
-    <integer name="config_defaultWorkspaceColumnsLand">5</integer>
+    <integer name="config_defaultWorkspaceColumnsLand">4</integer>
     <integer name="config_maxWorkspaceColumnsLand">12</integer>
     <integer name="config_minWorkspaceColumnsLand">3</integer>
 

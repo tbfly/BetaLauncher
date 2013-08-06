@@ -323,7 +323,7 @@ public class CellLayout extends ViewGroup {
 
     public void setChildrenScale(float childrenScale) {
         mChildrenScale = childrenScale;
-        mPreviewSize = (int) ((float) getResources().getDimensionPixelSize(R.dimen.folder_preview_size) * mChildrenScale);
+        mPreviewSize = adjustForScale(getResources().getDimensionPixelSize(R.dimen.folder_preview_size));
     }
 
     public float getChildrenScale() {
@@ -646,9 +646,6 @@ public class CellLayout extends ViewGroup {
             Resources res = getResources();
             bubbleChild.setTextColor(res.getColor(R.color.workspace_icon_text_color));
         }
-
-        child.setScaleX(1f);
-        child.setScaleY(1f);
 
         if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
             if (child instanceof BubbleTextView) {

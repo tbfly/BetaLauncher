@@ -31,7 +31,6 @@
     <dimen name="workspace_divider_padding_right">3dp</dimen>
     <dimen name="workspace_divider_padding_top">0dp</dimen>
     <dimen name="workspace_divider_padding_bottom">0dp</dimen>
-    <dimen name="hotseat_icon_padding_top">8dp</dimen>
     <dimen name="hotseat_cell_width">64dp</dimen>
     <dimen name="hotseat_cell_height">64dp</dimen>
     <dimen name="hotseat_width_gap">-1dp</dimen>
@@ -41,7 +40,8 @@
 
     <dimen name="app_icon_drawable_padding">6dp</dimen>
     <dimen name="app_icon_drawable_padding_land">2dp</dimen>
-    <dimen name="app_icon_padding_top">8dp</dimen>
+
+    <dimen name="extra_padding_top">8dp</dimen>
 
 <!-- QSB -->
     <dimen name="toolbar_button_vertical_padding">0dip</dimen>
