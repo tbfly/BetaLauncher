@@ -2774,6 +2774,10 @@ public class Workspace extends PagedView
             destCanvas.clipRect(clipRect, Op.REPLACE);
             v.draw(destCanvas);
             if (textVisible) ((BubbleTextView) v).setTextVisible(true);
+        } else {
+            destCanvas.translate(-v.getScrollX() + padding / 2, -v.getScrollY() + padding / 2);
+            destCanvas.clipRect(clipRect, Op.REPLACE);
+            v.draw(destCanvas);
         }
         destCanvas.restore();
     }
