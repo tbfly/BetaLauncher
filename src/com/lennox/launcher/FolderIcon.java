@@ -106,6 +106,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private int mTotalWidth = -1;
     private int mPreviewOffsetX;
     private int mPreviewOffsetY;
+    private int mOriginalIconSize;
     private int mOriginalTextSize;
     private float mMaxPerspectiveShift;
     boolean mAnimating = false;
@@ -113,6 +114,8 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private PreviewItemDrawingParams mParams = new PreviewItemDrawingParams(0, 0, 0, 0);
     private PreviewItemDrawingParams mAnimParams = new PreviewItemDrawingParams(0, 0, 0, 0);
     private ArrayList<ShortcutInfo> mHiddenItems = new ArrayList<ShortcutInfo>();
+
+    private float mIconScale = 1.0f;
 
     public FolderIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -145,7 +148,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     }
 
     static FolderIcon fromXml(int resId, Launcher launcher, ViewGroup group,
-            FolderInfo folderInfo) {
+            FolderInfo folderInfo, float scale) {
         @SuppressWarnings("all") // suppress dead code warning
         final boolean error = INITIAL_ITEM_ANIMATION_DURATION >= DROP_IN_ANIMATION_DURATION;
         if (error) {
@@ -160,6 +163,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         icon.mFolderName.setText(folderInfo.title);
         icon.mOriginalTextSize = (int) icon.mFolderName.getTextSize();
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
+        icon.mOriginalIconSize = (int) icon.mPreviewBackground.getLayoutParams().width;
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(launcher);
@@ -173,8 +177,10 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         folder.bind(folderInfo);
         icon.mFolder = folder;
 
-        icon.mFolderRingAnimator = new FolderRingAnimator(launcher, icon);
+        icon.mFolderRingAnimator = new FolderRingAnimator(launcher, icon, scale);
         folderInfo.addListener(icon);
+
+        icon.mIconScale = scale;
 
         return icon;
     }
@@ -191,6 +197,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         private CellLayout mCellLayout;
         public float mOuterRingSize;
         public float mInnerRingSize;
+        public float mPreviewScale = 1.0f;
         public FolderIcon mFolderIcon = null;
         public Drawable mOuterRingDrawable = null;
         public Drawable mInnerRingDrawable = null;
@@ -198,47 +205,34 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         public static Drawable sSharedInnerRingDrawable = null;
         public static int sPreviewSize = -1;
         public static int sPreviewPadding = -1;
-        public static int sPreviewPaddingTop = -1;
 
         private ValueAnimator mAcceptAnimator;
         private ValueAnimator mNeutralAnimator;
 
-        public FolderRingAnimator(Launcher launcher, FolderIcon folderIcon) {
+        public FolderRingAnimator(Launcher launcher, FolderIcon folderIcon, float scale) {
             mFolderIcon = folderIcon;
+            mPreviewScale = scale;
             Resources res = launcher.getResources();
-
-            int folderIconStyle = PreferencesProvider.Interface.Folder.getFolderIconStyle();
-            int topPaddingResource;
-            switch (folderIconStyle) {
-                case FolderIcon.STYLE_STACKED:
-                    topPaddingResource = R.dimen.folder_preview_padding_top_stacked;
-                    break;
-                case FolderIcon.STYLE_FAN:
-                    topPaddingResource = R.dimen.folder_preview_padding_top_fan;
-                    break;
-                case FolderIcon.STYLE_CAROUSEL:
-                    topPaddingResource = R.dimen.folder_preview_padding_top_carousel;
-                    break;
-                case FolderIcon.STYLE_GRID:
-                case FolderIcon.STYLE_IOS:
-                default:
-                    topPaddingResource = R.dimen.folder_preview_padding_top;
-                    break;
-            }
-
 
             // We need to reload the static values when configuration changes in case they are
             // different in another configuration
             if (sStaticValuesDirty) {
                 sPreviewSize = res.getDimensionPixelSize(R.dimen.folder_preview_size);
                 sPreviewPadding = res.getDimensionPixelSize(R.dimen.folder_preview_padding);
-                sPreviewPaddingTop = res.getDimensionPixelSize(topPaddingResource);
                 sSharedOuterRingDrawable = res.getDrawable(R.drawable.portal_ring_outer_holo);
                 LennoxColorFilter.themeColor(sSharedOuterRingDrawable);
                 sSharedInnerRingDrawable = res.getDrawable(R.drawable.portal_ring_inner_holo);
                 sSharedFolderLeaveBehind = res.getDrawable(R.drawable.portal_ring_rest);
                 LennoxColorFilter.themeColor(sSharedFolderLeaveBehind);
                 sStaticValuesDirty = false;
+            }
+        }
+
+        public int adjustForScale(int inputSize) {
+            if (mFolderIcon == null) {
+                return (int) ((float) inputSize * mPreviewScale);
+            } else {
+                return (int) ((float) inputSize * mFolderIcon.mIconScale);
             }
         }
 
@@ -249,7 +243,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             mAcceptAnimator = LauncherAnimUtils.ofFloat(0f, 1f);
             mAcceptAnimator.setDuration(CONSUMPTION_ANIMATION_DURATION);
 
-            final int previewSize = sPreviewSize;
+            final int previewSize = adjustForScale(sPreviewSize);
             mAcceptAnimator.addUpdateListener(new AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator animation) {
                     final float percent = (Float) animation.getAnimatedValue();
@@ -278,7 +272,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             mNeutralAnimator = LauncherAnimUtils.ofFloat(0f, 1f);
             mNeutralAnimator.setDuration(CONSUMPTION_ANIMATION_DURATION);
 
-            final int previewSize = sPreviewSize;
+            final int previewSize = adjustForScale(sPreviewSize);
             mNeutralAnimator.addUpdateListener(new AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator animation) {
                     final float percent = (Float) animation.getAnimatedValue();
@@ -334,6 +328,19 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     FolderInfo getFolderInfo() {
         return mInfo;
+    }
+
+    public void setIconScale(float scale) {
+        mIconScale = scale;
+        //if (mOriginalIconSize <= 0) mOriginalIconSize = mPreviewBackground.getLayoutParams().width;
+        int size = adjustForScale(mOriginalIconSize);
+        mPreviewBackground.getLayoutParams().width = size;
+        mPreviewBackground.getLayoutParams().height = size;
+        //mFolderRingAnimator.reloadDimensions(mLauncher.getResources());
+    }
+
+    public int adjustForScale(int inputSize) {
+        return (int) ((float) inputSize * mIconScale);
     }
 
     private boolean willAcceptItem(ItemInfo item) {
@@ -480,9 +487,8 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             mIntrinsicIconSize = drawableSize;
             mTotalWidth = totalSize;
 
-            final int previewSize = FolderRingAnimator.sPreviewSize;
-            final int previewPadding = FolderRingAnimator.sPreviewPadding;
-            final int previewPaddingTop = FolderRingAnimator.sPreviewPaddingTop;
+            final int previewSize = adjustForScale(FolderRingAnimator.sPreviewSize);
+            final int previewPadding = adjustForScale(FolderRingAnimator.sPreviewPadding);
 
             mAvailableSpaceInPreview = (previewSize - 2 * previewPadding);
             // cos(45) = 0.707  + ~= 0.1) = 0.8f
@@ -495,7 +501,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
             mMaxPerspectiveShift = mBaselineIconSize * PERSPECTIVE_SHIFT_FACTOR;
 
             mPreviewOffsetX = (mTotalWidth - mAvailableSpaceInPreview) / 2;
-            mPreviewOffsetY = previewPaddingTop + previewPadding;
+            mPreviewOffsetY = previewPadding;
         }
     }
 
@@ -549,27 +555,36 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private PreviewItemDrawingParams computePreviewItemDrawingParamsStacked(int index,
             PreviewItemDrawingParams params) {
-        index = mNumItemsInPreview - index - 1;
-        float r = (index * 1.0f) / (mNumItemsInPreview - 1);
-        float scale = (1 - PERSPECTIVE_SCALE_FACTOR * (1 - r));
+        float sideScale = (index == 1) ? 0.03f : 0.05f;
+        if (index == 0) sideScale = 0f;
+        float iconScale = (0.50f - sideScale) * mIconScale;
 
-        float offset = (1 - r) * mMaxPerspectiveShift;
-        float scaledSize = scale * mBaselineIconSize;
-        float scaleOffsetCorrection = (1 - scale) * mBaselineIconSize;
+        float yOffset;
+        float xOffset;
+        int alpha;
+        float iconSize = mIntrinsicIconSize * iconScale;
+        if (index > 0 ) {
+            yOffset = index == 1 ? (mAvailableSpaceInPreview - iconSize) / 2 : 0f;
+            xOffset = index == 1 ? (mAvailableSpaceInPreview - iconSize) / 2 : mAvailableSpaceInPreview - iconSize;
+            alpha = 80;
+        } else {
+            yOffset = mAvailableSpaceInPreview - iconSize;
+            xOffset = 0f;
+            alpha = 0;
+        }
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
-        float transY = mAvailableSpaceInPreview - (offset + scaledSize + scaleOffsetCorrection);
-        float transX = offset + scaleOffsetCorrection;
-        float totalScale = mBaselineIconScale * scale;
-        final int overlayAlpha = (int) (80 * (1 - r));
+        float transY = yOffset;
+        float transX = xOffset;
+        final int overlayAlpha = alpha;
 
         if (params == null) {
-            params = new PreviewItemDrawingParams(transX, transY, totalScale, overlayAlpha);
+            params = new PreviewItemDrawingParams(transX, transY, iconScale, overlayAlpha);
         } else {
             params.transX = transX;
             params.transY = transY;
-            params.scale = totalScale;
+            params.scale = iconScale;
             params.overlayAlpha = overlayAlpha;
         }
         return params;
@@ -577,8 +592,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private PreviewItemDrawingParams computePreviewItemDrawingParamsGrid(int index,
             PreviewItemDrawingParams params) {
-        //index = mNumItemsInPreview - index - 1;
-        float iconScale = 0.40f;
+        float iconScale = 0.35f * mIconScale;
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
@@ -588,7 +602,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         int cellX = index % (mNumItemsInPreview / 2);
         int cellY = index / (mNumItemsInPreview / 2);
         float xOffset = (totalCellSize * cellX) + cellOffset;
-        float yOffset = (totalCellSize * cellY) + cellOffset + mPreviewOffsetY;
+        float yOffset = (totalCellSize * cellY) + cellOffset;
         float transX = xOffset;
         float transY = yOffset;
         final int overlayAlpha = 0;
@@ -606,8 +620,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private PreviewItemDrawingParams computePreviewItemDrawingParamsIos(int index,
             PreviewItemDrawingParams params) {
-        //index = mNumItemsInPreview - index - 1;
-        float iconScale = 0.25f;
+        float iconScale = 0.25f * mIconScale;
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
@@ -617,7 +630,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         int cellX = index % (mNumItemsInPreview / 3);
         int cellY = index / (mNumItemsInPreview / 3);
         float xOffset = (totalCellSize * cellX) + cellOffset;
-        float yOffset = (totalCellSize * cellY) + cellOffset + mPreviewOffsetY;
+        float yOffset = (totalCellSize * cellY) + cellOffset;
         float transX = xOffset;
         float transY = yOffset;
         final int overlayAlpha = 0;
@@ -635,38 +648,35 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private PreviewItemDrawingParams computePreviewItemDrawingParamsCarousel(int index,
                                                                             PreviewItemDrawingParams params) {
-        float r = (index == 0) ? ((mNumItemsInPreview - 2) * 1.0f) / (mNumItemsInPreview - 1) :
-                0;
-        float scale = (1 - PERSPECTIVE_SCALE_FACTOR * (1 - r));
+        float sideScale = (index == 0) ? 0f : 0.15f;
+        float iconScale = (0.50f - sideScale) * mIconScale;
 
         float yOffset;
         float xOffset;
         int alpha;
-        float scaledSize = scale * mBaselineIconSize;
+        float iconSize = mIntrinsicIconSize * iconScale;
         if (index > 0 ) {
-            yOffset = scaledSize/3;
-            xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - scaledSize;
+            yOffset = iconSize/3;
+            xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - iconSize;
             alpha = 80;
         } else {
-            yOffset = scaledSize/2;
-            xOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
+            yOffset = (mAvailableSpaceInPreview - iconSize) - iconSize/8;
+            xOffset = (mAvailableSpaceInPreview - iconSize) / 2;
             alpha = 0;
         }
-        //float scaleOffsetCorrection = (1 - scale) * mBaselineIconSize;
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
-        float transY = yOffset;// + scaledSize + scaleOffsetCorrection);
-        float transX = xOffset;// + scaleOffsetCorrection;
-        float totalScale = mBaselineIconScale * scale;
-        final int overlayAlpha = alpha;//(int) (80 * (1 - r));
+        float transY = yOffset;
+        float transX = xOffset;
+        final int overlayAlpha = alpha;
 
         if (params == null) {
-            params = new PreviewItemDrawingParams(transX, transY, totalScale, overlayAlpha);
+            params = new PreviewItemDrawingParams(transX, transY, iconScale, overlayAlpha);
         } else {
             params.transX = transX;
             params.transY = transY;
-            params.scale = totalScale;
+            params.scale = iconScale;
             params.overlayAlpha = overlayAlpha;
         }
         return params;
@@ -674,38 +684,35 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
     private PreviewItemDrawingParams computePreviewItemDrawingParamsFan(int index,
                                                                             PreviewItemDrawingParams params) {
-        float r = (index == 0) ? ((mNumItemsInPreview - 2) * 1.0f) / (mNumItemsInPreview - 1) :
-                0;
-        float scale = (1 - PERSPECTIVE_SCALE_FACTOR * (1 - r));
+        float sideScale = (index == 0) ? 0f : 0.15f;
+        float iconScale = (0.50f - sideScale) * mIconScale;
 
         float yOffset;
         float xOffset;
         int alpha;
-        float scaledSize = scale * mBaselineIconSize;
+        float iconSize = mIntrinsicIconSize * iconScale;
         if (index > 0 ) {
-            yOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
-            xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - scaledSize;
+            yOffset = (mAvailableSpaceInPreview - iconSize) / 2;
+            xOffset = index == 1 ? 0f : mAvailableSpaceInPreview - iconSize;
             alpha = 80;
         } else {
-            yOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
-            xOffset = (mAvailableSpaceInPreview - scaledSize) / 2;
+            yOffset = (mAvailableSpaceInPreview - iconSize) / 2;
+            xOffset = (mAvailableSpaceInPreview - iconSize) / 2;
             alpha = 0;
         }
-        //float scaleOffsetCorrection = (1 - scale) * mBaselineIconSize;
 
         // We want to imagine our coordinates from the bottom left, growing up and to the
         // right. This is natural for the x-axis, but for the y-axis, we have to invert things.
-        float transY = yOffset;// + scaledSize + scaleOffsetCorrection);
-        float transX = xOffset;// + scaleOffsetCorrection;
-        float totalScale = mBaselineIconScale * scale;
-        final int overlayAlpha = alpha;//(int) (80 * (1 - r));
+        float transY = yOffset;
+        float transX = xOffset;
+        final int overlayAlpha = alpha;
 
         if (params == null) {
-            params = new PreviewItemDrawingParams(transX, transY, totalScale, overlayAlpha);
+            params = new PreviewItemDrawingParams(transX, transY, iconScale, overlayAlpha);
         } else {
             params.transX = transX;
             params.transY = transY;
-            params.scale = totalScale;
+            params.scale = iconScale;
             params.overlayAlpha = overlayAlpha;
         }
         return params;

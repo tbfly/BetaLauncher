@@ -2749,45 +2749,31 @@ public class Workspace extends PagedView
      * @param destCanvas the canvas to draw on
      * @param padding the horizontal and vertical padding to use when drawing
      */
-    private void drawDragView(View v, Canvas destCanvas, int padding, boolean pruneToDrawable) {
+    private void drawDragView(View v, Canvas destCanvas, int padding) {
         final Rect clipRect = mTempRect;
         v.getDrawingRect(clipRect);
 
         boolean textVisible = false;
 
         destCanvas.save();
-        if (v instanceof TextView && pruneToDrawable) {
-            Drawable d = ((TextView) v).getCompoundDrawables()[1];
-            clipRect.set(0, 0, d.getIntrinsicWidth() + padding, d.getIntrinsicHeight() + padding);
-            destCanvas.translate(padding / 2, padding / 2);
-            d.draw(destCanvas);
-        } else {
-            if (v instanceof FolderIcon) {
-                if (!mHideIconLabels) {
-                    // For FolderIcons the text can bleed into the icon area, and so we need to
-                    // hide the text completely (which can't be achieved by clipping).
-                    if (((FolderIcon) v).getTextVisible()) {
-                        ((FolderIcon) v).setTextVisible(false);
-                        textVisible = true;
-                    }
-                }
-            } else if (v instanceof BubbleTextView) {
-                final BubbleTextView tv = (BubbleTextView) v;
-                clipRect.bottom = tv.getExtendedPaddingTop() - (int) BubbleTextView.PADDING_V +
-                        tv.getLayout().getLineTop(0);
-            } else if (v instanceof TextView) {
-                final TextView tv = (TextView) v;
-                clipRect.bottom = tv.getExtendedPaddingTop() - tv.getCompoundDrawablePadding() +
-                        tv.getLayout().getLineTop(0);
+        if (v instanceof FolderIcon) {
+            if (((FolderIcon) v).getTextVisible()) {
+                ((FolderIcon) v).setTextVisible(false);
+                textVisible = true;
             }
             destCanvas.translate(-v.getScrollX() + padding / 2, -v.getScrollY() + padding / 2);
             destCanvas.clipRect(clipRect, Op.REPLACE);
             v.draw(destCanvas);
-
-            // Restore text visibility of FolderIcon if necessary
-            if (!mHideIconLabels && textVisible) {
-                ((FolderIcon) v).setTextVisible(true);
+            if (textVisible) ((FolderIcon) v).setTextVisible(true);
+        } else if (v instanceof BubbleTextView) {
+            if (((BubbleTextView) v).getTextVisible()) {
+                ((BubbleTextView) v).setTextVisible(false);
+                textVisible = true;
             }
+            destCanvas.translate(-v.getScrollX() + padding / 2, -v.getScrollY() + padding / 2);
+            destCanvas.clipRect(clipRect, Op.REPLACE);
+            v.draw(destCanvas);
+            if (textVisible) ((BubbleTextView) v).setTextVisible(true);
         }
         destCanvas.restore();
     }
@@ -2797,19 +2783,10 @@ public class Workspace extends PagedView
      * Responsibility for the bitmap is transferred to the caller.
      */
     public Bitmap createDragBitmap(View v, Canvas canvas, int padding) {
-        Bitmap b;
-
-        if (v instanceof TextView) {
-            Drawable d = ((TextView) v).getCompoundDrawables()[1];
-            b = Bitmap.createBitmap(d.getIntrinsicWidth() + padding,
-                    d.getIntrinsicHeight() + padding, Bitmap.Config.ARGB_8888);
-        } else {
-            b = Bitmap.createBitmap(
+        Bitmap b = Bitmap.createBitmap(
                     v.getWidth() + padding, v.getHeight() + padding, Bitmap.Config.ARGB_8888);
-        }
-
         canvas.setBitmap(b);
-        drawDragView(v, canvas, padding, true);
+        drawDragView(v, canvas, padding);
         canvas.setBitmap(null);
 
         return b;
@@ -2825,7 +2802,7 @@ public class Workspace extends PagedView
                 v.getWidth() + padding, v.getHeight() + padding, Bitmap.Config.ARGB_8888);
 
         canvas.setBitmap(b);
-        drawDragView(v, canvas, padding, true);
+        drawDragView(v, canvas, padding);
         mOutlineHelper.applyMediumExpensiveOutlineWithBlur(b, canvas, outlineColor, outlineColor);
         canvas.setBitmap(null);
         return b;
@@ -2900,20 +2877,7 @@ public class Workspace extends PagedView
 
         Point dragVisualizeOffset = null;
         Rect dragRect = null;
-        if (child instanceof BubbleTextView || child instanceof PagedViewIcon) {
-            int iconSize = r.getDimensionPixelSize(R.dimen.app_icon_size);
-            int iconPaddingTop = r.getDimensionPixelSize(R.dimen.app_icon_padding_top);
-            int top = child.getPaddingTop();
-            int left = (bmpWidth - iconSize) / 2;
-            int right = left + iconSize;
-            int bottom = top + iconSize;
-            dragLayerY += top;
-            // Note: The drag region is used to calculate drag layer offsets, but the
-            // dragVisualizeOffset in addition to the dragRect (the size) to position the outline.
-            dragVisualizeOffset = new Point(-DRAG_BITMAP_PADDING / 2,
-                    iconPaddingTop - DRAG_BITMAP_PADDING / 2);
-            dragRect = new Rect(left, top, right, bottom);
-        } else if (child instanceof FolderIcon) {
+        if (child instanceof BubbleTextView || child instanceof PagedViewIcon || child instanceof FolderIcon) {
             int previewSize = r.getDimensionPixelSize(R.dimen.folder_preview_size);
             dragRect = new Rect(0, 0, child.getWidth(), previewSize);
         }
@@ -3268,6 +3232,12 @@ public class Workspace extends PagedView
                     lp.isLockedToGrid = true;
                     cell.setId(LauncherModel.getCellLayoutChildId(container, mDragInfo.screen,
                             mTargetCell[0], mTargetCell[1]));
+
+                    if (cell instanceof BubbleTextView) {
+                        ((BubbleTextView)cell).setIconScale(dropTargetLayout.getChildrenScale());
+                    } else if (cell instanceof FolderIcon) {
+                        ((FolderIcon)cell).setIconScale(dropTargetLayout.getChildrenScale());
+                    }
 
                     if (container != LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
                             cell instanceof LauncherAppWidgetHostView) {
@@ -3877,9 +3847,7 @@ public class Workspace extends PagedView
         }
 
         public void onAlarm(Alarm alarm) {
-            if (mDragFolderRingAnimator == null) {
-                mDragFolderRingAnimator = new FolderRingAnimator(mLauncher, null);
-            }
+            mDragFolderRingAnimator = new FolderRingAnimator(mLauncher, null, layout.getChildrenScale());
             mDragFolderRingAnimator.setCell(cellX, cellY);
             mDragFolderRingAnimator.setCellLayout(layout);
             mDragFolderRingAnimator.animateToAcceptState();
@@ -4097,7 +4065,7 @@ public class Workspace extends PagedView
                 break;
             case LauncherSettings.Favorites.ITEM_TYPE_FOLDER:
                 view = FolderIcon.fromXml(R.layout.folder_icon, mLauncher, cellLayout,
-                        (FolderInfo) info);
+                        (FolderInfo) info, cellLayout.getChildrenScale());
                 ((FolderIcon) view).setTextVisible(!mHideIconLabels);
                 break;
             default:
@@ -4129,6 +4097,11 @@ public class Workspace extends PagedView
                         null, mTargetCell, null, CellLayout.MODE_ON_DROP_EXTERNAL);
             } else {
                 cellLayout.findCellForSpan(mTargetCell, 1, 1);
+            }
+            if (view instanceof BubbleTextView) {
+                ((BubbleTextView)view).setIconScale(cellLayout.getChildrenScale());
+            } else if (view instanceof FolderIcon) {
+                ((FolderIcon)view).setIconScale(cellLayout.getChildrenScale());
             }
             addInScreen(view, container, screen, mTargetCell[0], mTargetCell[1], info.spanX,
                     info.spanY, insertAtFirst);
@@ -4755,7 +4728,7 @@ public class Workspace extends PagedView
                                 BubbleTextView shortcut = (BubbleTextView) view;
                                 info.updateIcon(mIconCache);
                                 info.title = app.title.toString();
-                                shortcut.applyFromShortcutInfo(info, mIconCache);
+                                shortcut.applyFromShortcutInfo(info, mIconCache, mIconScale);
                             }
                         }
                     }
@@ -4865,7 +4838,7 @@ public class Workspace extends PagedView
 
             CellLayout screen = (CellLayout)inflater.inflate(R.layout.workspace_screen, null);
             screen.setGridSize(LauncherModel.getWorkspaceCellCountX(), LauncherModel.getWorkspaceCellCountY());
-            screen.setStretchCells(true, true, mHomescreenPadding);
+            screen.setStretchCells(mHomescreenPadding);
             addView(screen, index);
             mNumberHomescreens++;
         }

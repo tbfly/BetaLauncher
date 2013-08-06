@@ -108,6 +108,32 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
         info.setListener(this);
     }
 
+    public void applyFromShortcutInfo(ShortcutInfo info, IconCache iconCache, float scale) {
+        Bitmap b = info.getIcon(iconCache);
+
+        int width = (int)((float)b.getWidth() * scale);
+        int height = (int)((float)b.getHeight() * scale);
+        FastBitmapDrawable d = new FastBitmapDrawable(b);
+        d.setBounds(new Rect(0, 0, width, height));
+
+        setCompoundDrawables(null,
+                d, null, null);
+        setCompoundDrawablePadding(0);
+        setText(info.title);
+        setTag(info);
+        info.setListener(this);
+    }
+
+    public void setIconScale(float scale) {
+        Drawable d = getCompoundDrawables()[1];
+        Bitmap b = ((FastBitmapDrawable)d).getBitmap();
+        int width = (int)((float)b.getWidth() * scale);
+        int height = (int)((float)b.getHeight() * scale);
+        d.setBounds(new Rect(0, 0, width, height));
+        setCompoundDrawables(null,
+                d, null, null);
+    }
+
     @Override
     protected boolean setFrame(int left, int top, int right, int bottom) {
         if (getLeft() != left || getRight() != right || getTop() != top || getBottom() != bottom) {
@@ -283,6 +309,7 @@ public class BubbleTextView extends TextView implements ShortcutInfo.ShortcutLis
         setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) mOriginalTextSize * (float) scale);
         if (padding) {
             setEllipsize(TextUtils.TruncateAt.END);
+            setSingleLine(true);
         } else {
             setEllipsize(TextUtils.TruncateAt.MARQUEE);
             setSingleLine(false);

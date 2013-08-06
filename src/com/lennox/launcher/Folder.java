@@ -172,7 +172,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         super.onFinishInflate();
         mContent = (CellLayout) findViewById(R.id.folder_content);
         mContent.setGridSize(0, 0);
-        mContent.setStretchCells(true, true);
+        mContent.setStretchCells(0);
         mContent.setChildrenScale(mIconScale);
         mContent.setTextScale(mTextScale, mTextPadding);
         mContent.getShortcutsAndWidgets().setMotionEventSplittingEnabled(false);
@@ -533,8 +533,6 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
      */
     private void positionAndSizeAsIcon() {
         if (!(getParent() instanceof DragLayer)) return;
-        setScaleX(mIconScale);
-        setScaleY(mIconScale);
         setAlpha(0f);
         mState = STATE_SMALL;
     }

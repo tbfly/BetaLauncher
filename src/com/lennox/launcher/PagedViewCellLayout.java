@@ -147,8 +147,14 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         final PagedViewCellLayout.LayoutParams lp = params;
 
         if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
-            if (child instanceof BubbleTextView) ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
-            if (child instanceof PagedViewIcon) ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof BubbleTextView) {
+                ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
+                ((BubbleTextView) child).setIconScale(getChildrenScale());
+            }
+            if (child instanceof PagedViewIcon) {
+                ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
+                ((PagedViewIcon) child).setIconScale(getChildrenScale());
+            }
             if (child instanceof FolderIcon) {
                 ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
                 ((FolderIcon) child).setIconScale(getChildrenScale());

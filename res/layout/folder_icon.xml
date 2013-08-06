@@ -20,7 +20,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:focusable="true"
-    android:paddingTop="@dimen/folder_icon_padding_top"
     android:background="@drawable/focusable_view_bg">
     <ImageView
         android:id="@+id/preview_background"
@@ -30,5 +29,5 @@
         android:src="@drawable/portal_ring_inner_holo"/>
     <com.lennox.launcher.BubbleTextView
         android:id="@+id/folder_icon_name"
-        style="@style/WorkspaceIcon.Folder"/>
+        style="@style/WorkspaceIcon"/>
 </com.lennox.launcher.FolderIcon>

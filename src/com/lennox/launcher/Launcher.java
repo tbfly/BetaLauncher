@@ -83,6 +83,7 @@ import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -310,7 +311,10 @@ public final class Launcher extends Activity
     private boolean mFullscreenMode;
     private String mDoubleTapAction;
 
+    private float mIconScale = 1.0f;
+    private float mDockIconScale = 1.0f;
     private float mDockScale = 1.0f;
+
     // Previews
     private PreviewLayout mPreviewLayout;
 
@@ -400,7 +404,10 @@ public final class Launcher extends Activity
 
         boolean isLandscape = (res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
+        mIconScale = (float) PreferencesProvider.Interface.Homescreen.getIconScale(isLandscape) / 100f;
+        mDockIconScale = (float) PreferencesProvider.Interface.Dock.getIconScale(isLandscape) / 100f;
         mDockScale = (float) PreferencesProvider.Interface.Dock.getScale(isLandscape) / 100f;
+
         // Preferences
         mShowSearchBar = PreferencesProvider.Interface.Homescreen.getShowSearchBar(isLandscape);
         mTabletSearchBar = PreferencesProvider.Interface.Homescreen.getTabletSearchBar();
@@ -1034,7 +1041,8 @@ public final class Launcher extends Activity
      */
     View createShortcut(int layoutResId, ViewGroup parent, ShortcutInfo info) {
         BubbleTextView favorite = (BubbleTextView) mInflater.inflate(layoutResId, parent, false);
-        favorite.applyFromShortcutInfo(info, mIconCache);
+        float scale = info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT ? mDockIconScale : mIconScale;
+        favorite.applyFromShortcutInfo(info, mIconCache, scale);
         favorite.setTextVisible(!mHideIconLabels);
         favorite.setOnClickListener(this);
         favorite.setOnTouchListener(this);
@@ -2189,7 +2197,7 @@ public final class Launcher extends Activity
 
         // Create the view
         FolderIcon newFolder =
-            FolderIcon.fromXml(R.layout.folder_icon, this, layout, folderInfo);
+            FolderIcon.fromXml(R.layout.folder_icon, this, layout, folderInfo, layout.getChildrenScale());
         int x = cellX, y = cellY;
         if (container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
             newFolder.setTextVisible(!mHideDockIconLabels);
@@ -4064,7 +4072,7 @@ public final class Launcher extends Activity
                 case LauncherSettings.Favorites.ITEM_TYPE_FOLDER:
                     FolderIcon newFolder = FolderIcon.fromXml(R.layout.folder_icon, this,
                             (ViewGroup) workspace.getChildAt(workspace.getCurrentPage()),
-                            (FolderInfo) item);
+                            (FolderInfo) item, mIconScale);
                     newFolder.setTextVisible(!mHideIconLabels);
                     workspace.addInScreen(newFolder, item.container, item.screen, item.cellX,
                             item.cellY, 1, 1, false);

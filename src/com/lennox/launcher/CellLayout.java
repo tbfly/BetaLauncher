@@ -73,6 +73,7 @@ public class CellLayout extends ViewGroup {
     private int mCellLayoutType;
     private int mOriginalWidthGap;
     private int mOriginalHeightGap;
+    private int mPreviewSize;
     private int mWidthGap;
     private int mHeightGap;
     private int mMaxGap;
@@ -304,6 +305,10 @@ public class CellLayout extends ViewGroup {
         addView(mShortcutsAndWidgets);
     }
 
+    public int adjustForScale(int inputSize) {
+        return (int) ((float) inputSize * mChildrenScale);
+    }
+
     public void enableHardwareLayers() {
         mShortcutsAndWidgets.setLayerType(LAYER_TYPE_HARDWARE, sPaint);
     }
@@ -318,6 +323,7 @@ public class CellLayout extends ViewGroup {
 
     public void setChildrenScale(float childrenScale) {
         mChildrenScale = childrenScale;
+        mPreviewSize = (int) ((float) getResources().getDimensionPixelSize(R.dimen.folder_preview_size) * mChildrenScale);
     }
 
     public float getChildrenScale() {
@@ -475,7 +481,7 @@ public class CellLayout extends ViewGroup {
             final float alpha = mDragOutlineAlphas[i];
             if (alpha > 0) {
                 final Rect r = mDragOutlines[i];
-                scaleRectAboutCenter(r, temp, getChildrenScale());
+                scaleRectAboutCenter(r, temp, 1f);
                 final Bitmap b = (Bitmap) mDragOutlineAnims[i].getTag();
                 paint.setAlpha((int)(alpha + .5f));
                 canvas.drawBitmap(b, null, temp, paint);
@@ -511,8 +517,7 @@ public class CellLayout extends ViewGroup {
             }
         }
 
-        final int previewOffset = FolderRingAnimator.sPreviewSize;
-        final int topPadding = getResources().getDimensionPixelSize(R.dimen.folder_icon_padding_top);
+        final int previewOffset = adjustForScale(FolderRingAnimator.sPreviewSize);
 
         // The folder outer / inner ring image(s)
         for (FolderRingAnimator ringAnimator : mFolderOuterRings) {
@@ -523,7 +528,7 @@ public class CellLayout extends ViewGroup {
             cellToPoint(ringAnimator.mCellX, ringAnimator.mCellY, mTempLocation);
 
             int centerX = mTempLocation[0] + mCellWidth / 2;
-            int centerY = mTempLocation[1] + previewOffset / 2 + topPadding;
+            int centerY = mTempLocation[1] + previewOffset / 2;
 
             canvas.save();
             canvas.translate(centerX - width / 2, centerY - height / 2);
@@ -538,7 +543,7 @@ public class CellLayout extends ViewGroup {
             cellToPoint(ringAnimator.mCellX, ringAnimator.mCellY, mTempLocation);
 
             centerX = mTempLocation[0] + mCellWidth / 2;
-            centerY = mTempLocation[1] + previewOffset / 2 + topPadding;
+            centerY = mTempLocation[1] + previewOffset / 2;
             canvas.save();
             canvas.translate(centerX - width / 2, centerY - width / 2);
             d.setBounds(0, 0, width, height);
@@ -553,7 +558,7 @@ public class CellLayout extends ViewGroup {
 
             cellToPoint(mFolderLeaveBehindCell[0], mFolderLeaveBehindCell[1], mTempLocation);
             int centerX = mTempLocation[0] + mCellWidth / 2;
-            int centerY = mTempLocation[1] + previewOffset / 2 + topPadding;
+            int centerY = mTempLocation[1] + previewOffset / 2;
 
             canvas.save();
             canvas.translate(centerX - width / 2, centerY - width / 2);
@@ -642,12 +647,22 @@ public class CellLayout extends ViewGroup {
             bubbleChild.setTextColor(res.getColor(R.color.workspace_icon_text_color));
         }
 
+        child.setScaleX(1f);
+        child.setScaleY(1f);
+
         if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
-            child.setScaleX(getChildrenScale());
-            child.setScaleY(getChildrenScale());
-            if (child instanceof BubbleTextView) ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
-            if (child instanceof FolderIcon) ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
-            if (child instanceof PagedViewIcon) ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
+            if (child instanceof BubbleTextView) {
+                ((BubbleTextView) child).setTextScale(getTextScale(), getTextPadding());
+                ((BubbleTextView) child).setIconScale(getChildrenScale());
+            }
+            if (child instanceof PagedViewIcon) {
+                ((PagedViewIcon) child).setTextScale(getTextScale(), getTextPadding());
+                ((PagedViewIcon) child).setIconScale(getChildrenScale());
+            }
+            if (child instanceof FolderIcon) {
+                ((FolderIcon) child).setTextScale(getTextScale(), getTextPadding());
+                ((FolderIcon) child).setIconScale(getChildrenScale());
+            }
         }
 
         // Generate an id for each view, this assumes we have at most 256x256 cells
@@ -1699,7 +1714,6 @@ public class CellLayout extends ViewGroup {
             c.x = mTempLocation[0];
             c.y = mTempLocation[1];
             success = true;
-
         }
         markCellsForView(c.x, c.y, c.spanX, c.spanY, mTmpOccupied, true);
         return success;
@@ -1935,7 +1949,6 @@ public class CellLayout extends ViewGroup {
                     ignoreView, solution)) {
                 return true;
             }
-
             // Then we try the opposite direction
             direction[0] *= -1;
             direction[1] *= -1;
@@ -2218,10 +2231,7 @@ public class CellLayout extends ViewGroup {
             }
             initDeltaX = child.getTranslationX();
             initDeltaY = child.getTranslationY();
-            finalScale = 1.0f - 4.0f / child.getWidth();
-            if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
-                finalScale = getChildrenScale() - 4.0f / child.getWidth();
-            }
+            finalScale = 1f - 4.0f / child.getWidth();
             initScale = child.getScaleX();
             this.child = child;
         }
@@ -2263,10 +2273,7 @@ public class CellLayout extends ViewGroup {
                     // We make sure to end only after a full period
                     initDeltaX = 0;
                     initDeltaY = 0;
-                    initScale = 1.0f;
-                    if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
-                        initScale = getChildrenScale();
-                    }
+                    initScale = 1f;
                 }
             });
             mShakeAnimators.put(child, this);
@@ -2286,16 +2293,9 @@ public class CellLayout extends ViewGroup {
 
             AnimatorSet s = LauncherAnimUtils.createAnimatorSet();
             a = s;
-            float scaleX = 1.0f;
-            float scaleY = 1.0f;
-            if (child instanceof BubbleTextView || child instanceof FolderIcon || child instanceof PagedViewIcon) {
-                scaleX = getChildrenScale();
-                scaleY = scaleX;
-            }
-
             s.playTogether(
-                LauncherAnimUtils.ofFloat(child, "scaleX", scaleX),
-                LauncherAnimUtils.ofFloat(child, "scaleY", scaleY),
+                LauncherAnimUtils.ofFloat(child, "scaleX", 1f),
+                LauncherAnimUtils.ofFloat(child, "scaleY", 1f),
                 LauncherAnimUtils.ofFloat(child, "translationX", 0f),
                 LauncherAnimUtils.ofFloat(child, "translationY", 0f)
             );
