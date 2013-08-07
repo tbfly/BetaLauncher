@@ -1,0 +1,9 @@
+<resources>
+
+    <!-- App drawer grid size -->
+    <integer name="config_defaultAppRows">5</integer>
+    <integer name="config_defaultAppColumns">4</integer>
+    <integer name="config_defaultAppRowsLand">3</integer>
+    <integer name="config_defaultAppColumnsLand">7</integer>
+
+</resources>
