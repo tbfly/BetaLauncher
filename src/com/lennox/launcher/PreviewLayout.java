@@ -275,10 +275,12 @@ public class PreviewLayout extends FrameLayout
         mCurrentDragView = v;
 
         ItemInfo info = (ItemInfo)v.getTag();
-        mEmptyCell[0] = info.cellX;
-        mEmptyCell[1] = info.cellY;
-        mContent.removeView(mCurrentDragView);
-        mDragInProgress = true;
+        if (info != null) {
+            mEmptyCell[0] = info.cellX;
+            mEmptyCell[1] = info.cellY;
+            mContent.removeView(mCurrentDragView);
+            mDragInProgress = true;
+        }
         return true;
     }
 
@@ -406,17 +408,6 @@ public class PreviewLayout extends FrameLayout
 
     @Override
     public void onDropCompleted(View target, DragObject d, boolean isFlingToDelete, boolean success) {
-        mDragInProgress = false;
-        mCurrentDragView = null;
-    }
-
-    @Override
-    public boolean isDropEnabled() {
-        return true;
-    }
-
-    @Override
-    public void onDrop(DragObject d) {
         mReorderAlarm.cancelAlarm();
         boolean reorderHomescreens = true;
         ItemInfo item = (ItemInfo) mCurrentDragView.getTag();
@@ -442,6 +433,17 @@ public class PreviewLayout extends FrameLayout
             snapDrawingCacheToImageViews();
             mWorkspace.invalidate();
         }
+        mDragInProgress = false;
+        mCurrentDragView = null;
+    }
+
+    @Override
+    public boolean isDropEnabled() {
+        return true;
+    }
+
+    @Override
+    public void onDrop(DragObject d) {
     }
 
     @Override
@@ -456,6 +458,10 @@ public class PreviewLayout extends FrameLayout
         mTargetCell = mContent.findNearestArea((int) r[0], (int) r[1], 1, 1, mTargetCell);
         // don't allow it to be dragged and inserted in the add workspace spot
         if ((mTargetCell[0] + mTargetCell[1] * 3) >= mWorkspace.getPageCount())
+            return;
+
+        // fix preview fuckups when out of bounds
+        if ((int) r[0] < 0 || (int) r[1] < 0)
             return;
 
         if (mTargetCell[0] != mPreviousTargetCell[0] || mTargetCell[1] != mPreviousTargetCell[1]) {
