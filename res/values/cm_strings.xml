@@ -20,7 +20,7 @@
     <!-- App copyright -->
     <string name="application_copyright">Copyright \u00A9 2013 Lennox Corporation\nClick here to Donate!</string>
     <!-- App version -->
-    <string name="application_version" translatable="false">1.1</string>
+    <string name="application_version" translatable="false">1.11</string>
 
     <!-- Noun, menu item used to launch the play store -->
     <string name="menu_play_store">Play Store</string>
