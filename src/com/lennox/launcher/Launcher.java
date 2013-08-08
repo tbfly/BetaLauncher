@@ -4254,9 +4254,6 @@ public final class Launcher extends Activity
                             .commit();
             }
         }.start();
-
-        // Hide overflow menu on devices with a hardkey
-        updateOverflowMenuButton();
     }
 
     @Override
@@ -4298,6 +4295,9 @@ public final class Launcher extends Activity
             // list of applications without waiting for any progress bars views to be hidden.
             setAllAppsRunnable.run();
         }
+
+        // Hide overflow menu on devices with a hardkey
+        updateOverflowMenuButton();
     }
 
     /**
