@@ -60,7 +60,8 @@ public class PreviewLayout extends FrameLayout
         mWorkspace.setOnLongClickListener(this.mLauncher);
         mWorkspace.invalidate();
         snapDrawingCacheToImageViews();
-        PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(), mWorkspace.getPageCount());
+        PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(),
+                mWorkspace.getPageCount());
     }
 
     /**
@@ -71,7 +72,8 @@ public class PreviewLayout extends FrameLayout
         mWorkspace.removeScreen(index);
         snapDrawingCacheToImageViews();
         mWorkspace.invalidate();
-        PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(), mWorkspace.getPageCount());
+        PreferencesProvider.Interface.Homescreen.setNumberHomescreens(getContext(),
+                mWorkspace.getChildCount());
     }
 
     /**
@@ -81,7 +83,8 @@ public class PreviewLayout extends FrameLayout
     private void setWorkspaceDefaultScreen(int index) {
         mWorkspace.setDefaultScreenTo(index);
         invalidate();
-        PreferencesProvider.Interface.Homescreen.setDefaultHomescreen(getContext(), index + 1);
+        PreferencesProvider.Interface.Homescreen.setDefaultHomescreen(getContext(),
+                index + 1);
     }
 
     /**
@@ -357,7 +360,7 @@ public class PreviewLayout extends FrameLayout
         mIsSwitchingState = true;
         if (toWorkspace) {
             // Going from Previews -> Workspace
-            int cellLayoutCount = mWorkspace.getPageCount();
+            int cellLayoutCount = mWorkspace.getChildCount();
             for (int i = 0; i < cellLayoutCount; i++) {
                 View cl = mWorkspace.getChildAt(i);
                 cl.setVisibility(View.VISIBLE);
