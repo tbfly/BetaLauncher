@@ -51,6 +51,8 @@ import com.lennox.launcher.R;
 import com.lennox.utils.ThemeUtils;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -105,18 +107,7 @@ public class Preferences extends PreferenceActivity
 
     @Override
     public void onBuildHeaders(List<Header> target) {
-        boolean backupInstalled = false;
-        try {
-           getPackageManager().getPackageInfo("com.lennox.backup", PackageManager.GET_ACTIVITIES);
-           backupInstalled = true;
-        } catch (PackageManager.NameNotFoundException e) {
-           backupInstalled = false;
-        }
-        if (backupInstalled) {
-            loadHeadersFromResource(R.xml.preferences_headers, target);
-        } else {
-            loadHeadersFromResource(R.xml.preferences_headers_nobackup, target);
-        }
+        loadHeadersFromResource(R.xml.preferences_headers, target);
         mHeaders = target;
         updateHeaders();
     }
@@ -134,12 +125,51 @@ public class Preferences extends PreferenceActivity
 
     private void updateHeaders() {
         int i = 0;
+        List<Header> newHeaders = new ArrayList<Header>();
         while (i < mHeaders.size()) {
             Header header = mHeaders.get(i);
+            newHeaders.add(header);
 
             // Version preference
             if (header.id == R.id.preferences_application_version) {
                 header.title = getString(R.string.application_name) + " " + getString(R.string.application_version);
+            }
+
+            if (header.id == R.id.preferences_application_version ||
+                        header.id == R.id.preferences_application_section) {
+                String lennoxDevice = "";
+                try {
+                    Class clazz = Class.forName("android.os.SystemProperties");
+                    Method method = clazz.getDeclaredMethod("get", String.class);
+                    lennoxDevice = (String) method.invoke(null, "ro.lennox.device");
+                    if (!lennoxDevice.equals("")) {
+                        newHeaders.remove(header);
+                    }
+                } catch (ClassNotFoundException e) {
+                    // Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SecurityException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } else if (header.id == R.id.preferences_backup_section) {
+                try {
+                    getPackageManager().getPackageInfo("com.lennox.backup", PackageManager.GET_ACTIVITIES);
+                } catch (PackageManager.NameNotFoundException e) {
+                    newHeaders.remove(header);
+                }
             }
 
             // Increment if not removed
@@ -147,6 +177,7 @@ public class Preferences extends PreferenceActivity
                 i++;
             }
         }
+        mHeaders = newHeaders;
     }
 
     @Override
