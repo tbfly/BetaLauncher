@@ -26,20 +26,6 @@ import java.lang.reflect.Method;
 
 public class LennoxCompatibility {
 
-    public static int getResourceId ( Context context, String name ) {
-    	String[] seperated = name.split(":");
-    	String[] seperated2 = seperated[1].split("/");
-    	String resourcePackage = seperated[0];
-    	
-        if ( resourcePackage.equalsIgnoreCase("custom")) {
-        	resourcePackage = "xtreamer";
-        }
-
-    	String resourceType = seperated2[0];
-    	String resourceName = seperated2[1];
-    	return context.getResources().getIdentifier(resourceName, resourceType, resourcePackage);
-    }
-
     public static boolean bindAppWidgetIdIfAllowed(AppWidgetManager appWidgetManager,
                             int appWidgetId, ComponentName componentName) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
